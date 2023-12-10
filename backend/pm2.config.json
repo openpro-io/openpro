@@ -1,0 +1,12 @@
+{
+  "apps": [
+    {
+      "name": "api",
+      "script": "src/index.js",
+      "instances": "max",
+      "exec_mode": "cluster",
+      "interpreter": "/bin/sh",
+      "cwd": "/app"
+    }
+  ]
+}

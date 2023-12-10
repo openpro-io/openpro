@@ -1,0 +1,376 @@
+@import url('https://fonts.cdnfonts.com/css/satoshi');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*TODO: Make button hover, bg states, make icon hover,bg states */
+@layer base {
+  :root,
+  .light {
+    --background-color-50: 248 250 252;
+    --background-color-100: 241 245 249;
+    --background-color-200: 226 232 240;
+    --background-color-300: 203 213 225;
+    --background-color-400: 148 163 184;
+    --background-color-500: 100 116 139;
+    --background-color-600: 71 85 105;
+    --background-color-700: 51 65 85;
+    --background-color-800: 30 41 59;
+    --background-color-900: 255 255 255;
+
+    --background-color-link-active: 232 239 251;
+    --background-color-neutral: 9 30 66;
+    --background-color-neutral-pressed: 9 30 66;
+    --background-color-neutral-hovered: 9 30 66;
+    --background-color-kanban-column: 243 244 246;
+    --background-color-kanban-card: 255 255 255;
+    --background-color-surface-overlay: 255 255 255;
+    --background-color-surface-overlay-hovered: 244 245 247;
+    --background-color-editor-toolbar: 255 255 255;
+    --background-color-editor-toolbar-pressed: 229 231 235;
+    --background-color-blue-bold: 12 102 228;
+    --background-color-blue-bold-hovered: 0 85 204;
+
+    /* 34, 39, 43 surface-raised */
+
+    --text-color: 30 33 37;
+    --text-color-inverted: 255 255 255;
+    --text-color-link-active: 33 81 197;
+    --text-color-link: 30 33 37;
+
+    --border-color-primary: 107 114 128;
+  }
+
+  .dark {
+    --background-color-50: 244 246 247;
+    --background-color-100: 227 231 234;
+    --background-color-200: 203 210 214;
+    --background-color-300: 166 177 186;
+    --background-color-400: 123 139 149;
+    --background-color-500: 95 111 123;
+    --background-color-600: 82 94 104;
+    --background-color-700: 70 79 88;
+    --background-color-800: 63 69 75;
+    --background-color-900: 30 33 37;
+
+    --background-color-link-active: 28 43 65;
+    --background-color-neutral: 161 189 217;
+    --background-color-neutral-pressed: 191 219 248;
+    --background-color-neutral-hovered: 166 197 226;
+    --background-color-kanban-column: 22 26 29;
+    --background-color-kanban-card: 34 39 43;
+    --background-color-surface-overlay: 40 46 51;
+    --background-color-surface-overlay-hovered: 44 51 58;
+    --background-color-editor-toolbar: 	29 33 37;
+    --background-color-editor-toolbar-pressed: 128 128 128;
+    --background-color-blue-bold: 87 157 255;
+    --background-color-blue-bold-hovered: 133 184 255;
+
+    --text-color: 255 255 255;
+    --text-color-inverted: 30 33 37;
+    --text-color-link-active: 87 157 255;
+    --text-color-link: 159 173 188;
+
+    --border-color-primary: 166 197 226;
+  }
+}
+
+@layer components {
+  .login-background {
+    background: rgb(0, 118, 221);
+    background: linear-gradient(
+      120deg,
+      rgba(0, 118, 221, 1) 0%,
+      rgba(230, 0, 233, 1) 100%
+    );
+    height: 100vh;
+  }
+
+  /* Color swatches */
+  .color {
+    white-space: nowrap;
+  }
+
+  .color::before {
+    content: " ";
+    display: inline-block;
+    height: 1em;
+    margin-bottom: 0.15em;
+    margin-right: 0.1em;
+    vertical-align: middle;
+    width: 1em;
+    background-color: var(--color);
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    border-radius: 2px;
+  }
+}
+
+@layer utilities {
+  /* Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .chat-height {
+    @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
+  }
+  .inbox-height {
+    @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
+  }
+}
+
+/* third-party libraries CSS */
+
+.tableCheckbox:checked ~ div span {
+  @apply opacity-100;
+}
+.tableCheckbox:checked ~ div {
+  @apply border-primary bg-primary;
+}
+
+.flatpickr-day.selected {
+  @apply border-primary bg-primary hover:border-primary hover:bg-primary;
+}
+.flatpickr-months .flatpickr-prev-month:hover svg,
+.flatpickr-months .flatpickr-next-month:hover svg {
+  @apply fill-primary;
+}
+.flatpickr-calendar.arrowTop:before {
+  @apply dark:!border-b-boxdark;
+}
+.flatpickr-calendar.arrowTop:after {
+  @apply dark:!border-b-boxdark;
+}
+.flatpickr-calendar {
+  @apply !p-6 dark:!bg-boxdark dark:!text-bodydark dark:!shadow-8 2xsm:!w-auto;
+}
+.flatpickr-day {
+  @apply dark:!text-bodydark;
+}
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+  @apply !top-7 dark:!fill-white dark:!text-white;
+}
+.flatpickr-months .flatpickr-prev-month.flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month.flatpickr-prev-month {
+  @apply !left-7;
+}
+.flatpickr-months .flatpickr-prev-month.flatpickr-next-month,
+.flatpickr-months .flatpickr-next-month.flatpickr-next-month {
+  @apply !right-7;
+}
+span.flatpickr-weekday,
+.flatpickr-months .flatpickr-month {
+  @apply dark:!fill-white dark:!text-white;
+}
+.flatpickr-day.inRange {
+  @apply dark:!border-meta-4 dark:!bg-meta-4 dark:!shadow-7;
+}
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.selected,
+.flatpickr-day.endRange {
+  @apply dark:!text-white;
+}
+
+.map-btn .jvm-zoom-btn {
+  @apply flex h-7.5 w-7.5 items-center justify-center rounded border border-stroke bg-white px-0 pb-0.5 pt-0 text-2xl leading-none text-body hover:border-primary hover:bg-primary hover:text-white dark:border-strokedark dark:text-bodydark dark:hover:border-primary dark:hover:text-white;
+}
+.mapOne .jvm-zoom-btn {
+  @apply bottom-0 left-auto top-auto;
+}
+.mapOne .jvm-zoom-btn.jvm-zoomin {
+  @apply right-10;
+}
+.mapOne .jvm-zoom-btn.jvm-zoomout {
+  @apply right-0;
+}
+.mapTwo .jvm-zoom-btn {
+  @apply bottom-0 top-auto;
+}
+.mapTwo .jvm-zoom-btn.jvm-zoomin {
+  @apply left-0;
+}
+.mapTwo .jvm-zoom-btn.jvm-zoomout {
+  @apply left-10;
+}
+
+.taskCheckbox:checked ~ .box span {
+  @apply opacity-100;
+}
+.taskCheckbox:checked ~ p {
+  @apply line-through;
+}
+.taskCheckbox:checked ~ .box {
+  @apply border-primary bg-primary dark:border-primary;
+}
+
+.custom-input-date::-webkit-calendar-picker-indicator {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 20px;
+}
+.custom-input-date-1::-webkit-calendar-picker-indicator {
+  background-image: url('/images/icon/icon-calendar.svg');
+}
+.custom-input-date-2::-webkit-calendar-picker-indicator {
+  background-image: url('/images/icon/icon-arrow-down.svg');
+}
+
+[x-cloak] {
+  display: none !important;
+}
+
+.jvectormap-tip {
+  background-color: #f8fafc !important;
+  font-family: Satoshi, sans-serif;
+}
+
+.map-btn .jvectormap-container .jvectormap-zoomin,
+.map-btn .jvectormap-container .jvectormap-zoomout {
+  @apply bottom-0 left-auto right-0 top-auto flex h-7.5 w-7.5 items-center justify-center rounded border border-stroke bg-white px-0 pb-0.5 pt-0 text-2xl leading-none text-body hover:border-primary hover:bg-primary hover:text-white dark:border-strokedark dark:text-bodydark dark:hover:border-primary dark:hover:text-white;
+}
+
+.map-btn .jvectormap-container .jvectormap-zoomin {
+  right: 45px;
+}
+
+.text-editor {
+  width: 1086px;
+  margin: 0 auto;
+}
+.ql-editor {
+  min-height: 100px;
+}
+
+.img-placeholder {
+  position: relative;
+  width: 35%;
+
+  &:before {
+    content: '';
+    box-sizing: border-box;
+    position: absolute;
+    top: 50%;
+    left: 45%;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid rgb(156, 163, 175);
+    border-top-color: rgb(31, 41, 55);
+    animation: spinning 0.6s linear infinite;
+  }
+}
+
+
+
+/* Custom TODO list checkboxes – shoutout to this awesome tutorial: https://moderncss.dev/pure-css-custom-checkbox-style/ */
+
+ul[data-type="taskList"] li > label {
+  margin-right: 0.2rem;
+  user-select: none;
+}
+
+@media screen and (max-width: 768px) {
+  ul[data-type="taskList"] li > label {
+    margin-right: 0.5rem;
+  }
+}
+
+ul[data-type="taskList"] li > label input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: rgb(var(--color-background-100));
+  margin: 0;
+  cursor: pointer;
+  width: 1.1rem;
+  height: 1.1rem;
+  position: relative;
+  border: 2px solid rgb(var(--color-text-100));
+  margin-right: 0.3rem;
+  display: grid;
+  place-content: center;
+
+  &:hover {
+    background-color: rgb(var(--color-background-80));
+  }
+
+  &:active {
+    background-color: rgb(var(--color-background-90));
+  }
+
+  &::before {
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em;
+    transform-origin: center;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  }
+
+  &:checked::before {
+    transform: scale(1);
+  }
+}
+
+ul[data-type="taskList"] li > div {
+  margin-top: -0.3rem;
+}
+
+ul[data-type="taskList"] li[data-checked="true"] > div > p {
+  color: rgb(var(--color-text-200));
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.resize-handle-outer {
+  flex: 0 0 1.5em;
+  position: relative;
+  outline: none;
+
+  --background-color: transparent;
+}
+.resize-handle-outer[data-resize-handle-active] {
+  --background-color: var(--color-solid-resize-bar-handle);
+}
+
+.resize-handle-inner {
+  position: absolute;
+  top: 0.25em;
+  bottom: 0.25em;
+  left: 0.25em;
+  right: 0.25em;
+  border-radius: 0.25em;
+  /*background-color: var(--background-color);*/
+  /*transition: background-color 0.2s linear;*/
+
+  /*background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2));*/
+  /*background-size: 2px 100%;*/
+  /*background-repeat: no-repeat;*/
+  /*background-position: center center;*/
+}
+
+.resize-handle-icon-horizontal {
+  width: 1em;
+  height: 1em;
+  position: absolute;
+  left: calc(50% - 0.5rem);
+  top: calc(50% - 0.5rem);
+}
+
+.resize-handle-icon-vertical {
+  width: 1em;
+  height: 1em;
+  position: absolute;
+  left: calc(50% - 0.5rem);
+  top: calc(10% - 0.5rem);
+  transform: rotate(90deg);
+}
