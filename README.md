@@ -1,15 +1,12 @@
 # openpro/openpro
 
-{ Banner }
+
+
+This repository hosts the code for a comprehensive project management platform tailored for software engineers. It provides a robust set of features that facilitate task tracking, team collaboration, and project progress visualization. The platform is designed to streamline the software development process, making it easier for teams to plan, track, and release software.
 
 [![Docker Image CI](https://github.com/openpro-io/openpro/actions/workflows/docker-image.yml/badge.svg)](https://github.com/openpro-io/openpro/actions/workflows/docker-image.yml)
-
-{ Description}
-
-Find us at:
-
-{ linkedin }
-{ discord }
+[![](https://dcbadge.vercel.app/api/server/3WxA2pz7YB)](https://discord.gg/3WxA2pz7YB)
+[![](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/claygorman)
 
 ## Supported Architectures
 
@@ -27,7 +24,7 @@ The architectures supported by this image are:
 
 ## Application Setup
 
-{ setup }
+TODO:
 
 ## Usage
 
@@ -42,7 +39,7 @@ version: "3.8"
 TODO:
 ```
 
-### docker cli ([click here for more info](https://docs.docker.com/engine/reference/commandline/cli/))å
+### docker cli ([click here for more info](https://docs.docker.com/engine/reference/commandline/cli/))
 
 ## Parameters
 
