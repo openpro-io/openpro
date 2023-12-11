@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import {
   NFTY_WS_HOST,
   NFTY_WS_SSL,
+  PUBLIC_NFTY_HTTP_HOST,
   PUBLIC_NFTY_HTTP_SSL,
 } from '@/services/config';
 import { subscriptionsTable } from '@/database/database.config';
@@ -13,11 +14,10 @@ import Dexie from 'dexie';
 type BaseUrlType = { http: string; ws: string };
 
 const getBaseUrl = (): BaseUrlType => {
-  const httpUrlPrefix = PUBLIC_NFTY_HTTP_SSL ? 'https://' : 'http://';
   const wsUrlPrefix = NFTY_WS_SSL ? 'wss://' : 'ws://';
 
   return {
-    http: `${httpUrlPrefix}${NFTY_WS_HOST}`,
+    http: `${PUBLIC_NFTY_HTTP_HOST}`,
     ws: `${wsUrlPrefix}${NFTY_WS_HOST}`,
   };
 };
@@ -52,14 +52,11 @@ export const getNftyChannels = async ({
   const userId = session?.user?.id;
   if (userId) channelsToUse.push(`user-${session?.user?.id}`);
 
+  const baseUrls = getBaseUrl();
+
   const channelsToPushIntoDb = channelsToUse.flatMap((channel) =>
-    (Object.keys(getBaseUrl()) as Array<keyof BaseUrlType>).map(
-      (connectionType) =>
-        createChannelObject(
-          getBaseUrl()[connectionType],
-          channel,
-          connectionType
-        )
+    (Object.keys(baseUrls) as Array<keyof BaseUrlType>).map((connectionType) =>
+      createChannelObject(baseUrls[connectionType], channel, connectionType)
     )
   );
 
@@ -87,13 +84,7 @@ export const getNtfyHttpUrl = async ({
 }) => {
   const channelsToUse = await getNftyChannels({ channels, additionalChannels });
 
-  const httpUrl = `${getBaseUrl().http}/${channelsToUse.join(
-    ','
-  )}/${subscriptionType}`;
-
-  console.log({ httpUrl });
-
-  return httpUrl;
+  return `${getBaseUrl().http}/${channelsToUse.join(',')}/${subscriptionType}`;
 };
 
 const getSocketUrl = async ({

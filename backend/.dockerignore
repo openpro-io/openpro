@@ -18,7 +18,7 @@ coverage
 bower_components
 .lock-wscript
 build/Release
-node_modules
+node_modules/
 jspm_packages/
 web_modules/
 *.tsbuildinfo
@@ -70,7 +70,3 @@ node_modules
 .vercel
 next-env.d.ts
 .pnpm-store
-Dockerfile
-.dockerignore
-README.md
-.git

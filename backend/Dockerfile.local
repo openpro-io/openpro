@@ -1,4 +1,4 @@
-FROM node:20-slim AS base
+FROM node:20 AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
@@ -11,6 +11,8 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 FROM base
 COPY --from=build /app /app
 
+CMD "pnpm install --frozen-lockfile -f"
+
 EXPOSE 8080
 
-CMD sh -c "pnpm install --frozen-lockfile -f && pnpm dev"
+CMD sh -c "pnpm migrate:up && pnpm dev"

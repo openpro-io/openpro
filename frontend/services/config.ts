@@ -20,7 +20,7 @@ export const AUTH_KEYCLOAK_ISSUER = process.env.AUTH_KEYCLOAK_ISSUER;
 export const PUBLIC_NFTY_HTTP_SSL = env('NEXT_PUBLIC_NFTY_HTTP_SSL') === 'true';
 export const PUBLIC_NFTY_HTTP_HOST = env('NEXT_PUBLIC_NFTY_HTTP_HOST');
 export const NFTY_WS_SSL = (process.env.NFTY_WS_SSL ?? 'false') === 'true';
-export const NFTY_WS_HOST = process.env.NFTY_WS_HOST ?? 'localhost:8093';
+export const NFTY_WS_HOST = process.env.NFTY_WS_HOST;
 
 export const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 export const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
