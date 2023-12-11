@@ -13,10 +13,6 @@ export default (sequelize, DataTypes) => {
       projectId: {
         type: DataTypes.INTEGER,
         field: 'project_id',
-        references: {
-          model: 'projects',
-          key: 'id',
-        },
       },
       name: {
         type: DataTypes.STRING,
@@ -46,7 +42,7 @@ export default (sequelize, DataTypes) => {
   );
 
   ProjectTag.associate = ({ Project }) => {
-    ProjectTag.belongsTo(Project);
+    ProjectTag.belongsTo(Project, { foreignKey: 'project_id' });
   };
 
   return ProjectTag;

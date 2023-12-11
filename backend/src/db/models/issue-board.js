@@ -7,18 +7,10 @@ export default (sequelize, DataTypes) => {
       boardId: {
         type: DataTypes.INTEGER,
         field: 'board_id',
-        references: {
-          model: 'boards',
-          key: 'id',
-        },
       },
       issueId: {
         type: DataTypes.INTEGER,
         field: 'issue_id',
-        references: {
-          model: 'issues',
-          key: 'id',
-        },
       },
       position: {
         type: DataTypes.INTEGER,
@@ -37,8 +29,8 @@ export default (sequelize, DataTypes) => {
   );
 
   IssueBoards.associate = ({ Board, Issue }) => {
-    IssueBoards.belongsTo(Board);
-    IssueBoards.belongsTo(Issue);
+    IssueBoards.belongsTo(Board, { foreignKey: 'board_id' });
+    IssueBoards.belongsTo(Issue, { foreignKey: 'issue_id' });
   };
 
   return IssueBoards;

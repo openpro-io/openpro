@@ -50,7 +50,7 @@ export default (sequelize, DataTypes) => {
   );
 
   IssueTag.associate = ({ Issue }) => {
-    IssueTag.belongsTo(Issue);
+    IssueTag.belongsTo(Issue, { foreignKey: 'issue_id' });
   };
 
   return IssueTag;

@@ -16,7 +16,10 @@ export default {
         type: Sequelize.INTEGER,
         field: 'project_id',
         references: {
-          model: 'projects',
+          model: {
+            tableName: 'projects',
+            schema: 'public',
+          },
           key: 'id',
         },
       },
@@ -36,11 +39,11 @@ export default {
       },
     });
 
-    await queryInterface.addIndex(TABLE_NAME, 'project_id', {
-      fields: 'project_id',
-      unique: true,
+    await queryInterface.addIndex(TABLE_NAME, {
+      fields: ['project_id'],
+      unique: false,
     });
-    await queryInterface.addIndex(TABLE_NAME, 'project_id_name', {
+    await queryInterface.addIndex(TABLE_NAME, {
       fields: ['project_id', 'name'],
       unique: true,
     });

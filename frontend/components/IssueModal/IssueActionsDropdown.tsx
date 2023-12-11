@@ -97,11 +97,11 @@ const DeleteDialogue = ({
                 </Dialog.Title>
                 <div className='mt-2'>
                   <p className='text-sm'>
-                    You're about to permanently delete this issue, its comments
-                    and attachments, and all of its data.
+                    You&apos;re about to permanently delete this issue, its
+                    comments and attachments, and all of its data.
                     <br />
                     <br />
-                    If you're not sure, you can resolve or close this issue
+                    If you&apos;re not sure, you can resolve or close this issue
                     instead.
                   </p>
                 </div>

@@ -60,6 +60,8 @@ export default (sequelize, DataTypes) => {
   Board.associate = ({ IssueBoard, Issue }) => {
     Board.belongsToMany(Issue, {
       through: IssueBoard,
+      foreignKey: 'board_id',
+      otherKey: 'issue_id',
     });
   };
 

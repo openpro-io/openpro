@@ -16,7 +16,10 @@ export default {
         type: Sequelize.INTEGER,
         field: 'reporter_id',
         references: {
-          model: 'users',
+          model: {
+            tableName: 'users',
+            schema: 'public',
+          },
           key: 'id',
         },
       },
@@ -24,7 +27,10 @@ export default {
         type: Sequelize.INTEGER,
         field: 'issue_id',
         references: {
-          model: 'issues',
+          model: {
+            tableName: 'issues',
+            schema: 'public',
+          },
           key: 'id',
         },
       },
@@ -35,7 +41,6 @@ export default {
       createdAt: {
         field: 'created_at',
         type: Sequelize.DATE,
-        default: Sequelize.fn('NOW'),
       },
       updatedAt: {
         field: 'updated_at',
@@ -43,12 +48,12 @@ export default {
       },
     });
 
-    await queryInterface.addIndex(TABLE_NAME, 'issue_id', {
-      fields: 'issue_id',
+    await queryInterface.addIndex(TABLE_NAME, {
+      fields: ['issue_id'],
       unique: false,
     });
-    await queryInterface.addIndex(TABLE_NAME, 'reporter_id', {
-      fields: 'reporter_id',
+    await queryInterface.addIndex(TABLE_NAME, {
+      fields: ['reporter_id'],
       unique: false,
     });
   },

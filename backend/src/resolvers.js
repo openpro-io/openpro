@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
 import { isUndefined } from 'lodash-es';
 import board from './db/models/board.js';
+import { issueResolvers } from './resolvers/issue.js';
 
 // TODO: make these delete operations with SQL + minio inside a SQL transaction
 
@@ -344,42 +345,7 @@ const resolvers = {
       return db.sequelize.models.User.findByPk(parent.reporterId);
     },
   },
-  Issue: {
-    __resolveType(obj, context, info) {
-      if (obj.boardId) {
-        return 'BoardIssue';
-      }
-
-      if (obj.projectId) {
-        return 'ProjectIssue';
-      }
-
-      return null; // GraphQLError is thrown
-    },
-    // TODO: optimize this by using join
-    tags: async (parent, args, { db }) => {
-      const issueTags = await db.sequelize.models.IssueTag.findAll({ where: { issueId: parent.id } });
-
-      return await db.sequelize.models.ProjectTag.findAll({
-        where: { id: issueTags.map((issueTag) => issueTag.projectTagId) },
-      });
-    },
-    comments: (parent, args, { db }) => {
-      return db.sequelize.models.IssueComment.findAll(
-        { where: { issueId: parent.id } },
-        { order: [['createdAt', 'DESC']] }
-      );
-    },
-    status: (parent, args, { db }) => {
-      return db.sequelize.models.IssueStatuses.findByPk(parent.issueStatusId);
-    },
-    reporter: (parent, args, { db }) => {
-      return db.sequelize.models.User.findByPk(parent.reporterId);
-    },
-    assignee: (parent, args, { db }) => {
-      return db.sequelize.models.User.findByPk(parent.assigneeId);
-    },
-  },
+  Issue: issueResolvers,
   Project: {
     tags: (parent, args, { db }) => {
       return db.sequelize.models.ProjectTag.findAll({ where: { projectId: parent.id } });

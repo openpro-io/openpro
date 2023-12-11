@@ -53,7 +53,7 @@ export default (sequelize, DataTypes) => {
   );
 
   IssueComment.associate = ({ Issue }) => {
-    IssueComment.belongsTo(Issue);
+    IssueComment.belongsTo(Issue, { foreignKey: 'issue_id' });
   };
 
   return IssueComment;

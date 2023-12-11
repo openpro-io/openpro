@@ -16,7 +16,10 @@ export default {
         type: Sequelize.INTEGER,
         field: 'owner_id',
         references: {
-          model: 'users',
+          model: {
+            tableName: 'users',
+            schema: 'public',
+          },
           key: 'id',
         },
       },
@@ -43,7 +46,6 @@ export default {
       createdAt: {
         field: 'created_at',
         type: Sequelize.DATE,
-        default: Sequelize.fn('NOW'),
       },
       updatedAt: {
         field: 'updated_at',
@@ -51,8 +53,8 @@ export default {
       },
     });
 
-    await queryInterface.addIndex(TABLE_NAME, 'asset_owner_id', {
-      fields: 'owner_id',
+    await queryInterface.addIndex(TABLE_NAME, {
+      fields: ['owner_id'],
       unique: false,
     });
   },

@@ -16,7 +16,10 @@ export default {
         type: Sequelize.INTEGER,
         field: 'project_id',
         references: {
-          model: 'projects',
+          model: {
+            tableName: 'projects',
+            schema: 'public',
+          },
           key: 'id',
         },
       },
@@ -24,7 +27,10 @@ export default {
         type: Sequelize.INTEGER,
         field: 'issue_status_id',
         references: {
-          model: 'issue_statuses',
+          model: {
+            tableName: 'issue_statuses',
+            schema: 'public',
+          },
           key: 'id',
         },
       },
@@ -32,7 +38,10 @@ export default {
         type: Sequelize.INTEGER,
         field: 'reporter_id',
         references: {
-          model: 'users',
+          model: {
+            tableName: 'users',
+            schema: 'public',
+          },
           key: 'id',
         },
       },
@@ -40,13 +49,16 @@ export default {
         type: Sequelize.INTEGER,
         field: 'assignee_id',
         references: {
-          model: 'users',
+          model: {
+            tableName: 'users',
+            schema: 'public',
+          },
           key: 'id',
         },
       },
       title: {
         type: Sequelize.STRING,
-        field: 'name',
+        field: 'title',
       },
       description: {
         type: Sequelize.TEXT,
@@ -60,7 +72,6 @@ export default {
       createdAt: {
         field: 'created_at',
         type: Sequelize.DATE,
-        default: Sequelize.fn('NOW'),
       },
       updatedAt: {
         field: 'updated_at',
@@ -68,20 +79,20 @@ export default {
       },
     });
 
-    await queryInterface.addIndex(TABLE_NAME, 'project_id', {
-      fields: 'project_id',
+    await queryInterface.addIndex(TABLE_NAME, {
+      fields: ['project_id'],
       unique: false,
     });
-    await queryInterface.addIndex(TABLE_NAME, 'assignee_id', {
-      fields: 'assignee_id',
+    await queryInterface.addIndex(TABLE_NAME, {
+      fields: ['assignee_id'],
       unique: false,
     });
-    await queryInterface.addIndex(TABLE_NAME, 'reporter_id', {
-      fields: 'reporter_id',
+    await queryInterface.addIndex(TABLE_NAME, {
+      fields: ['reporter_id'],
       unique: false,
     });
-    await queryInterface.addIndex(TABLE_NAME, 'issue_status_id', {
-      fields: 'issue_status_id',
+    await queryInterface.addIndex(TABLE_NAME, {
+      fields: ['issue_status_id'],
       unique: false,
     });
   },

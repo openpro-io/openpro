@@ -55,3 +55,5 @@ const Avatar = ({
 };
 
 export default Avatar;
+
+export * from './UploadComponent';

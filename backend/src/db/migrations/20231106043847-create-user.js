@@ -31,10 +31,6 @@ export default {
       avatarAssetId: {
         type: Sequelize.INTEGER,
         field: 'avatar_asset_id',
-        references: {
-          model: 'assets',
-          key: 'id',
-        },
       },
       createdAt: {
         field: 'created_at',

@@ -214,19 +214,19 @@ export default function KanbanBoardNew({
 
   useEffect(() => {
     if (saveToBackend) {
-      const configuredContainerOrder = JSON.parse(
-        getProjectInfo?.data?.project?.boards?.[0]?.containerOrder
-      ).map((item: any) => ({
-        id: `container-${item.id}`,
-        name: item.title,
-        position: item.position,
-      }));
+      // const configuredContainerOrder = JSON.parse(
+      //   getProjectInfo?.data?.project?.boards?.[0]?.containerOrder
+      // ).map((item: any) => ({
+      //   id: `container-${item.id}`,
+      //   name: item.title,
+      //   position: item.position,
+      // }));
 
-      const currentContainerOrder = containers.map((item, index) => ({
-        id: item.id,
-        name: item.title,
-        position: index,
-      }));
+      // const currentContainerOrder = containers.map((item, index) => ({
+      //   id: item.id,
+      //   name: item.title,
+      //   position: index,
+      // }));
 
       // TODO: we got some work to do here on using the backend container order
       // if (isEqual(configuredContainerOrder, currentContainerOrder)) {

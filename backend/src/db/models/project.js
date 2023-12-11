@@ -46,7 +46,7 @@ export default (sequelize, DataTypes) => {
   );
 
   Project.associate = ({ ProjectTag }) => {
-    Project.hasMany(ProjectTag);
+    Project.hasMany(ProjectTag, { foreignKey: 'project_id' });
   };
 
   return Project;

@@ -7,7 +7,7 @@ import {
   UPDATE_BOARD_MUTATION,
 } from '@/gql/gql-queries-mutations';
 
-const hideDoneAfter = ({
+const HideDoneAfter = ({
   projectId,
   boardId,
 }: {
@@ -110,4 +110,4 @@ const hideDoneAfter = ({
   );
 };
 
-export default hideDoneAfter;
+export default HideDoneAfter;

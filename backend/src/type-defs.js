@@ -65,11 +65,11 @@ const typeDefs = gql`
     updatedAt: String
     boards: [Board]
     issueStatuses: [IssueStatus]
-    issues(input: QueryIssueInput): [ProjectIssue]
+    issues(input: QueryIssueInput): [Issue]
     tags: [ProjectTag]
   }
 
-  interface Issue {
+  type Issue {
     id: ID!
     title: String!
     description: String
@@ -82,38 +82,6 @@ const typeDefs = gql`
     priority: Int
     comments: [IssueComment]
     tags: [ProjectTag]
-  }
-
-  type ProjectIssue implements Issue {
-    id: ID!
-    title: String!
-    description: String
-    projectId: String
-    status: IssueStatus
-    reporter: User
-    assignee: User
-    createdAt: String
-    updatedAt: String
-    priority: Int
-    comments: [IssueComment]
-    tags: [ProjectTag]
-  }
-
-  type BoardIssue implements Issue {
-    id: ID!
-    title: String!
-    description: String
-    projectId: String
-    status: IssueStatus
-    reporter: User
-    assignee: User
-    createdAt: String
-    updatedAt: String
-    priority: Int
-    comments: [IssueComment]
-    tags: [ProjectTag]
-    boardId: String
-    position: Int
   }
 
   type Column {
@@ -134,7 +102,7 @@ const typeDefs = gql`
     updatedAt: String
     settings: String
     columns: [Column]
-    issues: [BoardIssue]
+    issues: [Issue]
     containerOrder: String
   }
 
@@ -310,7 +278,7 @@ const typeDefs = gql`
     createProjectValidation(input: CreateProjectValidationInput!): MessageAndStatus
     boards: [Board]
     board(input: QueryBoardInput!): Board
-    issues(input: QueryIssueInput): [ProjectIssue]
+    issues(input: QueryIssueInput): [Issue]
     issue(input: QueryIssueInput): Issue
   }
 `;

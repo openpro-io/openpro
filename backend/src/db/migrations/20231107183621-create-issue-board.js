@@ -1,23 +1,17 @@
 'use strict';
 
-const TABLE_NAME = 'issue_tags';
+const TABLE_NAME = 'issue_boards';
 
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable(TABLE_NAME, {
-      id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
+      boardId: {
         type: Sequelize.INTEGER,
-      },
-      projectTagId: {
-        type: Sequelize.INTEGER,
-        field: 'project_tag_id',
+        field: 'board_id',
         references: {
           model: {
-            tableName: 'project_tags',
+            tableName: 'boards',
             schema: 'public',
           },
           key: 'id',
@@ -34,26 +28,18 @@ export default {
           key: 'id',
         },
       },
-      createdAt: {
-        field: 'created_at',
-        type: Sequelize.DATE,
-      },
-      updatedAt: {
-        field: 'updated_at',
-        type: Sequelize.DATE,
+      position: {
+        type: Sequelize.INTEGER,
+        field: 'position',
       },
     });
 
     await queryInterface.addIndex(TABLE_NAME, {
-      fields: ['issue_id'],
+      fields: ['board_id'],
       unique: false,
     });
     await queryInterface.addIndex(TABLE_NAME, {
-      fields: ['project_tag_id'],
-      unique: false,
-    });
-    await queryInterface.addIndex(TABLE_NAME, {
-      fields: ['issue_id', 'project_tag_id'],
+      fields: ['issue_id', 'board_id'],
       unique: true,
     });
   },
