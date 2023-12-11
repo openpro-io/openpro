@@ -20,7 +20,7 @@ jobs:
       with:
         image: openpro-backend
         registry: ghcr.io
-        directory: ./backend
+        directory: /home/runner/work/openpro/openpro/backend
         addLatest: true
         addTimestamp: true
         username: ${{ secrets.GHCR_USERNAME }}
@@ -31,7 +31,7 @@ jobs:
       with:
         image: openpro-frontend
         registry: ghcr.io
-        directory: ./frontend
+        directory: /home/runner/work/openpro/openpro/frontend
         addLatest: true
         addTimestamp: true
         username: ${{ secrets.GHCR_USERNAME }}
