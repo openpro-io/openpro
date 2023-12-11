@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PUBLIC_NFTY_HTTP_SSL } from '@/services/config';
+import { PUBLIC_NFTY_HTTP_HOST, PUBLIC_NFTY_HTTP_SSL } from '@/services/config';
 
 type Headers = {
   'Content-Type': string;
@@ -46,15 +46,10 @@ export const notify = async ({
   tags,
   click,
 }: Notification) => {
-  let url = '';
-
-  if (PUBLIC_NFTY_HTTP_SSL) {
-    url = 'https://';
-  } else {
-    url = 'http://';
+  if (!PUBLIC_NFTY_HTTP_HOST) {
+    console.log('PUBLIC_NFTY_HTTP_HOST not variable configured');
+    return Promise.resolve();
   }
-
-  url += process.env.NFTY_HTTP_HOST || 'localhost:8093';
 
   const headers: Headers = {
     'Content-Type': 'text/plain',
@@ -67,7 +62,9 @@ export const notify = async ({
   if (tags) postData.tags = tags;
   if (click) postData.click = click;
 
-  const { data } = await axios.post(`${url}`, postData, { headers });
+  const { data } = await axios.post(`${PUBLIC_NFTY_HTTP_HOST}`, postData, {
+    headers,
+  });
 
   return data;
 };
