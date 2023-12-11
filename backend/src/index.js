@@ -3,7 +3,7 @@ import { ApolloServer } from '@apollo/server';
 import { fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
 import typeDefs from './type-defs.js';
 import resolvers from './resolvers.js';
-import { HTTP_PORT, BUCKET_NAME } from './services/config.js';
+import { HTTP_PORT, BUCKET_NAME, CORS_ORIGIN } from './services/config.js';
 import { db } from './db/index.js';
 import { GraphQLError } from 'graphql/error/index.js';
 import * as cors from '@fastify/cors';
@@ -25,6 +25,7 @@ fastify.register(cors, {
       /localhost/.test(origin) ||
       /qa\.openpro\.io/.test(origin) ||
       /openpro\.io/.test(origin) ||
+      CORS_ORIGIN === origin ||
       origin === null ||
       origin === undefined
     ) {
