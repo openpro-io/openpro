@@ -16,11 +16,11 @@ export function middleware(req: NextRequest) {
     );
     res.headers.append(
       'Access-Control-Allow-Methods',
-      'GET,DELETE,PATCH,POST,PUT'
+      'GET,OPTIONS,DELETE,PATCH,POST,PUT'
     );
     res.headers.append(
       'Access-Control-Allow-Headers',
-      'Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, Apollo-Require-Preflight, Origin, X-Requested-With, Authorization'
+      'Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, Apollo-Require-Preflight, Origin, X-Requested-With, Authorization, X-CSRF-Token'
     );
   } else {
     // generic CORS policy omitted for brevity....
