@@ -18,10 +18,9 @@ jobs:
     - name: Build the backend Docker image and push
       uses: mr-smithers-excellent/docker-build-push@v6
       with:
-        image: ghcr.io/openpro-io/openpro-backend
+        image: openpro-backend
         registry: ghcr.io
-        directory: backend
-        enableBuildKit: true
+        directory: ./backend
         addLatest: true
         addTimestamp: true
         username: ${{ secrets.GHCR_USERNAME }}
@@ -30,10 +29,9 @@ jobs:
     - name: Build the frontend Docker image and push
       uses: mr-smithers-excellent/docker-build-push@v6
       with:
-        image: ghcr.io/openpro-io/openpro-frontend
+        image: openpro-frontend
         registry: ghcr.io
-        directory: frontend
-        enableBuildKit: true
+        directory: ./frontend
         addLatest: true
         addTimestamp: true
         username: ${{ secrets.GHCR_USERNAME }}
