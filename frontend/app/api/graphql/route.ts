@@ -31,9 +31,6 @@ export async function POST(request: Request) {
     headersToProxy[key] = headersList.get(key);
   }
 
-  // This is because we proxy through the frontend in all cases and do not want CORS issues
-  headersToProxy['origin'] = 'http://localhost:3000';
-
   // Override bearer token...
   if (!isIntrospection) {
     headersToProxy['Authorization'] = `Bearer ${token}`;

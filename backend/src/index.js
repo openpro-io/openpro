@@ -12,7 +12,7 @@ import processRequest from 'graphql-upload/processRequest.mjs';
 import { minioClient } from './services/minio-client.js';
 
 const fastify = Fastify({
-  logger: true,
+  logger: process.env.ENABLE_FASTIFY_LOGGING === 'true',
   keepAliveTimeout: 61 * 1000,
 });
 
@@ -31,6 +31,7 @@ fastify.register(cors, {
       cb(null, true);
       return;
     }
+    console.log('Blocked by CORS', { origin });
     // Generate an error on other origins, disabling access
     cb(new Error('Not allowed'));
   },
