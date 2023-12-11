@@ -38,14 +38,12 @@ export async function POST(request: Request) {
 
   const body = isJson ? await request.json() : await request.formData();
 
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/graphql`;
+
   try {
-    const axiosResponse = await axios.post(
-      `${httpsOrHttp}://backend:8080/graphql`,
-      body,
-      {
-        headers: headersToProxy,
-      }
-    );
+    const axiosResponse = await axios.post(url, body, {
+      headers: headersToProxy,
+    });
 
     // console.log(axiosResponse.data);
     // console.log(axiosResponse.headers);
