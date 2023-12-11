@@ -1,0 +1,143 @@
+version: "3.8"
+
+networks:
+  internal:
+
+volumes:
+  uploads:
+  pgdata:
+  ntfy:
+
+services:
+  ntfy:
+    image: binwiederhier/ntfy
+    container_name: ntfy
+    command:
+      - serve
+    environment:
+      TZ: UTC # optional: set desired timezone
+      NTFY_BASE_URL: http://localhost:8093
+      NTFY_CACHE_FILE: /var/lib/ntfy/cache.db
+      NTFY_AUTH_FILE: /var/lib/ntfy/auth.db
+      NTFY_AUTH_DEFAULT_ACCESS: read-write
+      NTFY_BEHIND_PROXY: true
+      NTFY_ATTACHMENT_CACHE_DIR: /var/lib/ntfy/attachments
+      NTFY_ENABLE_LOGIN: true
+      NTFY_VISITOR_REQUEST_LIMIT_BURST: 180
+      NTFY_VISITOR_SUBSCRIPTION_LIMIT: 50
+    #user: UID:GID # optional: replace with your own user/group or uid/gid
+    volumes:
+      - ntfy:/var/lib/ntfy
+    ports:
+      - "8093:80"
+    networks:
+      - internal
+    healthcheck: # optional: remember to adapt the host:port to your environment
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --tries=1 http://localhost:80/v1/health -O - | grep -Eo '\"healthy\"\\s*:\\s*true' || exit 1",
+        ]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  postgresql-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - internal
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+#    ports:
+#      - "5432:5432"
+
+  openpro-minio:
+    image: minio/minio
+    container_name: openpro-minio
+    environment:
+      MINIO_PORT: 9000
+      MINIO_HOST: openpro-minio
+      MINIO_ROOT_USER: access-key
+      MINIO_ROOT_PASSWORD: secret-key
+    pull_policy: always
+    restart: unless-stopped
+    networks:
+      - internal
+    command: server /uploads --console-address ":9090"
+    volumes:
+      - uploads:/uploads
+
+  createbuckets:
+    image: minio/mc
+    environment:
+      MINIO_PORT: 9000
+      MINIO_HOST: openpro-minio
+      MINIO_ROOT_USER: access-key
+      MINIO_ROOT_PASSWORD: secret-key
+      BUCKET_NAME: uploads
+    pull_policy: always
+    networks:
+      - internal
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add openpro-minio http://openpro-minio:9000 access-key secret-key;
+      /usr/bin/mc mb openpro-minio/uploads;
+      /usr/bin/mc anonymous set download openpro-minio/uploads;
+      "
+    depends_on:
+      - openpro-minio
+
+  backend:
+    container_name: backend
+    image: ghcr.io/openpro-io/openpro-backend:latest
+    environment:
+      HTTP_PORT: 8080
+      SQL_URI: postgres://postgres:postgres@postgresql-db:5432/postgres
+      FILE_SIZE_LIMIT: 5242880
+      BUCKET_NAME: uploads
+      # Minio
+      MINIO_PORT: 9000
+      MINIO_HOST: openpro-minio
+      MINIO_ROOT_USER: access-key
+      MINIO_ROOT_PASSWORD: secret-key
+    networks:
+      - internal
+    depends_on:
+      - postgresql-db
+      - createbuckets
+
+  frontend:
+    container_name: frontend
+    image: ghcr.io/openpro-io/openpro-frontend:latest
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:8080
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: # openssl rand -base64 32
+      NEXT_PUBLIC_NEXTAUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER: # github|keycloak
+
+      # Uncomment the following lines to enable keycloak OAuth
+      #AUTH_KEYCLOAK_ID:
+      #AUTH_KEYCLOAK_SECRET:
+      #KEYCLOAK_BASE_URL:
+
+      # Uncomment the following lines to enable GitHub OAuth
+      #GITHUB_CLIENT_ID: <client-id>
+      #GITHUB_CLIENT_SECRET: <client-secret>
+
+      NFTY_WS_HOST: localhost:8093
+      NFTY_WS_SSL: false
+      PUBLIC_NFTY_HTTP_SSL: false
+    networks:
+      - internal
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+      - ntfy

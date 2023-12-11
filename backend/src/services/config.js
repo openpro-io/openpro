@@ -2,9 +2,9 @@ import { __dirname } from './utils.js';
 
 export const HTTP_PORT = process.env.HTTP_PORT ?? 8080;
 export const ASSET_PATH = process.env.ASSET_PATH ?? '../../' + __dirname + '/assets';
-export const ASSET_PROVIDER = process.env.ASSET_PROVIDER ?? 'filesystem';
+export const ASSET_PROVIDER = process.env.ASSET_PROVIDER ?? 'minio';
 export const BUCKET_NAME = process.env.BUCKET_NAME ?? 'uploads';
-export const USE_MINIO = process.env.USE_MINIO ?? '0';
+export const USE_MINIO = process.env.USE_MINIO ?? '1';
 export const MINIO_HOST = process.env.MINIO_HOST ?? 'localhost';
 export const MINIO_PORT = process.env.MINIO_PORT ?? '9000';
 
