@@ -21,6 +21,7 @@ jobs:
         image: openpro-backend
         registry: ghcr.io
         dockerfile: backend/Dockerfile
+        directory: backend
         addLatest: true
         addTimestamp: true
         username: ${{ secrets.GHCR_USERNAME }}
@@ -32,6 +33,7 @@ jobs:
         image: openpro-frontend
         registry: ghcr.io
         dockerfile: frontend/Dockerfile
+        directory: frontend
         addLatest: true
         addTimestamp: true
         username: ${{ secrets.GHCR_USERNAME }}
