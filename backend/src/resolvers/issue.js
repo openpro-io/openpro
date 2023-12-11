@@ -13,7 +13,6 @@ export const issueResolvers = {
     );
   },
   status: (parent, args, { db }) => {
-    console.log({ parent, issueStatus: true });
     return db.sequelize.models.IssueStatuses.findByPk(parent.issueStatusId);
   },
   reporter: (parent, args, { db }) => {

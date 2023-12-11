@@ -6,6 +6,7 @@ import NextAuthProvider from '@/app/context/NextAuthProvider';
 import { ApolloProvider } from '@apollo/client';
 import { apolloClient } from '@/services/apollo-client';
 import MainLayout, { ProtectedLayout } from '@/components/Layout';
+import { PublicEnvScript } from 'next-runtime-env';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -16,6 +17,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en'>
+      <head>
+        <PublicEnvScript />
+        <title>OpenPro</title>
+      </head>
       <body id='root' className={inter.className}>
         <ApolloProvider client={apolloClient}>
           <NextAuthProvider>

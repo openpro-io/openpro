@@ -131,6 +131,9 @@ dependencies:
   next-auth:
     specifier: ^4.24.4
     version: 4.24.4(next@14.0.3)(react-dom@18.2.0)(react@18.2.0)
+  next-runtime-env:
+    specifier: 3.2.0
+    version: 3.2.0(next@14.0.3)(react@18.2.0)
   openai:
     specifier: ^4.17.4
     version: 4.17.4
@@ -5489,6 +5492,16 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       uuid: 8.3.2
+    dev: false
+
+  /next-runtime-env@3.2.0(next@14.0.3)(react@18.2.0):
+    resolution: {integrity: sha512-rwe3flUgSRm51hzRN4Vt5MMSYMS4aDMEPJa0r+CMONA3UyUZl8Y5O8zjHSIlaNb3yquTCttZ0ahObPyPprBj9g==}
+    peerDependencies:
+      next: ^14
+      react: ^18
+    dependencies:
+      next: 14.0.3(@babel/core@7.23.3)(react-dom@18.2.0)(react@18.2.0)
+      react: 18.2.0
     dev: false
 
   /next@14.0.3(@babel/core@7.23.3)(react-dom@18.2.0)(react@18.2.0):
