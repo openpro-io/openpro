@@ -10,7 +10,7 @@ import {
   USER_FIELDS,
 } from '@/gql/gql-queries-mutations';
 import { createFragmentRegistry } from '@apollo/client/cache';
-import { NEXT_PUBLIC_API_URL } from '@/services/config';
+import { NEXT_PUBLIC_API_URL, NEXTAUTH_URL } from '@/services/config';
 import { BatchHttpLink } from '@apollo/client/link/batch-http';
 import { getMainDefinition } from '@apollo/client/utilities';
 
@@ -29,14 +29,16 @@ const authLink = setContext(async (_, { headers }) => {
   };
 });
 
+const uri = `${NEXT_PUBLIC_API_URL ?? NEXTAUTH_URL}/api/graphql`;
+
 const batchLink = new BatchHttpLink({
-  uri: 'http://localhost:3000/api/graphql',
+  uri,
   batchMax: 10, // No more than 5 operations per batch
   batchInterval: 30, // Wait no more than 30ms after first batched operation
 });
 
 const uploadLink = createUploadLink({
-  uri: `http://localhost:3000/api/graphql`,
+  uri,
   headers: {
     'apollo-require-preflight': 'true',
   },
