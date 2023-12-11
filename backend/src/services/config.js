@@ -14,3 +14,5 @@ export const MINIO_ROOT_PASSWORD = process.env.MINIO_ROOT_PASSWORD;
 export const SQL_URI = process.env.SQL_URI;
 
 export const CORS_ORIGIN = process.env.CORS_ORIGIN;
+
+export const FRONTEND_HOSTNAME = process.env.FRONTEND_HOSTNAME;

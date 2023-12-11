@@ -3,7 +3,7 @@ import { ApolloServer } from '@apollo/server';
 import { fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
 import typeDefs from './type-defs.js';
 import resolvers from './resolvers.js';
-import { HTTP_PORT, BUCKET_NAME, CORS_ORIGIN } from './services/config.js';
+import { HTTP_PORT, BUCKET_NAME, CORS_ORIGIN, FRONTEND_HOSTNAME } from './services/config.js';
 import { db } from './db/index.js';
 import { GraphQLError } from 'graphql/error/index.js';
 import * as cors from '@fastify/cors';
@@ -88,7 +88,8 @@ const myContextFunction = async (request) => {
   // TODO: maybe we dont make this optional
   if (token) {
     try {
-      const { data } = await axios.get(`http://frontend:3000/api/verify-jwt`, {
+      // TODO: maybe we just call the url of the caller origin
+      const { data } = await axios.get(`${FRONTEND_HOSTNAME}/api/verify-jwt`, {
         headers: { Authorization: request.headers.authorization },
       });
 
