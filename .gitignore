@@ -129,6 +129,6 @@ assets/
 */.pnpm-store
 
 /frontend/.pnpm-store/
-/nfty/auth.db
-/nfty/cache.db
+/ntfy/auth.db
+/ntfy/cache.db
 /backend/.pnpm-store/

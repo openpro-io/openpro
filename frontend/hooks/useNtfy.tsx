@@ -3,10 +3,10 @@ import { Options, WebSocketHook } from 'react-use-websocket/src/lib/types';
 import { getSession } from 'next-auth/react';
 import { useCallback } from 'react';
 import {
-  NFTY_WS_HOST,
-  NFTY_WS_SSL,
-  PUBLIC_NFTY_HTTP_HOST,
-  PUBLIC_NFTY_HTTP_SSL,
+  NTFY_WS_HOST,
+  NTFY_WS_SSL,
+  PUBLIC_NTFY_HTTP_HOST,
+  PUBLIC_NTFY_HTTP_SSL,
 } from '@/services/config';
 import { subscriptionsTable } from '@/database/database.config';
 import Dexie from 'dexie';
@@ -14,11 +14,11 @@ import Dexie from 'dexie';
 type BaseUrlType = { http: string; ws: string };
 
 const getBaseUrl = (): BaseUrlType => {
-  const wsUrlPrefix = NFTY_WS_SSL ? 'wss://' : 'ws://';
+  const wsUrlPrefix = NTFY_WS_SSL ? 'wss://' : 'ws://';
 
   return {
-    http: `${PUBLIC_NFTY_HTTP_HOST}`,
-    ws: `${wsUrlPrefix}${NFTY_WS_HOST}`,
+    http: `${PUBLIC_NTFY_HTTP_HOST}`,
+    ws: `${wsUrlPrefix}${NTFY_WS_HOST}`,
   };
 };
 
@@ -104,11 +104,11 @@ const getSocketUrl = async ({
 const useNtfy = ({
   channels,
   additionalChannels,
-  nftyOptions,
+  ntfyOptions,
 }: {
   channels?: string[];
   additionalChannels?: string[];
-  nftyOptions?: Options;
+  ntfyOptions?: Options;
 } = {}): WebSocketHook => {
   const getSocketUrlCb = useCallback(() => {
     return getSocketUrl({ channels, additionalChannels });
@@ -119,7 +119,7 @@ const useNtfy = ({
     //Will attempt to reconnect on all close events, such as server shutting down
     shouldReconnect: (closeEvent) => true,
     share: true,
-    ...(nftyOptions ?? {}),
+    ...(ntfyOptions ?? {}),
   });
 };
 

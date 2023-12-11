@@ -169,7 +169,7 @@ services:
       NTFY_VISITOR_SUBSCRIPTION_LIMIT: 50
     #user: UID:GID # optional: replace with your own user/group or uid/gid
     volumes:
-      - ./nfty:/var/lib/ntfy
+      - ./ntfy:/var/lib/ntfy
     ports:
       - "8093:80"
     networks:
@@ -281,9 +281,9 @@ services:
       #OPENAI_API_KEY: "sk-" # add your openai key here
       #GPT_ENGINE: "gpt-3.5-turbo" # use "gpt-4" if you have access
       # Nfty
-      NFTY_WS_HOST: localhost:8093
-      NFTY_WS_SSL: false
-      PUBLIC_NFTY_HTTP_SSL: false
+      NTFY_WS_HOST: localhost:8093
+      NTFY_WS_SSL: false
+      PUBLIC_NTFY_HTTP_SSL: false
     networks:
       - internal
     ports:
