@@ -86,3 +86,17 @@ TODO:
 | GITHUB_CLIENT_ID                   | Required if `NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER=github`.                                                                         |         | :heavy_check_mark:* |
 | GITHUB_CLIENT_SECRET               | Required if `NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER=github`.                                                                         |         | :heavy_check_mark:* |
 
+# Running a reverse proxy
+
+If you are running these behind a reverse proxy like nginx proxy manager you will need to add the following headers to your proxy for `frontend` under advanced tab.
+
+The reason for this is nextauth payloads can be very large when redirecting back from the oauth provider.
+
+Without these headers you may get a `5XX` error.
+
+```
+proxy_buffers 8 16k;
+proxy_buffer_size 32k;
+```
+
+![npm-advanced-tab.png](readme-assets%2Fnpm-advanced-tab.png)
