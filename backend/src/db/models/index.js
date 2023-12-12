@@ -17,7 +17,9 @@ import IssueBoard from './issue-board.js';
 export const db = {};
 
 const init = async () => {
-  db.sequelize = new Sequelize(SQL_URI);
+  db.sequelize = new Sequelize(SQL_URI, {
+    logging: false,
+  });
 
   db.Users = User(db.sequelize, DataTypes);
   db.Project = Project(db.sequelize, DataTypes);
