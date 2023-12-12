@@ -42,14 +42,16 @@ const BoardColumns = ({
     if (getBoardInfo?.data?.board?.containerOrder) {
       const buildContainers: SetStateAction<ContainerItem[]> = [];
 
-      JSON.parse(getBoardInfo.data.board.containerOrder).forEach(
-        (container: any) => {
-          buildContainers[container.position] = {
-            id: container.id,
-            title: container.title,
-          };
-        }
+      const containerOrder = JSON.parse(
+        getBoardInfo?.data?.board?.containerOrder ?? '[]'
       );
+
+      containerOrder.forEach((container: any) => {
+        buildContainers[container.position] = {
+          id: container.id,
+          title: container.title,
+        };
+      });
 
       setColumns(buildContainers);
     } else if (getProjectInfo?.data) {
