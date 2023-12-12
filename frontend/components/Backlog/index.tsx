@@ -38,12 +38,12 @@ import {
   UPDATE_BOARD_MUTATION,
   UPDATE_ISSUE_MUTATION,
 } from '@/gql/gql-queries-mutations';
-import _ from 'lodash';
+import { cloneDeep, pullAt, flatMap } from 'lodash';
 import { getSession } from 'next-auth/react';
-import { notify } from '@/services/ntfy';
 import { useSearchParams } from 'next/navigation';
 import IssueModal from '@/components/IssueModal';
 import IssueModalContents from '@/components/IssueModal/IssueModalContents';
+import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
 
 // TODO: When we drag from backlog into a board we need to push into the viewState
 
@@ -72,6 +72,7 @@ export default function Backlog({ projectId }: { projectId: string }) {
   const [showAddContainerModal, setShowAddContainerModal] = useState(false);
   const [showAddItemModal, setShowAddItemModal] = useState(false);
   const [saveToBackend, setSaveToBackend] = useState(false);
+  const { socket, connected, error } = useAuthenticatedSocket();
 
   const [createIssue, createIssueProps] = useMutation(CREATE_ISSUE_MUTATION);
   const [updateIssue] = useMutation(UPDATE_ISSUE_MUTATION);
@@ -128,7 +129,6 @@ export default function Backlog({ projectId }: { projectId: string }) {
 
     // Create the item in backend
     const newIssueResp = await createIssue({
-      onCompleted: async (data) => {},
       variables: {
         input: {
           projectId: `${projectId}`,
@@ -150,11 +150,15 @@ export default function Backlog({ projectId }: { projectId: string }) {
     const notification = {
       title: 'New Issue Created',
       message: `Ticket title: ${itemName}`,
-      topic: `user-${session?.user?.id}`,
+      topic: `user:${session?.user?.id}`,
       tags: ['white_check_mark', 'openpro.notificationDuration=3000'],
     };
 
-    await notify(notification);
+    if (connected) {
+      socket.emit('message', notification);
+    }
+
+    // await notify(notification);
 
     const id = `item-${newIssue.id}`;
     container.items.push({
@@ -181,7 +185,7 @@ export default function Backlog({ projectId }: { projectId: string }) {
     const buildContainers = boards.map((board: any) => {
       const boardState = JSON.parse(board.viewState);
 
-      const allItems = _.flatMap(boardState, 'items');
+      const allItems = flatMap(boardState, 'items');
 
       allItems.forEach((item) => itemIdsInABoard.add(item.id));
 
@@ -467,9 +471,9 @@ export default function Backlog({ projectId }: { projectId: string }) {
                 (i: any) => i.id === active.id
               );
 
-              const newViewState = _.cloneDeep(viewState);
+              const newViewState = cloneDeep(viewState);
 
-              _.pullAt(
+              pullAt(
                 newViewState[indexOfContainer].items,
                 indexOfItemInContainer
               );

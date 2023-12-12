@@ -31,3 +31,5 @@ export const PUBLIC_KEYCLOAK_CLIENT_ID =
 export const PUBLIC_KEYCLOAK_URL = process.env.NEXT_PUBLIC_KEYCLOAK_URL;
 
 export const PUBLIC_KEYCLOAK_REALM = process.env.NEXT_PUBLIC_KEYCLOAK_REALM;
+
+export const HTTP_PORT = Number(process.env.HTTP_PORT ?? 3000);

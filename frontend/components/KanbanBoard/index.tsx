@@ -34,20 +34,18 @@ import { useMutation, useQuery } from '@apollo/client';
 import {
   CREATE_ISSUE_MUTATION,
   CREATE_ISSUE_STATUS_MUTATION,
-  GET_BOARD_INFO,
-  GET_BOARD_ISSUES,
   GET_PROJECT_INFO,
   UPDATE_BOARD_MUTATION,
   UPDATE_ISSUE_MUTATION,
 } from '@/gql/gql-queries-mutations';
-import _, { isEqual } from 'lodash';
+import { isEmpty } from 'lodash';
 import { getSession } from 'next-auth/react';
 import { getDomainName } from '@/services/utils';
-import { notify } from '@/services/ntfy';
 import { useSearchParams } from 'next/navigation';
 import IssueModal from '@/components/IssueModal';
 import IssueModalContents from '@/components/IssueModal/IssueModalContents';
 import Toolbar from '@/components/KanbanBoard/Toolbar';
+import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
 
 type DNDType = {
   id: UniqueIdentifier;
@@ -78,6 +76,7 @@ export default function KanbanBoardNew({
   const searchParams = useSearchParams()!;
   const selectedIssueId = searchParams.get('selectedIssueId');
 
+  const { socket, connected, error } = useAuthenticatedSocket();
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
   const [showAddContainerModal, setShowAddContainerModal] = useState(false);
   const [showAddItemModal, setShowAddItemModal] = useState(false);
@@ -184,14 +183,19 @@ export default function KanbanBoardNew({
     const notification = {
       title: 'New Issue Created',
       message: `Ticket title: ${itemName}`,
-      topic: `user-${session?.user?.id}`,
+      topic: `user:${session?.user?.id}`,
       tags: ['white_check_mark', 'openpro.notificationDuration=3000'],
       click: `${getDomainName()}/projects/${projectId}/boards/${boardId}/?selectedIssueId=${
         newIssue.id
       }`,
     };
 
-    await notify(notification);
+    if (connected) {
+      socket.emit('message', notification);
+      console.log('emitting');
+    }
+
+    // await notify(notification);
 
     const id = `item-${newIssue.id}`;
     container.items.push({
@@ -263,7 +267,7 @@ export default function KanbanBoardNew({
 
     if (thisBoard?.viewState) {
       // We only update the local state if its unset
-      if (_.isEmpty(containers)) {
+      if (isEmpty(containers)) {
         setPageState((prevState) => {
           return {
             ...prevState,
