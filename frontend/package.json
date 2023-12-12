@@ -71,7 +71,6 @@
     "react-moveable": "^0.55.0",
     "react-resizable-panels": "^0.0.55",
     "react-select": "^5.8.0",
-    "react-use-websocket": "^4.5.0",
     "socket.io-client": "^4.7.2",
     "socket.io-react-hook": "^2.4.4",
     "tailwind-highlightjs": "^2.0.1",
