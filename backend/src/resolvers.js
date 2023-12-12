@@ -54,7 +54,10 @@ const resolvers = {
       if (typeof viewState !== 'undefined') board.viewState = viewState;
       if (backlogEnabled !== undefined) board.backlogEnabled = backlogEnabled;
       if (typeof settings !== 'undefined') board.settings = settings;
-      if (typeof containerOrder !== 'undefined') board.containerOrder = JSON.parse(containerOrder);
+      // TODO: lets add some more safety checks here
+      if (typeof containerOrder !== 'undefined') {
+        board.containerOrder = typeof containerOrder === 'string' ? JSON.parse(containerOrder) : null;
+      }
 
       await board.save();
 
@@ -326,7 +329,7 @@ const resolvers = {
       return data;
     },
     containerOrder: (parent) => {
-      return JSON.stringify(parent.containerOrder);
+      return parent.containerOrder ? JSON.stringify(parent.containerOrder) : undefined;
     },
   },
   User: {
