@@ -13,28 +13,24 @@ import { createFragmentRegistry } from '@apollo/client/cache';
 import {
   NEXT_PUBLIC_API_URL,
   PUBLIC_NEXTAUTH_URL,
-  NEXTAUTH_URL,
   API_URL,
 } from '@/services/config';
 import { BatchHttpLink } from '@apollo/client/link/batch-http';
 import { getMainDefinition } from '@apollo/client/utilities';
+import axios from 'axios';
 
 const authLink = setContext(async (_, { headers }) => {
-  // Get the session
-  const session = await getSession();
-
-  // Set the access token to the Authorization header
-  const accessToken = session?.accessToken;
+  const { data } = await axios.get(`${PUBLIC_NEXTAUTH_URL}/api/get-jwt`);
 
   return {
     headers: {
       ...headers,
-      Authorization: accessToken ? `Bearer ${accessToken}` : '',
+      Authorization: data.token ? `Bearer ${data.token}` : '',
     },
   };
 });
 
-const uri = `${PUBLIC_NEXTAUTH_URL ?? NEXTAUTH_URL}/api/graphql`;
+const uri = NEXT_PUBLIC_API_URL;
 
 const batchLink = new BatchHttpLink({
   uri,
