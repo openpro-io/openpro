@@ -31,13 +31,111 @@ TODO:
 
 To help you get started creating a container from this image you can either use docker-compose or the docker cli.
 
-### docker-compose (development)
+### docker-compose (production)
+
+Here is my setup (slightly redacted) for a production setup.
 
 ```yaml
 ---
 version: "3.8"
 
-TODO:
+networks:
+  internal:
+  # This is a network from another stack that container nginx proxy manager which is why its external
+  nginx-proxy-manager-nw:
+    external: true
+
+# I would probably make these volumes a host bind r/w volume
+volumes:
+  uploads:
+  pgdata:
+
+services:
+  postgresql-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: REDACTED
+      POSTGRES_PASSWORD: REDACTED
+      POSTGRES_DB: postgres
+    networks:
+      - internal
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  openpro-minio:
+    image: minio/minio
+    environment:
+      MINIO_PORT: 9000
+      MINIO_HOST: openpro-minio
+      MINIO_ROOT_USER: REDACTED
+      MINIO_ROOT_PASSWORD: REDACTED
+    pull_policy: always
+    restart: unless-stopped
+    networks:
+      - internal
+    command: server /uploads --console-address ":9090"
+    volumes:
+      - uploads:/uploads
+
+  createbuckets:
+    image: minio/mc
+    environment:
+      MINIO_PORT: 9000
+      MINIO_HOST: openpro-minio
+      MINIO_ROOT_USER: REDACTED
+      MINIO_ROOT_PASSWORD: REDACTED
+      BUCKET_NAME: uploads
+    pull_policy: always
+    networks:
+      - internal
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add openpro-minio http://openpro-minio:9000 REDACTED REDACTED;
+      /usr/bin/mc mb openpro-minio/uploads;
+      /usr/bin/mc anonymous set download openpro-minio/uploads;
+      "
+    depends_on:
+      - openpro-minio
+
+  openpro-backend:
+    image: ghcr.io/openpro-io/openpro-backend:latest
+    environment:
+      HTTP_PORT: 8080
+      SQL_URI: postgres://REDACTED:REDACTED@postgresql-db:5432/postgres
+      BUCKET_NAME: uploads
+      # Minio
+      MINIO_PORT: 9000
+      MINIO_HOST: openpro-minio
+      MINIO_ROOT_USER: REDACTED
+      MINIO_ROOT_PASSWORD: REDACTED
+      ENABLE_FASTIFY_LOGGING: true
+      CORS_ORIGIN: https://openpro.mydomain.com
+      FRONTEND_HOSTNAME: http://openpro-openpro-frontend-1:3000
+    networks:
+      - internal
+      - nginx-proxy-manager-nw
+    depends_on:
+      - postgresql-db
+      - createbuckets
+
+  openpro-frontend:
+    image: ghcr.io/openpro-io/openpro-frontend:latest
+    environment:
+      NEXT_PUBLIC_API_URL: https://openpro-backend.mydomain.com
+      API_URL: http://openpro-openpro-backend-1:8080
+      NEXTAUTH_URL: https://openpro.mydomain.com
+      NEXTAUTH_SECRET: REDACTED
+      NEXT_PUBLIC_NEXTAUTH_URL: https://openpro.mydomain.com
+      NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER: keycloak
+      AUTH_KEYCLOAK_ISSUER: REDACTED
+      AUTH_KEYCLOAK_ID: REDACTED
+      AUTH_KEYCLOAK_SECRET: REDACTED
+      KEYCLOAK_BASE_URL: https://auth.mydomain.com
+    networks:
+      - internal
+      - nginx-proxy-manager-nw
+    depends_on:
+      - openpro-backend
 ```
 
 ### docker cli ([click here for more info](https://docs.docker.com/engine/reference/commandline/cli/))
