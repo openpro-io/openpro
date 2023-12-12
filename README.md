@@ -1,8 +1,7 @@
 # openpro/openpro
 
-
-
-This repository hosts the code for a comprehensive project management platform tailored for software engineers. It provides a robust set of features that facilitate task tracking, team collaboration, and project progress visualization. The platform is designed to streamline the software development process, making it easier for teams to plan, track, and release software.
+This repository hosts the code for a comprehensive project management platform tailored for software engineers. It provides a robust set of features that facilitate task tracking, team collaboration, and project progress visualization. The platform is designed to streamline the software development
+process, making it easier for teams to plan, track, and release software.
 
 [![Docker Image CI](https://github.com/openpro-io/openpro/actions/workflows/docker-image.yml/badge.svg)](https://github.com/openpro-io/openpro/actions/workflows/docker-image.yml)
 [![](https://dcbadge.vercel.app/api/server/3WxA2pz7YB)](https://discord.gg/3WxA2pz7YB)
@@ -43,6 +42,16 @@ TODO:
 
 ## Parameters
 
-| Parameter | Function |
-|:---------:|----------|
-|           |          |
+### Backend Environment Variables (`-e`)
+
+| Env | Description | Default | Required |
+|-----|-------------|---------|----------|
+|     |             |         |          |
+
+### Frontend Environment Variables (`-e`)
+
+| Env                 | Description                                                                                                                      | Default | Required           |
+|---------------------|----------------------------------------------------------------------------------------------------------------------------------|---------|--------------------|
+| NEXT_PUBLIC_API_URL | Tells the application where the backend is. This is usually a FQDN. The client browser must have access to this url.             |         | :heavy_check_mark: |
+| API_URL             | This is for when you want to tell the server side code to use a different url. This can often be the container:port combination. |         | :x:                |
+
