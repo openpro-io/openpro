@@ -16,7 +16,9 @@ export async function GET(
   }
 
   const resp = await axios.get(
-    `${process.env.NEXT_PUBLIC_API_URL}/uploads/${filename}`,
+    `${
+      process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL
+    }/uploads/${filename}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,

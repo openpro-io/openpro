@@ -105,7 +105,9 @@ export const apolloClient = new ApolloClient({
           fullAvatarUrl: {
             read(_, { readField }) {
               const avatarUrl = readField('avatarUrl');
-              return avatarUrl ? `${NEXT_PUBLIC_API_URL}${avatarUrl}` : null;
+              return avatarUrl
+                ? `${process.env.API_URL ?? NEXT_PUBLIC_API_URL}${avatarUrl}`
+                : null;
             },
           },
         },

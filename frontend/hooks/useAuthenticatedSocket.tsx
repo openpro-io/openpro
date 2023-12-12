@@ -2,7 +2,7 @@ import { useSocket } from 'socket.io-react-hook';
 import { getSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { PUBLIC_NEXTAUTH_URL } from '@/services/config';
+import { PUBLIC_NEXTAUTH_URL, NEXT_PUBLIC_API_URL } from '@/services/config';
 
 export const getSocketIoRooms = async () => {
   const rooms = ['general'];
@@ -30,7 +30,7 @@ const useAuthenticatedSocket = (namespace?: string) => {
   }, []);
 
   // @ts-ignore
-  const socket = useSocket(namespace ?? 'ws://localhost:8080', {
+  const socket = useSocket(namespace ?? NEXT_PUBLIC_API_URL, {
     enabled: !!accessToken,
     auth: {
       token: accessToken,

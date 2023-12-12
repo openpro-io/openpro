@@ -38,7 +38,9 @@ export async function POST(request: Request) {
 
   const body = isJson ? await request.json() : await request.formData();
 
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/graphql`;
+  const url = `${
+    process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL
+  }/graphql`;
 
   try {
     const axiosResponse = await axios.post(url, body, {
