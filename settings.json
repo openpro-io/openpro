@@ -1,0 +1,8 @@
+{
+    "search.exclude": {
+        "**/.pnpm-store": true,
+        "**/node_modules": true,
+        ".history": true,
+        "**/.next": true
+    }
+}
