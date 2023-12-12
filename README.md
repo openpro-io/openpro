@@ -99,4 +99,4 @@ proxy_buffers 8 16k;
 proxy_buffer_size 32k;
 ```
 
-<img src="readme-assets/npm-advanced-tab.png" alt="npm-advanced-tab" width="200"/>
+<img src="readme-assets/npm-advanced-tab.png" alt="npm-advanced-tab" width="250"/>
