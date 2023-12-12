@@ -1,7 +1,10 @@
-# openpro/openpro
+# OpenPro Project Managment
 
-This repository hosts the code for a comprehensive project management platform tailored for software engineers. It provides a robust set of features that facilitate task tracking, team collaboration, and project progress visualization. The platform is designed to streamline the software development
-process, making it easier for teams to plan, track, and release software.
+<img src="frontend/public/images/openpro-logo.svg" alt="openpro-logo" width="250"/>
+
+This repository hosts the code for a comprehensive project management platform tailored for software engineers.
+It provides a robust set of features that facilitate task tracking, team collaboration, and project progress visualization.
+The platform is designed to streamline the software development process, making it easier for teams to plan, track, and release software.
 
 [![Docker Image CI](https://github.com/openpro-io/openpro/actions/workflows/docker-image.yml/badge.svg)](https://github.com/openpro-io/openpro/actions/workflows/docker-image.yml)
 [![License](https://img.shields.io/github/license/golangci/golangci-lint)](/LICENSE.txt)
@@ -25,7 +28,7 @@ The architectures supported by this image are:
 
 ## Application Setup
 
-TODO:
+Access the UI at `:3000` at your frontend container.
 
 ## Usage
 
