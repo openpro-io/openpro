@@ -1,6 +1,6 @@
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
 import { classNames } from '@/services/utils';
-import { useQuery, useSuspenseQuery } from '@apollo/client';
+import { useSuspenseQuery } from '@apollo/client';
 import { GetProjectsQuery, Project } from '@/gql/__generated__/graphql';
 import { GET_PROJECTS } from '@/gql/gql-queries-mutations';
 import { sample } from 'lodash';

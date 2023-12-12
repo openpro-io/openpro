@@ -1,10 +1,11 @@
-import useNtfy from '@/hooks/useNtfy';
 import { useEffect } from 'react';
 import { Alert } from '@/components/Alert';
 import { toast } from 'react-hot-toast';
 import { priorityToIcon } from '@/components/Icons';
 import { PUBLIC_NEXTAUTH_URL } from '@/services/config';
 import { notificationsTable } from '@/database/database.config';
+import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
+import { useSocketEvent } from 'socket.io-react-hook';
 
 type ProcessTagsReturn = {
   otherTags: string[];
@@ -28,44 +29,45 @@ const processTags = (tags: any | undefined): ProcessTagsReturn => {
 };
 
 const Notifications = () => {
-  const ntfy = useNtfy();
+  const { socket, connected, error } = useAuthenticatedSocket();
+  const { lastMessage: msg } = useSocketEvent(socket, 'message');
 
   useEffect(() => {
-    // console.log(ntfy.lastJsonMessage);
-    const event: any = ntfy?.lastJsonMessage;
-    // message, title, topic, time, id, priority: 5 (max)
+    if (msg) {
+      if (!msg.id && msg.messageId) msg.id = msg.messageId;
+      msg.subscriptionId = `http://${PUBLIC_NEXTAUTH_URL}/${msg.topic}`;
+      msg.new = 1;
 
-    if (event?.event === 'message') {
-      event.subscriptionId = `http://${PUBLIC_NEXTAUTH_URL}/${event.topic}`;
-      event.new = 1;
-
-      notificationsTable.add(event).catch((error) => {
+      notificationsTable.add(msg).catch((error) => {
         if (
           !error.toString().includes('Key already exists in the object store.')
         ) {
           return Promise.reject(error);
         }
+
+        // We return here because we do not want to toast the same message twice
+        return;
       });
 
-      const { otherTags, openpro } = processTags(event?.tags);
+      const { otherTags, openpro } = processTags(msg?.tags);
 
       toast.success(
         JSON.stringify({
-          title: event?.title,
-          message: event?.message,
+          title: msg?.title,
+          message: msg?.message,
           tags: otherTags,
-          priority: event?.priority,
-          click: event?.click,
+          priority: msg?.priority,
+          click: msg?.click,
         }),
         {
           duration: openpro?.notificationDuration
             ? Number(openpro?.notificationDuration)
             : 10000,
-          icon: priorityToIcon(event?.priority),
+          icon: priorityToIcon(msg?.priority),
         }
       );
     }
-  }, [ntfy.lastJsonMessage]);
+  }, [msg]);
 
   return <Alert />;
 };

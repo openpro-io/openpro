@@ -7,6 +7,7 @@ import { ApolloProvider } from '@apollo/client';
 import { apolloClient } from '@/services/apollo-client';
 import MainLayout, { ProtectedLayout } from '@/components/Layout';
 import { PublicEnvScript } from 'next-runtime-env';
+import { IoProvider } from 'socket.io-react-hook';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,7 +26,9 @@ export default function RootLayout({
         <ApolloProvider client={apolloClient}>
           <NextAuthProvider>
             <ProtectedLayout>
-              <MainLayout>{children}</MainLayout>
+              <IoProvider>
+                <MainLayout>{children}</MainLayout>
+              </IoProvider>
             </ProtectedLayout>
           </NextAuthProvider>
         </ApolloProvider>

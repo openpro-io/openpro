@@ -1,14 +1,13 @@
+'use client';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
-import { getNtfyHttpUrl } from '@/hooks/useNtfy';
 import { notificationsTable } from '@/database/database.config';
-import { PUBLIC_NEXTAUTH_URL } from '@/services/config';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { CheckIcon } from '@heroicons/react/20/solid';
-import Dexie from 'dexie';
 import { DateTime } from 'luxon';
 import { IoCheckmarkDone } from 'react-icons/io5';
+import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
 
 type Event = {
   event: string;
@@ -25,59 +24,74 @@ type Event = {
 const DropdownNotification = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifying, setNotifying] = useState(false);
+  const { socket, connected, error } = useAuthenticatedSocket();
+
   // const [messages, setMessages] = useState<Event[]>([]);
 
   const trigger = useRef<any>(null);
   const dropdown = useRef<any>(null);
 
   useEffect(() => {
-    getNtfyHttpUrl({ subscriptionType: 'json' })
-      .then((url) => {
-        // TODO: lets pull since last login. That means we need to track the last login time in DB
-        axios
-          .get(`${url}?since=72h&poll=1`)
-          .then((res) => {
-            let msgData = [];
-
-            if (typeof res.data === 'string') {
-              msgData.push(
-                ...res.data
-                  .split('\n')
-                  .filter((x) => x)
-                  .map((x) => JSON.parse(x))
-              );
-            } else {
-              msgData.push(res.data);
-            }
-
-            msgData = msgData.map((msg) => ({
-              ...msg,
-              subscriptionId: `http://${PUBLIC_NEXTAUTH_URL}/${msg.topic}`,
-              new: 1,
-            }));
-
-            notificationsTable
-              .bulkAdd(msgData)
-              .catch(Dexie.BulkError, (error) => {
-                if (
-                  !error
-                    .toString()
-                    .includes('Key already exists in the object store.')
-                ) {
-                  return Promise.reject(error);
-                }
-              });
-
-            // setMessages(msgData);
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      })
-      .catch((err) => {
-        console.error(err);
+    if (connected) {
+      socket.on('message', (msg: any) => {
+        console.log({ msg });
+        // notificationsTable.add({
+        //   ...msg,
+        //   subscriptionId: `http://${PUBLIC_NEXTAUTH_URL}/${msg.topic}`,
+        //   new: 1,
+        // });
       });
-  }, []);
+    }
+  }, [connected]);
+
+  // useEffect(() => {
+  //   getNtfyHttpUrl({ subscriptionType: 'json' })
+  //     .then((url) => {
+  //       // TODO: lets pull since last login. That means we need to track the last login time in DB
+  //       axios
+  //         .get(`${url}?since=72h&poll=1`)
+  //         .then((res) => {
+  //           let msgData = [];
+  //
+  //           if (typeof res.data === 'string') {
+  //             msgData.push(
+  //               ...res.data
+  //                 .split('\n')
+  //                 .filter((x) => x)
+  //                 .map((x) => JSON.parse(x))
+  //             );
+  //           } else {
+  //             msgData.push(res.data);
+  //           }
+  //
+  //           msgData = msgData.map((msg) => ({
+  //             ...msg,
+  //             subscriptionId: `http://${PUBLIC_NEXTAUTH_URL}/${msg.topic}`,
+  //             new: 1,
+  //           }));
+  //
+  //           notificationsTable
+  //             .bulkAdd(msgData)
+  //             .catch(Dexie.BulkError, (error) => {
+  //               if (
+  //                 !error
+  //                   .toString()
+  //                   .includes('Key already exists in the object store.')
+  //               ) {
+  //                 return Promise.reject(error);
+  //               }
+  //             });
+  //
+  //           // setMessages(msgData);
+  //         })
+  //         .catch((err) => {
+  //           console.error(err);
+  //         });
+  //     })
+  //     .catch((err) => {
+  //       console.error(err);
+  //     });
+  // }, []);
 
   useEffect(() => {
     const clickHandler = ({ target }: MouseEvent) => {

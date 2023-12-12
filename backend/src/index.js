@@ -10,6 +10,8 @@ import * as cors from '@fastify/cors';
 import axios from 'axios';
 import processRequest from 'graphql-upload/processRequest.mjs';
 import { minioClient } from './services/minio-client.js';
+import fastifyIO from 'fastify-socket.io';
+import { socketInit } from './socket/index.js';
 
 const fastify = Fastify({
   logger: process.env.ENABLE_FASTIFY_LOGGING === 'true',
@@ -49,6 +51,13 @@ fastify.register(cors, {
   ],
   exposedHeaders: [],
   credentials: true,
+});
+
+fastify.register(fastifyIO, {
+  path: '/socket.io',
+  cors: {
+    origin: ['localhost', CORS_ORIGIN, 'http://localhost:3000'],
+  },
 });
 
 // Handle all requests that have the `Content-Type` header set as multipart
@@ -184,6 +193,10 @@ fastify.get('/uploads/:file', async (request, reply) => {
 //   const buffer = await fs.readFile(filePath);
 //   reply.send(buffer);
 // });
+
+fastify.ready().then(() => {
+  socketInit(fastify.io);
+});
 
 await fastify.listen({ port: HTTP_PORT, host: '0.0.0.0' });
 
