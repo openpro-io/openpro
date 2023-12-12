@@ -151,41 +151,6 @@ x-minio-env-variables: &minio-env-variables
   MINIO_ROOT_PASSWORD: secret-key
 
 services:
-  ntfy:
-    image: binwiederhier/ntfy
-    container_name: ntfy
-    command:
-      - serve
-    environment:
-      TZ: UTC # optional: set desired timezone
-      NTFY_BASE_URL: http://localhost:8093
-      NTFY_CACHE_FILE: /var/lib/ntfy/cache.db
-      NTFY_AUTH_FILE: /var/lib/ntfy/auth.db
-      NTFY_AUTH_DEFAULT_ACCESS: read-write
-      NTFY_BEHIND_PROXY: true
-      NTFY_ATTACHMENT_CACHE_DIR: /var/lib/ntfy/attachments
-      NTFY_ENABLE_LOGIN: true
-      NTFY_VISITOR_REQUEST_LIMIT_BURST: 180
-      NTFY_VISITOR_SUBSCRIPTION_LIMIT: 50
-    #user: UID:GID # optional: replace with your own user/group or uid/gid
-    volumes:
-      - ./ntfy:/var/lib/ntfy
-    ports:
-      - "8093:80"
-    networks:
-      - internal
-    healthcheck: # optional: remember to adapt the host:port to your environment
-      test:
-        [
-          "CMD-SHELL",
-          "wget -q --tries=1 http://localhost:80/v1/health -O - | grep -Eo '\"healthy\"\\s*:\\s*true' || exit 1",
-        ]
-      interval: 60s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    restart: unless-stopped
-
   postgresql-db:
     image: postgres:16
     environment:
@@ -283,10 +248,6 @@ services:
       #OPENAI_API_BASE: "https://api.openai.com/v1" # change if using a custom endpoint
       #OPENAI_API_KEY: "sk-" # add your openai key here
       #GPT_ENGINE: "gpt-3.5-turbo" # use "gpt-4" if you have access
-      # Nfty
-      NTFY_WS_HOST: localhost:8093
-      NTFY_WS_SSL: false
-      PUBLIC_NTFY_HTTP_SSL: false
     networks:
       - internal
     ports:
@@ -296,25 +257,29 @@ services:
       - frontend_node_modules:/app/node_modules
     depends_on:
       - backend
-      - ntfy
 ```
 
-
 ### Improving The Documentation
+
 <!-- TODO
 Updating, improving and correcting the documentation
 
 -->
 
 ## Styleguides
+
 ### Commit Messages
+
 <!-- TODO
 
 -->
 
 ## Join The Project Team
+
 <!-- TODO -->
 
 <!-- omit in toc -->
+
 ## Attribution
+
 This guide is based on the **contributing-gen**. [Make your own](https://github.com/bttger/contributing-gen)!

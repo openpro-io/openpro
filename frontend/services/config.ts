@@ -18,11 +18,6 @@ export const AUTH_KEYCLOAK_SECRET = process.env.AUTH_KEYCLOAK_SECRET;
 
 export const AUTH_KEYCLOAK_ISSUER = process.env.AUTH_KEYCLOAK_ISSUER;
 
-export const PUBLIC_NTFY_HTTP_SSL = env('NEXT_PUBLIC_NTFY_HTTP_SSL') === 'true';
-export const PUBLIC_NTFY_HTTP_HOST = env('NEXT_PUBLIC_NTFY_HTTP_HOST');
-export const NTFY_WS_SSL = (process.env.NTFY_WS_SSL ?? 'false') === 'true';
-export const NTFY_WS_HOST = process.env.NTFY_WS_HOST;
-
 export const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 export const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 

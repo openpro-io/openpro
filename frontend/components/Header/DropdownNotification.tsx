@@ -44,55 +44,6 @@ const DropdownNotification = () => {
     }
   }, [connected]);
 
-  // useEffect(() => {
-  //   getNtfyHttpUrl({ subscriptionType: 'json' })
-  //     .then((url) => {
-  //       // TODO: lets pull since last login. That means we need to track the last login time in DB
-  //       axios
-  //         .get(`${url}?since=72h&poll=1`)
-  //         .then((res) => {
-  //           let msgData = [];
-  //
-  //           if (typeof res.data === 'string') {
-  //             msgData.push(
-  //               ...res.data
-  //                 .split('\n')
-  //                 .filter((x) => x)
-  //                 .map((x) => JSON.parse(x))
-  //             );
-  //           } else {
-  //             msgData.push(res.data);
-  //           }
-  //
-  //           msgData = msgData.map((msg) => ({
-  //             ...msg,
-  //             subscriptionId: `http://${PUBLIC_NEXTAUTH_URL}/${msg.topic}`,
-  //             new: 1,
-  //           }));
-  //
-  //           notificationsTable
-  //             .bulkAdd(msgData)
-  //             .catch(Dexie.BulkError, (error) => {
-  //               if (
-  //                 !error
-  //                   .toString()
-  //                   .includes('Key already exists in the object store.')
-  //               ) {
-  //                 return Promise.reject(error);
-  //               }
-  //             });
-  //
-  //           // setMessages(msgData);
-  //         })
-  //         .catch((err) => {
-  //           console.error(err);
-  //         });
-  //     })
-  //     .catch((err) => {
-  //       console.error(err);
-  //     });
-  // }, []);
-
   useEffect(() => {
     const clickHandler = ({ target }: MouseEvent) => {
       if (!dropdown.current) return;
