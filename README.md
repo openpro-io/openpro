@@ -100,3 +100,20 @@ proxy_buffer_size 32k;
 ```
 
 <img src="readme-assets/npm-advanced-tab.png" alt="npm-advanced-tab" width="250"/>
+
+# Minio
+
+Minio is a self-hosted s3 compatible storage solution. We use this to store assets for the application.
+
+You can generate dummy AWS creds using https://canarytokens.org/generate# and select AWS Keys for `MINO_ROOT_USER` and `MINIO_ROOT_PASSWORD`.
+
+You do not have to use this of course but please make sure you use something secure.
+
+I also would read documentation on minio thoroughly. I don't recommend using the root keys in your frontend application.
+
+Please follow security best practices!!
+
+https://min.io/docs/minio/container/administration/console/security-and-access.html
+
+
+
