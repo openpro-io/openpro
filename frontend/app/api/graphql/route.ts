@@ -1,6 +1,7 @@
 import { getToken } from 'next-auth/jwt';
 import axios from 'axios';
 import { headers } from 'next/headers';
+import { API_URL, NEXT_PUBLIC_API_URL } from '@/services/config';
 
 // TODO: handle introspection better
 
@@ -38,9 +39,7 @@ export async function POST(request: Request) {
 
   const body = isJson ? await request.json() : await request.formData();
 
-  const url = `${
-    process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL
-  }/graphql`;
+  const url = `${API_URL ?? NEXT_PUBLIC_API_URL}/graphql`;
 
   try {
     const axiosResponse = await axios.post(url, body, {

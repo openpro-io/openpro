@@ -14,6 +14,7 @@ import {
   NEXT_PUBLIC_API_URL,
   PUBLIC_NEXTAUTH_URL,
   NEXTAUTH_URL,
+  API_URL,
 } from '@/services/config';
 import { BatchHttpLink } from '@apollo/client/link/batch-http';
 import { getMainDefinition } from '@apollo/client/utilities';
@@ -106,7 +107,7 @@ export const apolloClient = new ApolloClient({
             read(_, { readField }) {
               const avatarUrl = readField('avatarUrl');
               return avatarUrl
-                ? `${process.env.API_URL ?? NEXT_PUBLIC_API_URL}${avatarUrl}`
+                ? `${API_URL ?? NEXT_PUBLIC_API_URL}${avatarUrl}`
                 : null;
             },
           },

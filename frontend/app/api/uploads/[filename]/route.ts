@@ -1,5 +1,6 @@
 import { getToken } from 'next-auth/jwt';
 import axios from 'axios';
+import { API_URL, NEXT_PUBLIC_API_URL } from '@/services/config';
 
 export async function GET(
   request: Request,
@@ -16,9 +17,7 @@ export async function GET(
   }
 
   const resp = await axios.get(
-    `${
-      process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL
-    }/uploads/${filename}`,
+    `${API_URL ?? NEXT_PUBLIC_API_URL}/uploads/${filename}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
