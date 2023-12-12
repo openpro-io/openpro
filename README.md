@@ -88,11 +88,11 @@ TODO:
 
 # Running a reverse proxy
 
-If you are running these behind a reverse proxy like nginx proxy manager you will need to add the following headers to your proxy for `frontend` under advanced tab.
+If you are running these behind a reverse proxy like nginx proxy manager you will need to add the following to your proxy host for `frontend` under advanced tab.
 
 The reason for this is nextauth payloads can be very large when redirecting back from the oauth provider.
 
-Without these headers you may get a `5XX` error.
+Without these you may get a `5XX` error.
 
 ```
 proxy_buffers 8 16k;
