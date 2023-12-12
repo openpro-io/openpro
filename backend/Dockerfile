@@ -8,7 +8,7 @@ WORKDIR /app
 FROM base AS build
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
-FROM base
+FROM node:20-slim
 COPY --from=build /app /app
 
 RUN npm install pm2 -g
