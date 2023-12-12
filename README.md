@@ -42,11 +42,23 @@ TODO:
 
 ## Parameters
 
+### Backend Ports (`-p`)
+
+| Port | Description                                  | 
+|------|----------------------------------------------|
+| 8080 | The main port for the API + Websocket server |
+
 ### Backend Environment Variables (`-e`)
 
 | Env | Description | Default | Required |
 |-----|-------------|---------|----------|
 |     |             |         |          |
+
+### Frontend Ports (`-p`)
+
+| Port | Description          | 
+|------|----------------------|
+| 3000 | The main port the UI |
 
 ### Frontend Environment Variables (`-e`)
 
