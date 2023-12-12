@@ -3,7 +3,7 @@ import { ApolloServer } from '@apollo/server';
 import { fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
 import typeDefs from './type-defs.js';
 import resolvers from './resolvers.js';
-import { HTTP_PORT, BUCKET_NAME, CORS_ORIGIN, FRONTEND_HOSTNAME } from './services/config.js';
+import { HTTP_PORT, BUCKET_NAME, CORS_ORIGIN, FRONTEND_HOSTNAME, ENABLE_FASTIFY_LOGGING } from './services/config.js';
 import { db } from './db/index.js';
 import { GraphQLError } from 'graphql/error/index.js';
 import * as cors from '@fastify/cors';
@@ -14,7 +14,7 @@ import fastifyIO from 'fastify-socket.io';
 import { socketInit } from './socket/index.js';
 
 const fastify = Fastify({
-  logger: process.env.ENABLE_FASTIFY_LOGGING === 'true',
+  logger: ENABLE_FASTIFY_LOGGING,
   keepAliveTimeout: 61 * 1000,
 });
 
