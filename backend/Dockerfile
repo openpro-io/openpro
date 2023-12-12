@@ -6,6 +6,8 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 FROM base AS build
+ENV PYTHONUNBUFFERED=1
+RUN apk add --update --no-cache g++ make python3 py3-pip && ln -sf python3 /usr/bin/python
 # pnpm fetch does require only lockfile
 COPY pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch --prod
