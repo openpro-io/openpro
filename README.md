@@ -50,8 +50,15 @@ TODO:
 
 ### Frontend Environment Variables (`-e`)
 
-| Env                 | Description                                                                                                                      | Default | Required           |
-|---------------------|----------------------------------------------------------------------------------------------------------------------------------|---------|--------------------|
-| NEXT_PUBLIC_API_URL | Tells the application where the backend is. This is usually a FQDN. The client browser must have access to this url.             |         | :heavy_check_mark: |
-| API_URL             | This is for when you want to tell the server side code to use a different url. This can often be the container:port combination. |         | :x:                |
+| Env                                | Description                                                                                                                      | Default | Required           |
+|------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|---------|--------------------|
+| NEXT_PUBLIC_API_URL                | Tells the application where the backend is. This is usually a FQDN. The client browser must have access to this url.             |         | :heavy_check_mark: |
+| API_URL                            | This is for when you want to tell the server side code to use a different url. This can often be the container:port combination. |         | :x:                |
+| NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER | Currently we have tested `keycloak` and `github` but in theory you can use anything nextauth supports.                           |         | :heavy_check_mark: |
+| NEXTAUTH_URL                       | This is the url of your frontend public facing.                                                                                  |         | :heavy_check_mark: |
+| NEXTAUTH_SECRET                    | You must generate this yourself. `openssl rand -base64 32`                                                                       |         | :heavy_check_mark: |
+| NEXT_PUBLIC_NEXTAUTH_URL           | This is the url of your frontend public facing. NOTE: We might be able to use this entirely and deprecate `NEXTAUTH_URL`         |         | :heavy_check_mark: |
+| AUTH_KEYCLOAK_ID                   | Required if `NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER=keycloak`. This is client ID typically.                                          |         | :o:                |
+| AUTH_KEYCLOAK_SECRET               | Required if `NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER=keycloak`. This is client secret typically.                                      |         | :o:                |
+| AUTH_KEYCLOAK_ISSUER               | Required if `NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER=keycloak`. Typically looks like `https://domain.com/realms/REALMNAME`            |         | :o:                |
 
