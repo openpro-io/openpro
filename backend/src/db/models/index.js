@@ -1,7 +1,7 @@
 'use strict';
 
 import { DataTypes, Sequelize } from 'sequelize';
-import { SQL_URI } from '../../services/config.js';
+import { ENABLE_SEQUELIZE_LOGGING, SQL_URI } from '../../services/config.js';
 
 import User from './user.js';
 import Project from './project.js';
@@ -17,7 +17,9 @@ import IssueBoard from './issue-board.js';
 export const db = {};
 
 const init = async () => {
-  db.sequelize = new Sequelize(SQL_URI);
+  db.sequelize = new Sequelize(SQL_URI, {
+    logging: ENABLE_SEQUELIZE_LOGGING,
+  });
 
   db.Users = User(db.sequelize, DataTypes);
   db.Project = Project(db.sequelize, DataTypes);

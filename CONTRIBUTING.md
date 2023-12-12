@@ -236,7 +236,10 @@ services:
       args:
         DOCKER_BUILDKIT: 1
     environment:
+      HTTP_PORT: 8080
       SQL_URI: postgres://postgres:postgres@postgresql-db:5432/postgres
+      FRONTEND_HOSTNAME: http://frontend:3000
+      FILE_SIZE_LIMIT: 5242880
       BUCKET_NAME: uploads
       # Assets
       ASSET_PATH: /app/assets

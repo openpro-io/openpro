@@ -16,3 +16,6 @@ export const SQL_URI = process.env.SQL_URI;
 export const CORS_ORIGIN = process.env.CORS_ORIGIN;
 
 export const FRONTEND_HOSTNAME = process.env.FRONTEND_HOSTNAME;
+
+export const ENABLE_FASTIFY_LOGGING = process.env.ENABLE_FASTIFY_LOGGING === 'true';
+export const ENABLE_SEQUELIZE_LOGGING = process.env.ENABLE_SEQUELIZE_LOGGING === 'true';
