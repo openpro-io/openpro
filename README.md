@@ -52,9 +52,17 @@ TODO:
 
 ### Backend Environment Variables (`-e`)
 
-| Env | Description | Default | Required |
-|-----|-------------|---------|----------|
-|     |             |         |          |
+| Env                 | Description                                                                                                                          | Default | Required           |
+|---------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------|--------------------|
+| HTTP_PORT           | The port of the http server                                                                                                          | 8080    | :x:                |
+| SQL_URI             | This is a full URI for sql. Looks like `postgres://postgres:postgres@postgresql-db:5432/postgres`                                    |         | :heavy_check_mark: |
+| BUCKET_NAME         | The minio primary bucket used for storing assets.                                                                                    | uploads | :heavy_check_mark: |
+| USE_MINIO           | Should we use minio. There is a possibility to fallback to disk but its WIP.                                                         | 1       | :x:                |
+| MINIO_PORT          | The port for communication of asset transfer.                                                                                        | 9000    | :x:                |
+| MINIO_HOST          | The hostname for communication of asset transfer. Example is container name `openpro-minio`                                          |         | :heavy_check_mark: |
+| MINIO_ROOT_USER     | The username for communication of asset transfer. This can be an iam aws access key.                                                 |         | :heavy_check_mark: |
+| MINIO_ROOT_PASSWORD | The password for communication of asset transfer.This can be an iam aws secret key.                                                  |         | :heavy_check_mark: |
+| FRONTEND_HOSTNAME   | This tells the backend how to talk to the frontend. This is usually a container to container call. Example is `http://frontend:3000` |         | :heavy_check_mark: |
 
 ### Frontend Ports (`-p`)
 
@@ -75,4 +83,6 @@ TODO:
 | AUTH_KEYCLOAK_ID                   | Required if `NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER=keycloak`. This is client ID typically.                                          |         | :heavy_check_mark:* |
 | AUTH_KEYCLOAK_SECRET               | Required if `NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER=keycloak`. This is client secret typically.                                      |         | :heavy_check_mark:* |
 | AUTH_KEYCLOAK_ISSUER               | Required if `NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER=keycloak`. Typically looks like `https://domain.com/realms/REALMNAME`            |         | :heavy_check_mark:* |
+| GITHUB_CLIENT_ID                   | Required if `NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER=github`.                                                                         |         | :heavy_check_mark:* |
+| GITHUB_CLIENT_SECRET               | Required if `NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER=github`.                                                                         |         | :heavy_check_mark:* |
 
