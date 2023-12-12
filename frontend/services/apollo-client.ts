@@ -30,7 +30,7 @@ const authLink = setContext(async (_, { headers }) => {
   };
 });
 
-const uri = NEXT_PUBLIC_API_URL;
+const uri = `${NEXT_PUBLIC_API_URL}/graphql`;
 
 const batchLink = new BatchHttpLink({
   uri,
