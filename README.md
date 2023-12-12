@@ -4,6 +4,8 @@ This repository hosts the code for a comprehensive project management platform t
 process, making it easier for teams to plan, track, and release software.
 
 [![Docker Image CI](https://github.com/openpro-io/openpro/actions/workflows/docker-image.yml/badge.svg)](https://github.com/openpro-io/openpro/actions/workflows/docker-image.yml)
+[![License](https://img.shields.io/github/license/golangci/golangci-lint)](/LICENSE.txt)
+[![Release](https://img.shields.io/github/release/openpro-io/openpro.svg)](https://github.com/openpro-io/openpro/releases/latest)
 [![](https://dcbadge.vercel.app/api/server/3WxA2pz7YB)](https://discord.gg/3WxA2pz7YB)
 [![](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/claygorman)
 
