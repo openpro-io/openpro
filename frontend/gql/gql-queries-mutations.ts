@@ -249,6 +249,7 @@ export const GET_PROJECTS = gql(/* GraphQL */ `
       name
       key
       createdAt
+      issueCount
       boards {
         id
         style
@@ -325,8 +326,6 @@ export const GET_BOARD_ISSUES = gql(/* GraphQL */ `
       containerOrder
       issues {
         ...IssueFields
-        boardId
-        position
       }
     }
   }

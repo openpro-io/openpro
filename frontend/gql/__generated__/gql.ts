@@ -19,7 +19,7 @@ const documents = {
     "\n  fragment UserFields on User {\n    id\n    email\n    firstName\n    lastName\n    avatarUrl\n  }\n": types.UserFieldsFragmentDoc,
     "\n  fragment IssueCommentFields on IssueComment {\n    id\n    comment\n    reporter {\n      ...UserFields\n    }\n    issueId\n    createdAt\n    updatedAt\n  }\n": types.IssueCommentFieldsFragmentDoc,
     "\n  query GetIssue($input: QueryIssueInput) {\n    issue(input: $input) {\n      ...IssueFields\n    }\n  }\n": types.GetIssueDocument,
-    "\n  query GetProjectInfo(\n    $input: QueryProjectInput\n    $issueInput: QueryIssueInput\n  ) {\n    project(input: $input) {\n      id\n      name\n      key\n      description\n      boards {\n        id\n        viewState\n        backlogEnabled\n      }\n      issueStatuses {\n        id\n        projectId\n        name\n        createdAt\n      }\n      issues(input: $issueInput) {\n        ...IssueFields\n      }\n    }\n  }\n": types.GetProjectInfoDocument,
+    "\n  query GetProjectInfo(\n    $input: QueryProjectInput\n    $issueInput: QueryIssueInput\n  ) {\n    project(input: $input) {\n      id\n      name\n      key\n      description\n      boards {\n        id\n        viewState\n        backlogEnabled\n        containerOrder\n      }\n      issueStatuses {\n        id\n        projectId\n        name\n        createdAt\n      }\n      issues(input: $issueInput) {\n        ...IssueFields\n      }\n    }\n  }\n": types.GetProjectInfoDocument,
     "\n  mutation CreateIssue($input: CreateIssueInput) {\n    createIssue(input: $input) {\n      ...IssueFields\n    }\n  }\n": types.CreateIssueDocument,
     "\n  mutation CreateIssueComment($input: CreateIssueCommentInput!) {\n    createIssueComment(input: $input) {\n      ...IssueCommentFields\n    }\n  }\n": types.CreateIssueCommentDocument,
     "\n  query GetIssueStatuses($input: QueryProjectInput) {\n    project(input: $input) {\n      id\n      name\n      description\n      issueStatuses {\n        id\n        projectId\n        name\n        createdAt\n      }\n    }\n  }\n": types.GetIssueStatusesDocument,
@@ -38,6 +38,7 @@ const documents = {
     "\n  mutation CreateProjectTag($input: CreateProjectTagInput!) {\n    createProjectTag(input: $input) {\n      id\n      name\n    }\n  }\n": types.CreateProjectTagDocument,
     "\n  mutation DeleteProjectTag($input: DeleteProjectTagInput!) {\n    deleteProjectTag(input: $input) {\n      message\n      status\n    }\n  }\n": types.DeleteProjectTagDocument,
     "\n  query GetBoardInfo($input: QueryBoardInput!) {\n    board(input: $input) {\n      id\n      name\n      viewState\n      backlogEnabled\n      settings\n      containerOrder\n    }\n  }\n": types.GetBoardInfoDocument,
+    "\n  query GetBoardIssues($input: QueryBoardInput!) {\n    board(input: $input) {\n      id\n      name\n      viewState\n      backlogEnabled\n      settings\n      containerOrder\n      issues {\n        ...IssueFields\n      }\n    }\n  }\n": types.GetBoardIssuesDocument,
     "\n  mutation UpdateMe($input: UpdateMeInput!) {\n    updateMe(input: $input) {\n      ...UserFields\n    }\n  }\n": types.UpdateMeDocument,
 };
 
@@ -82,7 +83,7 @@ export function gql(source: "\n  query GetIssue($input: QueryIssueInput) {\n    
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  query GetProjectInfo(\n    $input: QueryProjectInput\n    $issueInput: QueryIssueInput\n  ) {\n    project(input: $input) {\n      id\n      name\n      key\n      description\n      boards {\n        id\n        viewState\n        backlogEnabled\n      }\n      issueStatuses {\n        id\n        projectId\n        name\n        createdAt\n      }\n      issues(input: $issueInput) {\n        ...IssueFields\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetProjectInfo(\n    $input: QueryProjectInput\n    $issueInput: QueryIssueInput\n  ) {\n    project(input: $input) {\n      id\n      name\n      key\n      description\n      boards {\n        id\n        viewState\n        backlogEnabled\n      }\n      issueStatuses {\n        id\n        projectId\n        name\n        createdAt\n      }\n      issues(input: $issueInput) {\n        ...IssueFields\n      }\n    }\n  }\n"];
+export function gql(source: "\n  query GetProjectInfo(\n    $input: QueryProjectInput\n    $issueInput: QueryIssueInput\n  ) {\n    project(input: $input) {\n      id\n      name\n      key\n      description\n      boards {\n        id\n        viewState\n        backlogEnabled\n        containerOrder\n      }\n      issueStatuses {\n        id\n        projectId\n        name\n        createdAt\n      }\n      issues(input: $issueInput) {\n        ...IssueFields\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetProjectInfo(\n    $input: QueryProjectInput\n    $issueInput: QueryIssueInput\n  ) {\n    project(input: $input) {\n      id\n      name\n      key\n      description\n      boards {\n        id\n        viewState\n        backlogEnabled\n        containerOrder\n      }\n      issueStatuses {\n        id\n        projectId\n        name\n        createdAt\n      }\n      issues(input: $issueInput) {\n        ...IssueFields\n      }\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -155,6 +156,10 @@ export function gql(source: "\n  mutation DeleteProjectTag($input: DeleteProject
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  query GetBoardInfo($input: QueryBoardInput!) {\n    board(input: $input) {\n      id\n      name\n      viewState\n      backlogEnabled\n      settings\n      containerOrder\n    }\n  }\n"): (typeof documents)["\n  query GetBoardInfo($input: QueryBoardInput!) {\n    board(input: $input) {\n      id\n      name\n      viewState\n      backlogEnabled\n      settings\n      containerOrder\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  query GetBoardIssues($input: QueryBoardInput!) {\n    board(input: $input) {\n      id\n      name\n      viewState\n      backlogEnabled\n      settings\n      containerOrder\n      issues {\n        ...IssueFields\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetBoardIssues($input: QueryBoardInput!) {\n    board(input: $input) {\n      id\n      name\n      viewState\n      backlogEnabled\n      settings\n      containerOrder\n      issues {\n        ...IssueFields\n      }\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

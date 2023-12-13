@@ -4,7 +4,7 @@ const config: CodegenConfig = {
   overwrite: true,
   schema: [
     {
-      'http://localhost:3000/api/graphql': {
+      'http://localhost:8080/graphql': {
         headers: {
           'x-graphql-introspection': 'true',
         },

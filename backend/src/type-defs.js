@@ -67,6 +67,7 @@ const typeDefs = gql`
     issueStatuses: [IssueStatus]
     issues(input: QueryIssueInput): [Issue]
     tags: [ProjectTag]
+    issueCount: Int
   }
 
   type Issue {

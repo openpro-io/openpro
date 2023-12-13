@@ -38,7 +38,7 @@ const formatProjectCard = (project: Project) => {
     name: project.name,
     initials: project.key,
     href: `projects/${project.id}/boards/1`,
-    issueCount: sample([1, 2, 5, 10, 22, 156, 1103, 22, 55, 23]), // TODO: Get the issue count
+    issueCount: project.issueCount,
     bgColor: getUniqueColor(),
   };
 };

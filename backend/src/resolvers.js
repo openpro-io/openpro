@@ -369,6 +369,9 @@ const resolvers = {
     issueStatuses: (parent, args, { db }) => {
       return db.sequelize.models.IssueStatuses.findAll({ where: { projectId: parent.id } });
     },
+    issueCount: async (parent, args, { db }) => {
+      return db.sequelize.models.Issue.count({ where: { projectId: parent.id } });
+    },
   },
   Query: {
     helloWorld: () => 'hello world',
