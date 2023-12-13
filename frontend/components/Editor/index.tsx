@@ -9,6 +9,7 @@ import { ImageResizer } from '@/components/Editor/extensions/image/image-resize'
 import { useMutation } from '@apollo/client';
 import { UPLOAD_ASSET_MUTATION } from '@/gql/gql-queries-mutations';
 import { EditorToolbar } from '@/components/Editor/toolbar';
+import { NEXT_PUBLIC_API_URL } from '@/services/config';
 
 export * as EditorRenderOnly from './EditorRenderOnly';
 
@@ -37,7 +38,7 @@ const Editor = ({
       });
 
       return {
-        remoteUrl: `http://localhost:8080/${upload.data.uploadAsset.assetPath}`,
+        remoteUrl: `${NEXT_PUBLIC_API_URL}/${upload.data.uploadAsset.assetPath}`,
         ...upload.data.uploadAsset,
       };
     } catch (e) {
@@ -152,7 +153,7 @@ const Editor = ({
 
   return (
     <div>
-      <section className='bg-editor-toolbar flex h-14 flex-wrap items-center border-l border-r border-t border-primary/20 pb-2 pl-5 pr-2 pt-2'>
+      <section className='flex h-14 flex-wrap items-center border-l border-r border-t border-primary/20 bg-editor-toolbar pb-2 pl-5 pr-2 pt-2'>
         <EditorToolbar
           editor={editor}
           uploadFile={uploadFile}
