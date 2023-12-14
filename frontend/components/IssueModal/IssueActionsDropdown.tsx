@@ -11,6 +11,7 @@ import {
   usePathname,
   useRouter,
 } from 'next/navigation';
+import Link from 'next/link';
 
 const DeleteDialogue = ({
   isOpen,
@@ -134,6 +135,7 @@ const DeleteDialogue = ({
 const IssueActionsDropdown = ({ issueId }: { issueId?: string }) => {
   const searchParams = useSearchParams()!;
   const params = new URLSearchParams(searchParams);
+  const urlParams = useParams();
   const selectedIssueId = issueId ?? params.get('selectedIssueId');
 
   const [deleteDialogueIsOpen, setDeleteDialogueIsOpen] = useState(false);
@@ -205,15 +207,15 @@ const IssueActionsDropdown = ({ issueId }: { issueId?: string }) => {
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
-                <a
-                  href='#'
+                <Link
+                  href={`/projects/${urlParams.projectId}/issues/${selectedIssueId}`}
                   className={classNames(
                     active ? activeClass : inactiveClass,
                     'block px-4 py-2 text-sm'
                   )}
                 >
-                  Move
-                </a>
+                  Full Screen
+                </Link>
               )}
             </Menu.Item>
           </div>
