@@ -38,7 +38,7 @@ import {
   UPDATE_BOARD_MUTATION,
   UPDATE_ISSUE_MUTATION,
 } from '@/gql/gql-queries-mutations';
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { getSession } from 'next-auth/react';
 import { getDomainName } from '@/services/utils';
 import { useSearchParams } from 'next/navigation';
@@ -105,6 +105,7 @@ export default function KanbanBoardNew({
 
   const getProjectInfo = useQuery(GET_PROJECT_INFO, {
     skip: !projectId,
+    fetchPolicy: 'cache-first',
     variables: {
       input: { id: `${projectId}` },
     },
@@ -181,6 +182,7 @@ export default function KanbanBoardNew({
     const session = await getSession();
 
     const notification = {
+      type: 'notification',
       title: 'New Issue Created',
       message: `Ticket title: ${itemName}`,
       topic: `user:${session?.user?.id}`,
@@ -262,20 +264,24 @@ export default function KanbanBoardNew({
   useEffect(() => {
     if (getProjectInfo.loading || !getProjectInfo?.data) return;
 
-    const boards = getProjectInfo?.data?.project?.boards;
-    const thisBoard = boards?.find((b: any) => b.id === boardId);
+    const thisBoard = getProjectInfo?.data?.project?.boards?.find(
+      (b: any) => b.id === boardId
+    );
 
     if (thisBoard?.viewState) {
-      // We only update the local state if its unset
-      if (isEmpty(containers)) {
+      const incomingData = JSON.parse(thisBoard.viewState);
+      const remoteDataChanged = !isEqual(incomingData, pageState?.containers);
+
+      if (isEmpty(containers) || remoteDataChanged) {
         setPageState((prevState) => {
           return {
             ...prevState,
-            containers: JSON.parse(thisBoard.viewState),
+            containers: incomingData,
           };
         });
       }
     } else {
+      // TODO: We should probably create a default board for the project server side during bootstrap
       const buildContainers = getProjectInfo?.data?.project.issueStatuses.map(
         (container: any) => {
           const issues = getProjectInfo?.data?.project?.issues.filter(

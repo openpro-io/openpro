@@ -148,6 +148,7 @@ export default function Backlog({ projectId }: { projectId: string }) {
     const session = await getSession();
 
     const notification = {
+      type: 'notification',
       title: 'New Issue Created',
       message: `Ticket title: ${itemName}`,
       topic: `user:${session?.user?.id}`,

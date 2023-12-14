@@ -13,6 +13,8 @@ import Loader from '@/components/common/Loader';
 
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { PUBLIC_DEFAULT_LOGIN_PROVIDER } from '@/services/config';
+import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
+import socketMsgHandler from '@/services/socket-handlers';
 
 export const ProtectedLayout = ({
   children,
@@ -61,6 +63,14 @@ export default function MainLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const leftPanel = useRef(null);
+  const { socket, connected, error } = useAuthenticatedSocket();
+
+  // This is our global handler for websocket messages
+  useEffect(() => {
+    if (connected) {
+      socket.on('message', socketMsgHandler);
+    }
+  }, [connected]);
 
   useEffect(() => {
     if (sidebarOpen) {

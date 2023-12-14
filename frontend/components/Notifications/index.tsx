@@ -33,7 +33,7 @@ const Notifications = () => {
   const { lastMessage: msg } = useSocketEvent(socket, 'message');
 
   useEffect(() => {
-    if (msg) {
+    if (msg && msg?.type === 'notification') {
       if (!msg.id && msg.messageId) msg.id = msg.messageId;
       msg.subscriptionId = `http://${PUBLIC_NEXTAUTH_URL}/${msg.topic}`;
       msg.new = 1;

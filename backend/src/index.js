@@ -155,6 +155,7 @@ const myContextFunction = async (request) => {
   }
 
   return {
+    io: fastify?.io,
     db,
     user,
   };

@@ -6,6 +6,7 @@ import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
 import { isUndefined } from 'lodash-es';
 import board from './db/models/board.js';
 import { issueResolvers } from './resolvers/issue.js';
+import { emitBoardUpdatedEvent } from './socket/events.js';
 
 // TODO: make these delete operations with SQL + minio inside a SQL transaction
 
@@ -46,7 +47,7 @@ const resolvers = {
         status: 'success',
       };
     },
-    updateBoard: async (parent, { input }, { db }) => {
+    updateBoard: async (parent, { input }, { db, io }) => {
       const { id, name, viewState, backlogEnabled, settings, containerOrder } = input;
 
       const board = await db.sequelize.models.Board.findByPk(id);
@@ -60,6 +61,10 @@ const resolvers = {
       }
 
       await board.save();
+
+      console.log({ io });
+
+      emitBoardUpdatedEvent(io, board.toJSON());
 
       return board;
     },
