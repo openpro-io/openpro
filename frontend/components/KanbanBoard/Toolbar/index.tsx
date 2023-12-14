@@ -1,6 +1,7 @@
 import SearchFilter from '@/components/KanbanBoard/SearchFilter';
 import LabelFilter from '@/components/KanbanBoard/LabelFilter';
 import { Button } from '@/components/Button';
+import AssignedUserFilter from '@/components/KanbanBoard/AssignedUserFilter';
 
 type Props = {
   setShowAddContainerModal: (args: any) => void;
@@ -16,6 +17,10 @@ const Toolbar = ({ setShowAddContainerModal }: Props) => {
 
         <div className='w-72'>
           <LabelFilter />
+        </div>
+
+        <div>
+          <AssignedUserFilter />
         </div>
       </div>
       <div className=''>

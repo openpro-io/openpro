@@ -1,6 +1,7 @@
 import { User } from '@/constants/types';
 import { cloneDeep, set } from 'lodash';
 import {
+  NEXT_PUBLIC_API_URL,
   PUBLIC_KEYCLOAK_CLIENT_ID,
   PUBLIC_KEYCLOAK_REALM,
   PUBLIC_KEYCLOAK_URL,
@@ -28,7 +29,7 @@ export const classNames = (...classes) => {
 export const formatUserAvatarUrl = (avatarUrl: string | undefined | null) => {
   if (avatarUrl?.startsWith('http') || !avatarUrl) return avatarUrl;
 
-  const publicUrl = `${PUBLIC_NEXTAUTH_URL}/api${avatarUrl}`;
+  const publicUrl = `${NEXT_PUBLIC_API_URL}${avatarUrl}`;
 
   // console.log({ publicUrl });
 

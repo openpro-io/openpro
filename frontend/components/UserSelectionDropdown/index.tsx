@@ -6,40 +6,9 @@ import { useQuery } from '@apollo/client';
 import { GET_USERS } from '@/gql/gql-queries-mutations';
 import Image from 'next/image';
 import { User } from '@/constants/types';
+import UserSelectionAvatar from '@/components/UserSelectionAvatar';
 
 // TODO: Add unassigned user
-
-const UserSelectionAvatar = ({
-  selectedPerson,
-}: {
-  selectedPerson: User | undefined;
-}) => {
-  if (selectedPerson) {
-    if (selectedPerson?.avatarUrl) {
-      return (
-        <img
-          src={selectedPerson.avatarUrl ?? ''}
-          alt='User'
-          className='inline-block h-8 w-8 rounded-full'
-        />
-      );
-    }
-
-    return (
-      <span className='inline-block h-8 w-8 overflow-hidden rounded-full'>
-        <svg
-          className='h-full w-full text-gray-300'
-          fill='currentColor'
-          viewBox='0 0 24 24'
-        >
-          <path d='M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z' />
-        </svg>
-      </span>
-    );
-  }
-
-  return <></>;
-};
 
 const initialPeople = [
   {
@@ -115,7 +84,7 @@ const UserSelectionDropdown = ({
         </Combobox.Button>
 
         {filteredPeople.length > 0 && (
-          <Combobox.Options className='bg-surface-overlay-hovered absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm'>
+          <Combobox.Options className='absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-surface-overlay-hovered py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm'>
             {filteredPeople.map((person: User) => (
               <Combobox.Option
                 key={person.id}

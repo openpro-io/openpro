@@ -69,6 +69,10 @@ const Items = ({ id, title, status, project }: ItemsType) => {
       const tagIds = searchParams.get('tagIds')?.split(',');
       return !data?.tags?.some((tag: any) => tagIds?.includes(tag?.id));
     }
+
+    if (searchParams.has('selectedUserId')) {
+      return data?.assignee?.id !== searchParams.get('selectedUserId');
+    }
   };
 
   return (
