@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import axios from 'axios';
 import { notificationsTable } from '@/database/database.config';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { CheckIcon } from '@heroicons/react/20/solid';
@@ -22,25 +21,24 @@ type Event = {
 };
 
 const DropdownNotification = () => {
+  const trigger = useRef<any>(null);
+  const dropdown = useRef<any>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifying, setNotifying] = useState(false);
   const { socket, connected, error } = useAuthenticatedSocket();
 
-  // const [messages, setMessages] = useState<Event[]>([]);
-
-  const trigger = useRef<any>(null);
-  const dropdown = useRef<any>(null);
-
   useEffect(() => {
     if (connected) {
-      socket.on('message', (msg: any) => {
+      const eventHandler = (msg: any) => {
         console.log({ msg });
-        // notificationsTable.add({
-        //   ...msg,
-        //   subscriptionId: `http://${PUBLIC_NEXTAUTH_URL}/${msg.topic}`,
-        //   new: 1,
-        // });
-      });
+      };
+
+      socket.on('message', eventHandler);
+
+      // unsubscribe from event for preventing memory leaks
+      return () => {
+        socket.off('message', eventHandler);
+      };
     }
   }, [connected]);
 
@@ -122,7 +120,7 @@ const DropdownNotification = () => {
         onFocus={() => setDropdownOpen(true)}
         onBlur={() => setDropdownOpen(false)}
         className={`absolute -right-27 mt-2.5 flex h-90 w-75 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark sm:right-0 sm:w-80 ${
-          dropdownOpen === true ? 'block' : 'hidden'
+          dropdownOpen ? 'block' : 'hidden'
         }`}
       >
         <div className='flex px-4.5 py-3'>

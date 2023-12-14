@@ -6,7 +6,7 @@ import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
 import { isUndefined } from 'lodash-es';
 import board from './db/models/board.js';
 import { issueResolvers } from './resolvers/issue.js';
-import { emitBoardUpdatedEvent } from './socket/events.js';
+import { emitBoardUpdatedEvent, emitIssueUpdatedEvent } from './socket/events.js';
 
 // TODO: make these delete operations with SQL + minio inside a SQL transaction
 
@@ -61,8 +61,6 @@ const resolvers = {
       }
 
       await board.save();
-
-      console.log({ io });
 
       emitBoardUpdatedEvent(io, board.toJSON());
 
@@ -207,7 +205,7 @@ const resolvers = {
     //     assetFilename: path.basename(finalAssetPath),
     //   });
     // },
-    updateIssue: async (parent, { input }, { db }) => {
+    updateIssue: async (parent, { input }, { db, io }) => {
       const { id, issueStatusId, assigneeId, reporterId, title, description, tagIds, priority } = input;
 
       const issue = await db.sequelize.models.Issue.findByPk(id);
@@ -233,6 +231,8 @@ const resolvers = {
       if (issue.reporterId === 0) issue.reporterId = null;
 
       await issue.save();
+
+      emitIssueUpdatedEvent(io, issue.toJSON());
 
       const issueStatus = await db.sequelize.models.IssueStatuses.findByPk(issueStatusId ?? issue.issueStatusId);
 
