@@ -14,7 +14,7 @@ RUN apk add --update --no-cache g++ make python3 py3-pip && ln -sf python3 /usr/
 # pnpm fetch does require only lockfile
 COPY pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch --prod
-ADD . ./
+COPY . ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install -r --offline --prod
 
 FROM base

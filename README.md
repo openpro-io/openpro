@@ -6,13 +6,16 @@ This repository hosts the code for a comprehensive project management platform t
 It provides a robust set of features that facilitate task tracking, team collaboration, and project progress visualization.
 The platform is designed to streamline the software development process, making it easier for teams to plan, track, and release software.
 
-[![Docker Image CI](https://github.com/openpro-io/openpro/actions/workflows/docker-image.yml/badge.svg)](https://github.com/openpro-io/openpro/actions/workflows/docker-image.yml)
+![GitHub contributors](https://img.shields.io/github/contributors/openpro-io/openpro)
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/openpro-io/openpro/docker-image.yml)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/7614767a1f8c49ff8ca41f3257ca6740)](https://app.codacy.com/gh/openpro-io/openpro/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![License](https://img.shields.io/github/license/golangci/golangci-lint)](/LICENSE.txt)
 [![Release](https://img.shields.io/github/release/openpro-io/openpro.svg)](https://github.com/openpro-io/openpro/releases/latest)
 [![](https://dcbadge.vercel.app/api/server/3WxA2pz7YB)](https://discord.gg/3WxA2pz7YB)
 [![](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/claygorman)
 
 ## Screenshots
+
 <img src="https://github.com/openpro-io/openpro/assets/4524500/d870d4dc-11d8-450b-b77a-cba105abff08" width="280" />
 <img src="https://github.com/openpro-io/openpro/assets/4524500/473392d7-3251-48ef-bad0-b689d7c5d5f1" width="315" />
 <img src="https://github.com/openpro-io/openpro/assets/4524500/92b2137f-5e79-4f25-9786-400f1638d09c" width="320" />
