@@ -128,6 +128,8 @@ services:
     depends_on:
       - postgresql-db
       - createbuckets
+    #ports:
+    #  - "8080:8080"
 
   openpro-frontend:
     image: ghcr.io/openpro-io/openpro-frontend:latest
@@ -147,6 +149,8 @@ services:
       - nginx-proxy-manager-nw
     depends_on:
       - openpro-backend
+    #ports:
+    #  - "3000:3000"
 ```
 
 ### docker cli ([click here for more info](https://docs.docker.com/engine/reference/commandline/cli/))
