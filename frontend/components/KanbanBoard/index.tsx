@@ -156,8 +156,10 @@ export default function KanbanBoardNew({
 
   const onAddItem = async () => {
     if (!itemName) return;
-
-    const container = containers.find((item) => item.id === currentContainerId);
+    const newContainers = cloneDeep(containers);
+    const container = newContainers.find(
+      (item) => item.id === currentContainerId
+    );
     if (!container) return;
 
     // @ts-ignore
@@ -211,7 +213,7 @@ export default function KanbanBoardNew({
         ...prevState,
         itemName: '',
         saveToBackend: true,
-        containers: [...containers],
+        containers: newContainers,
       };
     });
 

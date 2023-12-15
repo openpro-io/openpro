@@ -5,7 +5,6 @@ const typeDefs = gql`
   # 'GraphQLUpload' export from the 'graphql-upload' package
   # in the resolver map below.
   scalar Upload
-  scalar JSON
 
   enum Order {
     ASC
@@ -92,13 +91,31 @@ const typeDefs = gql`
     issues: [Issue]
   }
 
+  type ViewStateIssueStatus {
+    id: ID!
+    name: String
+    projectId: String
+  }
+
+  type ViewStateItem {
+    id: ID!
+    title: String
+    status: ViewStateIssueStatus
+  }
+
+  type ViewState {
+    id: ID!
+    items: [ViewStateItem]
+    title: String
+  }
+
   type Board {
     id: ID
     name: String
     projectId: String
     style: String
     status: String
-    viewState: JSON
+    viewState: [ViewState]
     backlogEnabled: Boolean
     createdAt: String
     updatedAt: String
@@ -213,10 +230,28 @@ const typeDefs = gql`
     name: String!
   }
 
+  input ViewStateIssueStatusInput {
+    id: ID!
+    name: String
+    projectId: String
+  }
+
+  input ViewStateItemInput {
+    id: ID!
+    title: String
+    status: ViewStateIssueStatusInput
+  }
+
+  input ViewStateInput {
+    id: ID!
+    items: [ViewStateItemInput]
+    title: String
+  }
+
   input UpdateBoardInput {
     id: String!
     name: String
-    viewState: JSON
+    viewState: [ViewStateInput]
     backlogEnabled: Boolean
     settings: String
     containerOrder: String

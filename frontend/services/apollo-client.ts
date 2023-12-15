@@ -8,6 +8,9 @@ import {
   ISSUE_COMMENT_FIELDS,
   ISSUE_FIELDS,
   USER_FIELDS,
+  VIEW_STATE_FIELDS,
+  VIEW_STATE_ISSUE_STATUS_FIELDS,
+  VIEW_STATE_ITEM_FIELDS,
 } from '@/gql/gql-queries-mutations';
 import { createFragmentRegistry } from '@apollo/client/cache';
 import {
@@ -15,6 +18,7 @@ import {
   PUBLIC_NEXTAUTH_URL,
   API_URL,
 } from '@/services/config';
+import { removeTypenameFromVariables } from '@apollo/client/link/remove-typename';
 import { BatchHttpLink } from '@apollo/client/link/batch-http';
 import { getMainDefinition } from '@apollo/client/utilities';
 import axios from 'axios';
@@ -45,6 +49,8 @@ const uploadLink = createUploadLink({
   },
 });
 
+const removeTypenameLink = removeTypenameFromVariables();
+
 export const splitLink = split(
   ({ query }) => {
     const definition = getMainDefinition(query);
@@ -61,12 +67,15 @@ export const splitLink = split(
 
 export const apolloClient = new ApolloClient({
   connectToDevTools: true,
-  link: from([authLink, splitLink]),
+  link: from([removeTypenameLink, authLink, splitLink]),
   cache: new InMemoryCache({
     fragments: createFragmentRegistry(gql`
       ${USER_FIELDS}
       ${ISSUE_COMMENT_FIELDS}
       ${ISSUE_FIELDS}
+      ${VIEW_STATE_ITEM_FIELDS}
+      ${VIEW_STATE_ISSUE_STATUS_FIELDS}
+      ${VIEW_STATE_FIELDS}
     `),
     typePolicies: {
       Board: {
