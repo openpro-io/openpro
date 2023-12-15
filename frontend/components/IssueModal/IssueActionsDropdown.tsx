@@ -88,7 +88,7 @@ const DeleteDialogue = ({
               leaveFrom='opacity-100 scale-100'
               leaveTo='opacity-0 scale-95'
             >
-              <Dialog.Panel className='w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all'>
+              <Dialog.Panel className='w-full max-w-md transform overflow-hidden rounded-2xl bg-surface-overlay-hovered p-6 text-left align-middle text-primary shadow-xl transition-all'>
                 <Dialog.Title
                   as='h3'
                   className='flex text-lg font-medium leading-6'
@@ -247,7 +247,7 @@ const IssueActionsDropdown = ({ issueId }: { issueId?: string }) => {
               )}
             </Menu.Item>
           </div>
-          <div className='py-1'>
+          <div className='bg-red-500 py-1 hover:opacity-80'>
             <Menu.Item>
               {({ active }) => (
                 <a
@@ -255,7 +255,7 @@ const IssueActionsDropdown = ({ issueId }: { issueId?: string }) => {
                   onClick={() => setDeleteDialogueIsOpen(true)}
                   className={classNames(
                     active ? activeClass : inactiveClass,
-                    'block px-4 py-2 text-sm'
+                    'block px-4 py-2 text-sm hover:bg-red-500'
                   )}
                 >
                   Delete

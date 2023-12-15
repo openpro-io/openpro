@@ -27,13 +27,10 @@ interface SidebarProps {
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const pathname = usePathname();
   const urlParams = useParams();
-  const [colorMode] = useColorMode();
-
-  const boardId = urlParams?.boardId;
-
   const trigger = useRef<any>(null);
   const sidebar = useRef<any>(null);
 
+  const boardId = urlParams?.boardId;
   let storedSidebarExpanded = 'true';
   const [sidebarExpanded, setSidebarExpanded] = useState(
     storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true'
@@ -60,16 +57,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     };
     document.addEventListener('click', clickHandler);
     return () => document.removeEventListener('click', clickHandler);
-  });
-
-  // close if the esc key is pressed
-  useEffect(() => {
-    const keyHandler = ({ keyCode }: KeyboardEvent) => {
-      if (!sidebarOpen || keyCode !== 27) return;
-      setSidebarOpen(false);
-    };
-    document.addEventListener('keydown', keyHandler);
-    return () => document.removeEventListener('keydown', keyHandler);
   });
 
   useEffect(() => {
@@ -139,7 +126,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
           {/* <!-- Menu Group --> */}
           <div>
-            <div className='pb-2 text-xs font-bold'>PLANNING</div>
             {/* <!--  This is the project view sidebar--> */}
             {pathname.includes('projects') && (
               <>
@@ -233,7 +219,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             {/* <!-- We hide this navbar in non project view --> */}
             {!pathname.includes('projects') && (
               <>
-                <h3 className='mb-4 ml-4 text-sm font-semibold'>MENU</h3>
                 <ul className='mb-6 flex flex-col gap-0.5'>
                   {/* <!-- Menu Item Dashboard --> */}
                   <SidebarLinkGroup

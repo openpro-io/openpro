@@ -68,7 +68,9 @@ export const IssueCommentEditorTipTap = ({
             onClick={() => setShowEditor(true)}
             className='prose prose-sm h-10 max-w-full overflow-y-scroll rounded-lg'
           >
-            <div className='m-1 opacity-70'>Click to add comment...</div>
+            <div className='m-1 text-primary opacity-70'>
+              Click to add comment...
+            </div>
           </article>
         )}
         {showEditor && (

@@ -10,7 +10,7 @@ type Props = {
 const Toolbar = ({ setShowAddContainerModal }: Props) => {
   return (
     <div className='flex items-center gap-y-2 pt-3 align-middle'>
-      <div className='flex shrink grow basis-0 space-x-2'>
+      <div className='flex shrink grow basis-0 space-x-4'>
         <div>
           <SearchFilter />
         </div>
