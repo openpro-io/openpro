@@ -184,7 +184,7 @@ export default function Backlog({ projectId }: { projectId: string }) {
     let itemIdsInABoard: Set<string> = new Set();
 
     const buildContainers = boards.map((board: any) => {
-      const boardState = JSON.parse(board.viewState);
+      const boardState = board.viewState;
 
       const allItems = flatMap(boardState, 'items');
 
