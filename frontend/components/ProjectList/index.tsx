@@ -183,7 +183,9 @@ const ProjectList = () => {
                     onClick={(e) => {
                       // @ts-ignore
                       if (e?.target?.id !== 'ProjectOptionsDropdown') {
-                        push(`/projects/${project.id}/boards/1`);
+                        push(
+                          `/projects/${project.id}/boards/${project.boards?.[0]?.id}`
+                        );
                       }
                     }}
                     key={project.id}
