@@ -38,7 +38,7 @@ import {
   UPDATE_BOARD_MUTATION,
   UPDATE_ISSUE_MUTATION,
 } from '@/gql/gql-queries-mutations';
-import { isEmpty, isEqual } from 'lodash';
+import { cloneDeep, isEmpty, isEqual } from 'lodash';
 import { getSession } from 'next-auth/react';
 import { getDomainName } from '@/services/utils';
 import { useSearchParams } from 'next/navigation';
@@ -417,7 +417,7 @@ export default function KanbanBoardNew({
       );
       // In the same container
       if (activeContainerIndex === overContainerIndex) {
-        let newItems = [...containers];
+        let newItems = cloneDeep(containers);
         newItems[activeContainerIndex].items = arrayMove(
           newItems[activeContainerIndex].items,
           activeitemIndex,
@@ -432,7 +432,7 @@ export default function KanbanBoardNew({
         });
       } else {
         // In different containers
-        let newItems = [...containers];
+        let newItems = cloneDeep(containers);
         const [removeditem] = newItems[activeContainerIndex].items.splice(
           activeitemIndex,
           1
@@ -480,7 +480,7 @@ export default function KanbanBoardNew({
       );
 
       // Remove the active item from the active container and add it to the over container
-      let newItems = [...containers];
+      let newItems = cloneDeep(containers);
       const [removeditem] = newItems[activeContainerIndex].items.splice(
         activeitemIndex,
         1
