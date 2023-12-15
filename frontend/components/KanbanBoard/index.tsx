@@ -283,21 +283,12 @@ export default function KanbanBoardNew({
         });
       }
     } else {
-      // TODO: We should probably create a default board for the project server side during bootstrap
       const buildContainers = getProjectInfo?.data?.project.issueStatuses.map(
         (container: any) => {
-          const issues = getProjectInfo?.data?.project?.issues.filter(
-            (issue: any) => issue.status.id === container.id
-          );
-
           return {
             id: `container-${container.id}`,
             title: container.name,
-            items: issues.map((issue: any) => ({
-              id: `item-${issue.id}`,
-              title: issue.title,
-              status: issue.status,
-            })),
+            items: [],
           };
         }
       );

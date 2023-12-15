@@ -309,10 +309,19 @@ const resolvers = {
         },
       ]);
 
+      const viewState = issueStatuses.map((is) => {
+        return {
+          id: `container-${is.id}`,
+          title: is.name,
+          items: [],
+        };
+      });
+
       const board = await db.sequelize.models.Board.create({
         projectId: Number(project.id),
         name: input?.boardName ?? 'default',
         style: input.boardStyle,
+        viewState,
       });
 
       return { ...project.toJSON(), boards: [board.toJSON()] };
