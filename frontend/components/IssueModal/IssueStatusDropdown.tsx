@@ -78,7 +78,7 @@ const IssueStatusDropdown = ({
         variables: {
           input: {
             id: `${boardId}`,
-            viewState: '',
+            viewState: [],
           },
         },
       });
@@ -124,7 +124,7 @@ const IssueStatusDropdown = ({
                       },
                     });
                   }}
-                  className='ui-active:bg-surface-overlay-hovered block px-4 py-2 text-sm ui-active:text-link-active ui-not-active:text-link'
+                  className='block px-4 py-2 text-sm ui-active:bg-surface-overlay-hovered ui-active:text-link-active ui-not-active:text-link'
                 >
                   {is.name}
                 </Menu.Item>

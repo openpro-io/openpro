@@ -1,10 +1,29 @@
+export type ViewStateIssueStatus = {
+  id: string;
+  name: string;
+  projectId: string;
+  __typename: string;
+};
+
+export type ViewStateItem = {
+  id: string;
+  title: string;
+  status?: IssueStatus;
+};
+
+export type ViewState = {
+  id: string;
+  items: ViewStateItem[];
+  title: string;
+};
+
 export type Board = {
   id: string;
   name: string;
   projectId: string;
   style: string;
   status: string;
-  viewState?: string;
+  viewState?: ViewState[];
   backlogEnabled?: Boolean;
   createdAt: string;
   updatedAt?: string;

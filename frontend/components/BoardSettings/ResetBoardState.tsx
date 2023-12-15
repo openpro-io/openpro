@@ -13,7 +13,7 @@ const ResetBoardState = ({ boardId }: { boardId: string }) => {
           variables: {
             input: {
               id: boardId,
-              viewState: '',
+              viewState: [],
             },
           },
         });

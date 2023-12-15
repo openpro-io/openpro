@@ -184,7 +184,7 @@ export default function Backlog({ projectId }: { projectId: string }) {
     let itemIdsInABoard: Set<string> = new Set();
 
     const buildContainers = boards.map((board: any) => {
-      const boardState = JSON.parse(board.viewState);
+      const boardState = board.viewState;
 
       const allItems = flatMap(boardState, 'items');
 
@@ -449,14 +449,14 @@ export default function Backlog({ projectId }: { projectId: string }) {
           variables: {
             input: {
               id: boardId,
-              viewState: JSON.stringify(boardState),
+              viewState: boardState,
             },
           },
         });
       } else if (boardId === '0') {
         // push from board onto the backlog
         boards.forEach((board: any) => {
-          const viewState = JSON.parse(board.viewState);
+          const { viewState } = board;
 
           viewState.forEach((container: any) => {
             const item = container.items.find(
@@ -483,7 +483,7 @@ export default function Backlog({ projectId }: { projectId: string }) {
                 variables: {
                   input: {
                     id: board.id,
-                    viewState: JSON.stringify(newViewState),
+                    viewState: newViewState,
                   },
                 },
               });
