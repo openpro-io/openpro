@@ -1,6 +1,5 @@
 import { from, ApolloClient, InMemoryCache, gql, split } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
-import { getSession } from 'next-auth/react';
 // TODO: Why isn't typescript picking up the ./types definition for this...
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 import { DateTime } from 'luxon';
@@ -18,7 +17,6 @@ import {
   PUBLIC_NEXTAUTH_URL,
   API_URL,
 } from '@/services/config';
-import { removeTypenameFromVariables } from '@apollo/client/link/remove-typename';
 import { BatchHttpLink } from '@apollo/client/link/batch-http';
 import { getMainDefinition } from '@apollo/client/utilities';
 import axios from 'axios';
@@ -49,8 +47,6 @@ const uploadLink = createUploadLink({
   },
 });
 
-const removeTypenameLink = removeTypenameFromVariables();
-
 export const splitLink = split(
   ({ query }) => {
     const definition = getMainDefinition(query);
@@ -67,7 +63,7 @@ export const splitLink = split(
 
 export const apolloClient = new ApolloClient({
   connectToDevTools: true,
-  link: from([removeTypenameLink, authLink, splitLink]),
+  link: from([authLink, splitLink]),
   cache: new InMemoryCache({
     fragments: createFragmentRegistry(gql`
       ${USER_FIELDS}

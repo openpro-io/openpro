@@ -46,6 +46,7 @@ import IssueModal from '@/components/IssueModal';
 import IssueModalContents from '@/components/IssueModal/IssueModalContents';
 import Toolbar from '@/components/KanbanBoard/Toolbar';
 import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
+import { omitDeep } from '@apollo/client/utilities';
 
 type DNDType = {
   id: UniqueIdentifier;
@@ -205,7 +206,7 @@ export default function KanbanBoardNew({
     container.items.push({
       id,
       title: itemName,
-      status: newIssue.status,
+      status: omitDeep(newIssue.status, '__typename'),
     });
 
     setPageState((prevState) => {
@@ -271,7 +272,9 @@ export default function KanbanBoardNew({
     );
 
     if (thisBoard?.viewState) {
-      const incomingData = thisBoard.viewState;
+      // We want to omit __typename metafield from gql query results
+      const incomingData = omitDeep(thisBoard.viewState, '__typename');
+
       const remoteDataChanged = !isEqual(incomingData, pageState?.containers);
 
       if (isEmpty(containers) || remoteDataChanged) {
