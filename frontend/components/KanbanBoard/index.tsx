@@ -271,35 +271,18 @@ export default function KanbanBoardNew({
       (b: any) => b.id === boardId
     );
 
-    if (thisBoard?.viewState) {
-      // We want to omit __typename metafield from gql query results
-      const incomingData = omitDeep(thisBoard.viewState, '__typename');
+    if (!thisBoard?.viewState) return;
 
-      const remoteDataChanged = !isEqual(incomingData, pageState?.containers);
+    // We want to omit __typename metafield from gql query results
+    const incomingData = omitDeep(thisBoard.viewState, '__typename');
 
-      if (isEmpty(containers) || remoteDataChanged) {
-        setPageState((prevState) => {
-          return {
-            ...prevState,
-            containers: incomingData,
-          };
-        });
-      }
-    } else {
-      const buildContainers = getProjectInfo?.data?.project.issueStatuses.map(
-        (container: any) => {
-          return {
-            id: `container-${container.id}`,
-            title: container.name,
-            items: [],
-          };
-        }
-      );
+    const remoteDataChanged = !isEqual(incomingData, pageState?.containers);
 
+    if (isEmpty(containers) || remoteDataChanged) {
       setPageState((prevState) => {
         return {
           ...prevState,
-          containers: buildContainers,
+          containers: incomingData,
         };
       });
     }
