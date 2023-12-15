@@ -313,6 +313,11 @@ const resolvers = {
         projectId: Number(project.id),
         name: input?.boardName ?? 'default',
         style: input.boardStyle,
+        viewState: issueStatuses.map((is) => ({
+          id: `container-${is.id}`,
+          title: is.name,
+          items: [],
+        })),
       });
 
       return { ...project.toJSON(), boards: [board.toJSON()] };

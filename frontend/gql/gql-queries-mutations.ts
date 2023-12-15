@@ -11,7 +11,9 @@ export const PROJECT_FIELDS = gql(/* GraphQL */ `
     boards {
       id
       name
-      viewState
+      viewState {
+        ...ViewStateFields
+      }
       backlogEnabled
       settings
       createdAt
@@ -86,6 +88,34 @@ export const ISSUE_COMMENT_FIELDS = gql(/* GraphQL */ `
   }
 `);
 
+export const VIEW_STATE_ISSUE_STATUS_FIELDS = gql(/* GraphQL */ `
+  fragment ViewStateIssueStatusFields on ViewStateIssueStatus {
+    id
+    name
+    projectId
+  }
+`);
+
+export const VIEW_STATE_ITEM_FIELDS = gql(/* GraphQL */ `
+  fragment ViewStateItemFields on ViewStateItem {
+    id
+    title
+    status {
+      ...ViewStateIssueStatusFields
+    }
+  }
+`);
+
+export const VIEW_STATE_FIELDS = gql(/* GraphQL */ `
+  fragment ViewStateFields on ViewState {
+    id
+    title
+    items {
+      ...ViewStateItemFields
+    }
+  }
+`);
+
 export const GET_ISSUE_QUERY = gql(/* GraphQL */ `
   query GetIssue($input: QueryIssueInput) {
     issue(input: $input) {
@@ -106,7 +136,9 @@ export const GET_PROJECT_INFO = gql(/* GraphQL */ `
       description
       boards {
         id
-        viewState
+        viewState {
+          ...ViewStateFields
+        }
         backlogEnabled
         containerOrder
       }
@@ -235,7 +267,9 @@ export const CREATE_PROJECT_MUTATION = gql(/* GraphQL */ `
         id
         style
         backlogEnabled
-        viewState
+        viewState {
+          ...ViewStateFields
+        }
         createdAt
       }
     }
@@ -253,7 +287,9 @@ export const GET_PROJECTS = gql(/* GraphQL */ `
       boards {
         id
         style
-        viewState
+        viewState {
+          ...ViewStateFields
+        }
         backlogEnabled
       }
     }
@@ -265,7 +301,9 @@ export const UPDATE_BOARD_MUTATION = gql(/* GraphQL */ `
     updateBoard(input: $input) {
       id
       name
-      viewState
+      viewState {
+        ...ViewStateFields
+      }
       backlogEnabled
       settings
     }
@@ -307,7 +345,9 @@ export const GET_BOARD_INFO = gql(/* GraphQL */ `
     board(input: $input) {
       id
       name
-      viewState
+      viewState {
+        ...ViewStateFields
+      }
       backlogEnabled
       settings
       containerOrder
@@ -320,7 +360,9 @@ export const GET_BOARD_ISSUES = gql(/* GraphQL */ `
     board(input: $input) {
       id
       name
-      viewState
+      viewState {
+        ...ViewStateFields
+      }
       backlogEnabled
       settings
       containerOrder

@@ -2,13 +2,12 @@ export type ViewStateIssueStatus = {
   id: string;
   name: string;
   projectId: string;
-  __typename: string;
 };
 
 export type ViewStateItem = {
   id: string;
   title: string;
-  status?: IssueStatus;
+  status?: ViewStateIssueStatus;
 };
 
 export type ViewState = {

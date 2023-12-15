@@ -46,6 +46,7 @@ import IssueModal from '@/components/IssueModal';
 import IssueModalContents from '@/components/IssueModal/IssueModalContents';
 import Toolbar from '@/components/KanbanBoard/Toolbar';
 import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
+import { omitDeep } from '@apollo/client/utilities';
 
 type DNDType = {
   id: UniqueIdentifier;
@@ -156,8 +157,10 @@ export default function KanbanBoardNew({
 
   const onAddItem = async () => {
     if (!itemName) return;
-
-    const container = containers.find((item) => item.id === currentContainerId);
+    const newContainers = cloneDeep(containers);
+    const container = newContainers.find(
+      (item) => item.id === currentContainerId
+    );
     if (!container) return;
 
     // @ts-ignore
@@ -203,7 +206,7 @@ export default function KanbanBoardNew({
     container.items.push({
       id,
       title: itemName,
-      status: newIssue.status,
+      status: omitDeep(newIssue.status, '__typename'),
     });
 
     setPageState((prevState) => {
@@ -211,7 +214,7 @@ export default function KanbanBoardNew({
         ...prevState,
         itemName: '',
         saveToBackend: true,
-        containers: [...containers],
+        containers: newContainers,
       };
     });
 
@@ -268,42 +271,18 @@ export default function KanbanBoardNew({
       (b: any) => b.id === boardId
     );
 
-    if (thisBoard?.viewState) {
-      const incomingData = thisBoard.viewState;
-      const remoteDataChanged = !isEqual(incomingData, pageState?.containers);
+    if (!thisBoard?.viewState) return;
 
-      if (isEmpty(containers) || remoteDataChanged) {
-        setPageState((prevState) => {
-          return {
-            ...prevState,
-            containers: incomingData,
-          };
-        });
-      }
-    } else {
-      // TODO: We should probably create a default board for the project server side during bootstrap
-      const buildContainers = getProjectInfo?.data?.project.issueStatuses.map(
-        (container: any) => {
-          const issues = getProjectInfo?.data?.project?.issues.filter(
-            (issue: any) => issue.status.id === container.id
-          );
+    // We want to omit __typename metafield from gql query results
+    const incomingData = omitDeep(thisBoard.viewState, '__typename');
 
-          return {
-            id: `container-${container.id}`,
-            title: container.name,
-            items: issues.map((issue: any) => ({
-              id: `item-${issue.id}`,
-              title: issue.title,
-              status: issue.status,
-            })),
-          };
-        }
-      );
+    const remoteDataChanged = !isEqual(incomingData, pageState?.containers);
 
+    if (isEmpty(containers) || remoteDataChanged) {
       setPageState((prevState) => {
         return {
           ...prevState,
-          containers: buildContainers,
+          containers: incomingData,
         };
       });
     }
