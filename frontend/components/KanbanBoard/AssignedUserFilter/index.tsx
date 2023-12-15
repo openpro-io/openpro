@@ -3,9 +3,10 @@ import { GET_USERS } from '@/gql/gql-queries-mutations';
 import { classNames, formatUser } from '@/services/utils';
 
 import { User } from '@/constants/types';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { Route } from 'next';
+import { useSession } from 'next-auth/react';
 
 const UserAvatarBubbleWide = ({
   selectedPerson,
@@ -90,25 +91,29 @@ const AssignedUserFilter = () => {
   const pathname = usePathname();
   const router = useRouter();
 
-  const handleButtonClick = () => {
-    setShowDropdown(!showDropdown);
-  };
+  const handleButtonClick = useCallback(() => {
+    setShowDropdown((prevShowDropdown) => !prevShowDropdown);
+  }, []);
 
-  const users = data?.users.map((u: any) => formatUser(u));
+  const setSelectedUserId = useCallback(
+    (userId: string) => {
+      if (userId) {
+        params.set('selectedUserId', userId);
+      } else {
+        params.delete('selectedUserId');
+      }
 
-  console.log('SID', params.get('selectedUserId'));
+      const newPath = pathname + '?' + params.toString();
+      router.replace(newPath as Route);
+    },
+    [params, pathname, router]
+  );
 
-  const setSelectedUserId = (userId: string) => {
-    // @ts-ignore
-    if (userId) {
-      params.set('selectedUserId', userId);
-    } else {
-      params.delete('selectedUserId');
-    }
+  const mapUsers = useCallback((users: any) => {
+    return users.map((u: any) => formatUser(u));
+  }, []);
 
-    const newPath = pathname + '?' + params.toString();
-    router.replace(newPath as Route);
-  };
+  const users = data ? mapUsers(data.users) : [];
 
   return (
     <div className='relative flex h-9 w-max flex-row -space-x-2'>
