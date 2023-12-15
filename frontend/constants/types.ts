@@ -4,7 +4,7 @@ export type Board = {
   projectId: string;
   style: string;
   status: string;
-  viewState?: string;
+  viewState?: Object;
   backlogEnabled?: Boolean;
   createdAt: string;
   updatedAt?: string;

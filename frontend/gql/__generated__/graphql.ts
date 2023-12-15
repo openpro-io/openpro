@@ -14,6 +14,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  JSON: { input: any; output: any; }
   /** The `Upload` scalar type represents a file upload. */
   Upload: { input: any; output: any; }
 };
@@ -47,7 +48,7 @@ export type Board = {
   status?: Maybe<Scalars['String']['output']>;
   style?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['String']['output']>;
-  viewState?: Maybe<Scalars['String']['output']>;
+  viewState?: Maybe<Scalars['JSON']['output']>;
 };
 
 export enum BoardStyle {
@@ -372,7 +373,7 @@ export type UpdateBoardInput = {
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   settings?: InputMaybe<Scalars['String']['input']>;
-  viewState?: InputMaybe<Scalars['String']['input']>;
+  viewState?: InputMaybe<Scalars['JSON']['input']>;
 };
 
 export type UpdateIssueInput = {
@@ -408,7 +409,7 @@ export type User = {
 
 export type UpdateIssueStatusFragment = { __typename?: 'Issue', id: string, status?: { __typename?: 'IssueStatus', id: string, name: string } | null } & { ' $fragmentName'?: 'UpdateIssueStatusFragment' };
 
-export type ProjectFieldsFragment = { __typename?: 'Project', id?: string | null, name?: string | null, key?: string | null, description?: string | null, createdAt?: string | null, updatedAt?: string | null, boards?: Array<{ __typename?: 'Board', id?: string | null, name?: string | null, viewState?: string | null, backlogEnabled?: boolean | null, settings?: string | null, createdAt?: string | null, updatedAt?: string | null } | null> | null, issueStatuses?: Array<{ __typename?: 'IssueStatus', id: string, name: string, projectId?: string | null, createdAt?: string | null, updatedAt?: string | null } | null> | null, issues?: Array<(
+export type ProjectFieldsFragment = { __typename?: 'Project', id?: string | null, name?: string | null, key?: string | null, description?: string | null, createdAt?: string | null, updatedAt?: string | null, boards?: Array<{ __typename?: 'Board', id?: string | null, name?: string | null, viewState?: any | null, backlogEnabled?: boolean | null, settings?: string | null, createdAt?: string | null, updatedAt?: string | null } | null> | null, issueStatuses?: Array<{ __typename?: 'IssueStatus', id: string, name: string, projectId?: string | null, createdAt?: string | null, updatedAt?: string | null } | null> | null, issues?: Array<(
     { __typename?: 'Issue' }
     & { ' $fragmentRefs'?: { 'IssueFieldsFragment': IssueFieldsFragment } }
   ) | null> | null } & { ' $fragmentName'?: 'ProjectFieldsFragment' };
@@ -447,7 +448,7 @@ export type GetProjectInfoQueryVariables = Exact<{
 }>;
 
 
-export type GetProjectInfoQuery = { __typename?: 'Query', project?: { __typename?: 'Project', id?: string | null, name?: string | null, key?: string | null, description?: string | null, boards?: Array<{ __typename?: 'Board', id?: string | null, viewState?: string | null, backlogEnabled?: boolean | null, containerOrder?: string | null } | null> | null, issueStatuses?: Array<{ __typename?: 'IssueStatus', id: string, projectId?: string | null, name: string, createdAt?: string | null } | null> | null, issues?: Array<(
+export type GetProjectInfoQuery = { __typename?: 'Query', project?: { __typename?: 'Project', id?: string | null, name?: string | null, key?: string | null, description?: string | null, boards?: Array<{ __typename?: 'Board', id?: string | null, viewState?: any | null, backlogEnabled?: boolean | null, containerOrder?: string | null } | null> | null, issueStatuses?: Array<{ __typename?: 'IssueStatus', id: string, projectId?: string | null, name: string, createdAt?: string | null } | null> | null, issues?: Array<(
       { __typename?: 'Issue' }
       & { ' $fragmentRefs'?: { 'IssueFieldsFragment': IssueFieldsFragment } }
     ) | null> | null } | null };
@@ -545,21 +546,21 @@ export type CreateProjectMutationVariables = Exact<{
 }>;
 
 
-export type CreateProjectMutation = { __typename?: 'Mutation', createProject?: { __typename?: 'Project', id?: string | null, name?: string | null, description?: string | null, boards?: Array<{ __typename?: 'Board', id?: string | null, style?: string | null, backlogEnabled?: boolean | null, viewState?: string | null, createdAt?: string | null } | null> | null } | null };
+export type CreateProjectMutation = { __typename?: 'Mutation', createProject?: { __typename?: 'Project', id?: string | null, name?: string | null, description?: string | null, boards?: Array<{ __typename?: 'Board', id?: string | null, style?: string | null, backlogEnabled?: boolean | null, viewState?: any | null, createdAt?: string | null } | null> | null } | null };
 
 export type GetProjectsQueryVariables = Exact<{
   input?: InputMaybe<QueryProjectInput>;
 }>;
 
 
-export type GetProjectsQuery = { __typename?: 'Query', projects?: Array<{ __typename?: 'Project', id?: string | null, name?: string | null, key?: string | null, createdAt?: string | null, boards?: Array<{ __typename?: 'Board', id?: string | null, style?: string | null, viewState?: string | null, backlogEnabled?: boolean | null } | null> | null } | null> | null };
+export type GetProjectsQuery = { __typename?: 'Query', projects?: Array<{ __typename?: 'Project', id?: string | null, name?: string | null, key?: string | null, createdAt?: string | null, issueCount?: number | null, boards?: Array<{ __typename?: 'Board', id?: string | null, style?: string | null, viewState?: any | null, backlogEnabled?: boolean | null } | null> | null } | null> | null };
 
 export type UpdateBoardMutationVariables = Exact<{
   input?: InputMaybe<UpdateBoardInput>;
 }>;
 
 
-export type UpdateBoardMutation = { __typename?: 'Mutation', updateBoard?: { __typename?: 'Board', id?: string | null, name?: string | null, viewState?: string | null, backlogEnabled?: boolean | null, settings?: string | null } | null };
+export type UpdateBoardMutation = { __typename?: 'Mutation', updateBoard?: { __typename?: 'Board', id?: string | null, name?: string | null, viewState?: any | null, backlogEnabled?: boolean | null, settings?: string | null } | null };
 
 export type GetProjectTagsQueryVariables = Exact<{
   input: QueryProjectTagsInput;
@@ -587,14 +588,14 @@ export type GetBoardInfoQueryVariables = Exact<{
 }>;
 
 
-export type GetBoardInfoQuery = { __typename?: 'Query', board?: { __typename?: 'Board', id?: string | null, name?: string | null, viewState?: string | null, backlogEnabled?: boolean | null, settings?: string | null, containerOrder?: string | null } | null };
+export type GetBoardInfoQuery = { __typename?: 'Query', board?: { __typename?: 'Board', id?: string | null, name?: string | null, viewState?: any | null, backlogEnabled?: boolean | null, settings?: string | null, containerOrder?: string | null } | null };
 
 export type GetBoardIssuesQueryVariables = Exact<{
   input: QueryBoardInput;
 }>;
 
 
-export type GetBoardIssuesQuery = { __typename?: 'Query', board?: { __typename?: 'Board', id?: string | null, name?: string | null, viewState?: string | null, backlogEnabled?: boolean | null, settings?: string | null, containerOrder?: string | null, issues?: Array<(
+export type GetBoardIssuesQuery = { __typename?: 'Query', board?: { __typename?: 'Board', id?: string | null, name?: string | null, viewState?: any | null, backlogEnabled?: boolean | null, settings?: string | null, containerOrder?: string | null, issues?: Array<(
       { __typename?: 'Issue' }
       & { ' $fragmentRefs'?: { 'IssueFieldsFragment': IssueFieldsFragment } }
     ) | null> | null } | null };
@@ -628,7 +629,7 @@ export const GetMeDocument = {"kind":"Document","definitions":[{"kind":"Operatio
 export const GetUsersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUsers"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"users"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"UserFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"UserFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"User"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}}]} as unknown as DocumentNode<GetUsersQuery, GetUsersQueryVariables>;
 export const CreateIssueStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateIssueStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateIssueStatusInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createIssueStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<CreateIssueStatusMutation, CreateIssueStatusMutationVariables>;
 export const CreateProjectDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateProject"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateProjectInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"boards"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"style"}},{"kind":"Field","name":{"kind":"Name","value":"backlogEnabled"}},{"kind":"Field","name":{"kind":"Name","value":"viewState"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]}}]} as unknown as DocumentNode<CreateProjectMutation, CreateProjectMutationVariables>;
-export const GetProjectsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetProjects"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"QueryProjectInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projects"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"boards"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"style"}},{"kind":"Field","name":{"kind":"Name","value":"viewState"}},{"kind":"Field","name":{"kind":"Name","value":"backlogEnabled"}}]}}]}}]}}]} as unknown as DocumentNode<GetProjectsQuery, GetProjectsQueryVariables>;
+export const GetProjectsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetProjects"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"QueryProjectInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projects"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"issueCount"}},{"kind":"Field","name":{"kind":"Name","value":"boards"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"style"}},{"kind":"Field","name":{"kind":"Name","value":"viewState"}},{"kind":"Field","name":{"kind":"Name","value":"backlogEnabled"}}]}}]}}]}}]} as unknown as DocumentNode<GetProjectsQuery, GetProjectsQueryVariables>;
 export const UpdateBoardDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateBoard"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateBoardInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateBoard"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"viewState"}},{"kind":"Field","name":{"kind":"Name","value":"backlogEnabled"}},{"kind":"Field","name":{"kind":"Name","value":"settings"}}]}}]}}]} as unknown as DocumentNode<UpdateBoardMutation, UpdateBoardMutationVariables>;
 export const GetProjectTagsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetProjectTags"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"QueryProjectTagsInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectTags"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<GetProjectTagsQuery, GetProjectTagsQueryVariables>;
 export const CreateProjectTagDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateProjectTag"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateProjectTagInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createProjectTag"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<CreateProjectTagMutation, CreateProjectTagMutationVariables>;

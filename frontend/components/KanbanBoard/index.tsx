@@ -253,7 +253,7 @@ export default function KanbanBoardNew({
         variables: {
           input: {
             id: boardId,
-            viewState: JSON.stringify(containers),
+            viewState: containers,
           },
         },
       });
@@ -269,7 +269,7 @@ export default function KanbanBoardNew({
     );
 
     if (thisBoard?.viewState) {
-      const incomingData = JSON.parse(thisBoard.viewState);
+      const incomingData = thisBoard.viewState;
       const remoteDataChanged = !isEqual(incomingData, pageState?.containers);
 
       if (isEmpty(containers) || remoteDataChanged) {

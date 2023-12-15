@@ -78,7 +78,7 @@ const IssueStatusDropdown = ({
         variables: {
           input: {
             id: `${boardId}`,
-            viewState: '',
+            viewState: {},
           },
         },
       });
