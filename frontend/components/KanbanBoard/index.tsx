@@ -256,7 +256,6 @@ export default function KanbanBoard({
       const filteredContainers = containers.map((container) => {
         const items = container.items.reduce((acc, item) => {
           const issueData = getIssueFragment(`${item.id}`.replace('item-', ''));
-          console.log({ issueData, container });
 
           // We remove archived items from the board
           if (!issueData.archived) {

@@ -95,6 +95,7 @@ const LabelFilter = () => {
         isClearable
         isMulti
         name='project-tags'
+        placeholder='Filter by label...'
         onChange={(newValue) => setValue(newValue as OptionType[])}
         options={options}
         isDisabled={isLoading}
