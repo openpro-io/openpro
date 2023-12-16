@@ -39,6 +39,7 @@ export const ISSUE_FIELDS = gql(/* GraphQL */ `
     description
     projectId
     priority
+    archived
     tags {
       id
       name

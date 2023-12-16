@@ -6,6 +6,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/Button';
 import { classNames } from '@/services/utils';
 import { BsArrowsMove } from 'react-icons/bs';
+import { useMutation } from '@apollo/client';
+import { UPDATE_ISSUE_MUTATION } from '@/gql/gql-queries-mutations';
 
 const Container = ({
   id,
@@ -13,6 +15,7 @@ const Container = ({
   title,
   description,
   onAddItem,
+  issueIds,
 }: ContainerProps) => {
   const {
     attributes,
@@ -27,6 +30,24 @@ const Container = ({
       type: 'container',
     },
   });
+  const [updateIssue] = useMutation(UPDATE_ISSUE_MUTATION);
+
+  const archiveIssues = async (issueIds?: string[]) => {
+    if (!issueIds) return;
+
+    const promises = issueIds.map((issueId) =>
+      updateIssue({
+        variables: {
+          input: {
+            id: issueId,
+            archived: true,
+          },
+        },
+      })
+    );
+
+    await Promise.all(promises);
+  };
 
   return (
     <div
@@ -46,12 +67,27 @@ const Container = ({
           <h1 className='text-xl'>{title}</h1>
           <p className='text-sm'>{description}</p>
         </div>
-        <button
-          className='rounded-xl border p-2 text-xs shadow-lg hover:shadow-xl'
-          {...listeners}
-        >
-          <BsArrowsMove className='h-4 w-4' />
-        </button>
+        <div>
+          {title?.toLowerCase() === 'done' && (
+            <button
+              className='text-xs'
+              onClick={() => {
+                if (confirm('Are you sure you want to archive this column?')) {
+                  archiveIssues(issueIds);
+                }
+              }}
+            >
+              Archive All
+            </button>
+          )}
+
+          <button
+            className='ml-3 rounded-xl border p-2 text-xs shadow-lg hover:shadow-xl'
+            {...listeners}
+          >
+            <BsArrowsMove className='h-4 w-4' />
+          </button>
+        </div>
       </div>
 
       {children}

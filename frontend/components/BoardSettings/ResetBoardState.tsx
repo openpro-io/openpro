@@ -9,14 +9,15 @@ const ResetBoardState = ({ boardId }: { boardId: string }) => {
     <Button
       className='float-right bg-red-500'
       onClick={() => {
-        updateBoard({
-          variables: {
-            input: {
-              id: boardId,
-              viewState: [],
-            },
-          },
-        });
+        // TODO: This breaks everything at the moment
+        // updateBoard({
+        //   variables: {
+        //     input: {
+        //       id: boardId,
+        //       viewState: [],
+        //     },
+        //   },
+        // });
       }}
     >
       Rebuild Board

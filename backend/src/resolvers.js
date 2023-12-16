@@ -206,7 +206,7 @@ const resolvers = {
     //   });
     // },
     updateIssue: async (parent, { input }, { db, io }) => {
-      const { id, issueStatusId, assigneeId, reporterId, title, description, tagIds, priority } = input;
+      const { id, issueStatusId, assigneeId, reporterId, title, description, tagIds, priority, archived } = input;
 
       const issue = await db.sequelize.models.Issue.findByPk(id);
 
@@ -225,6 +225,7 @@ const resolvers = {
           }))
         );
       }
+      if (archived !== undefined) issue.archived = archived;
 
       // TODO: look for better way to handle nullifying user
       if (issue.assigneeId === 0) issue.assigneeId = null;

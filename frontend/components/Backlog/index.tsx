@@ -427,9 +427,7 @@ export default function Backlog({ projectId }: { projectId: string }) {
 
       // push from backlog onto the destination board
       if (boardId !== '0') {
-        const boardState = JSON.parse(
-          boards.find((b: any) => b.id === boardId).viewState
-        );
+        const boardState = boards.find((b: any) => b.id === boardId).viewState;
 
         if (!activeContainer) return;
 

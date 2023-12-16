@@ -35,10 +35,11 @@ import {
   CREATE_ISSUE_MUTATION,
   CREATE_ISSUE_STATUS_MUTATION,
   GET_PROJECT_INFO,
+  ISSUE_FIELDS,
   UPDATE_BOARD_MUTATION,
   UPDATE_ISSUE_MUTATION,
 } from '@/gql/gql-queries-mutations';
-import { cloneDeep, isEmpty, isEqual } from 'lodash';
+import { cloneDeep, isEmpty, isEqual, pick } from 'lodash';
 import { getSession } from 'next-auth/react';
 import { getDomainName } from '@/services/utils';
 import { useSearchParams } from 'next/navigation';
@@ -47,6 +48,7 @@ import IssueModalContents from '@/components/IssueModal/IssueModalContents';
 import Toolbar from '@/components/KanbanBoard/Toolbar';
 import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
 import { omitDeep } from '@apollo/client/utilities';
+import { apolloClient } from '@/services/apollo-client';
 
 type DNDType = {
   id: UniqueIdentifier;
@@ -127,6 +129,13 @@ export default function KanbanBoardNew({
       setIsIssueModalOpen(false);
     }
   }, [selectedIssueId]);
+
+  const getIssueFragment = (issueId: string) => {
+    return apolloClient.readFragment({
+      id: `Issue:${issueId}`,
+      fragment: ISSUE_FIELDS,
+    });
+  };
 
   const onAddContainer = async () => {
     if (!containerName) return;
@@ -244,6 +253,25 @@ export default function KanbanBoardNew({
       //   console.log('Need to update the backend');
       // }
 
+      const filteredContainers = containers.map((container) => {
+        const items = container.items.reduce((acc, item) => {
+          const issueData = getIssueFragment(`${item.id}`.replace('item-', ''));
+          console.log({ issueData, container });
+
+          // We remove archived items from the board
+          if (!issueData.archived) {
+            acc.push(item);
+          }
+
+          return acc;
+        }, [] as any[]);
+
+        return {
+          ...container,
+          items,
+        };
+      });
+
       updateBoard({
         onCompleted: () => {
           setPageState((prevState) => {
@@ -256,7 +284,7 @@ export default function KanbanBoardNew({
         variables: {
           input: {
             id: boardId,
-            viewState: containers,
+            viewState: filteredContainers,
           },
         },
       });
@@ -275,14 +303,89 @@ export default function KanbanBoardNew({
 
     // We want to omit __typename metafield from gql query results
     const incomingData = omitDeep(thisBoard.viewState, '__typename');
+    const correctedBoardState = cloneDeep(incomingData);
 
     const remoteDataChanged = !isEqual(incomingData, pageState?.containers);
+    let hasMismatchedIssueStatuses = false;
+
+    // If the issue status of an issue does not match the container it is in, we need to move it to the correct container
+    // this can happen when using the modal issue status dropdown to change the issue status versus dragging the issue to a new container
+    incomingData.forEach((container: any) => {
+      container.items.forEach((item: any) => {
+        const issueData = getIssueFragment(`${item.id}`.replace('item-', ''));
+        if (issueData.status.id !== container.id.replace('container-', '')) {
+          hasMismatchedIssueStatuses = true;
+
+          // move to correct container
+          const destinationContainer = findContainerById(
+            `container-${issueData.status.id}`
+          );
+
+          const previousContainer = findContainerByItemId(
+            `item-${issueData.id}`
+          );
+
+          if (!destinationContainer || !previousContainer) return;
+
+          const destinationContainerIndex = containers.findIndex(
+            (container) => container.id === destinationContainer.id
+          );
+          const previousContainerIndex = containers.findIndex(
+            (container) => container.id === previousContainer.id
+          );
+          const issueStatusId = `${issueData.status.id}`;
+          const issueId = `${issueData.id}`;
+          const previousItemIndex = previousContainer.items.findIndex(
+            (item) => item.id === `item-${issueData.id}`
+          );
+          const destinationItemIndex =
+            destinationContainer.items.length > 0
+              ? destinationContainer.items.length + 1
+              : destinationContainer.items.length;
+
+          // remove item from old container
+          const [removedItem] = correctedBoardState[
+            previousContainerIndex
+          ].items.splice(previousItemIndex, 1);
+
+          // push removed item to new container
+          correctedBoardState[destinationContainerIndex].items.splice(
+            destinationItemIndex,
+            0,
+            removedItem
+          );
+        }
+      });
+    });
+
+    const projectHasArchivedIssues =
+      getProjectInfo?.data?.project?.issues?.some(
+        (issue: any) => issue.archived
+      );
 
     if (isEmpty(containers) || remoteDataChanged) {
       setPageState((prevState) => {
         return {
           ...prevState,
           containers: incomingData,
+        };
+      });
+    } else if (projectHasArchivedIssues) {
+      // If the project has archived issues, we need to update the board
+      // to remove the archived issues from the board
+      setPageState((prevState) => {
+        return {
+          ...prevState,
+          saveToBackend: true,
+        };
+      });
+    } else if (hasMismatchedIssueStatuses) {
+      console.log({ correctedBoardState });
+      setPageState((prevState) => {
+        return {
+          ...prevState,
+          containers: correctedBoardState,
+          saveToBackend: true,
         };
       });
     }
@@ -310,6 +413,12 @@ export default function KanbanBoardNew({
 
   const findContainerByItemId = (id: UniqueIdentifier | undefined) => {
     const container = findValueOfItems(id, 'item');
+    if (!container) return null;
+    return container;
+  };
+
+  const findContainerById = (id: UniqueIdentifier | undefined) => {
+    const container = containers.find((container) => container.id === id);
     if (!container) return null;
     return container;
   };
@@ -503,7 +612,7 @@ export default function KanbanBoardNew({
           containers: newItems,
         };
       });
-      console.log({ newItems, containers });
+      // console.log({ newItems, containers });
     }
 
     // Handling item moving to another container
@@ -515,10 +624,11 @@ export default function KanbanBoardNew({
       active.id === over.id
     ) {
       const destinationContainer = findContainerByItemId(over.id);
-      // @ts-ignore
-      const issueStatusId = destinationContainer?.id.replace('container-', '');
-      // @ts-ignore
-      const issueId = active.id.replace('item-', '');
+      const issueStatusId = `${destinationContainer?.id}`.replace(
+        'container-',
+        ''
+      );
+      const issueId = `${active.id}`.replace('item-', '');
 
       updateIssue({
         variables: {
@@ -540,8 +650,10 @@ export default function KanbanBoardNew({
 
           let newItems = [...containers];
 
-          newItems[overContainerIndex].items[overitemIndex].status =
-            data.updateIssue.status;
+          newItems[overContainerIndex].items[overitemIndex].status = pick(
+            data.updateIssue.status,
+            ['id', 'name', 'projectId']
+          );
 
           setPageState((prevState) => {
             return {
@@ -742,6 +854,9 @@ export default function KanbanBoardNew({
                   id={container.id}
                   title={container.title}
                   key={container.id}
+                  issueIds={container.items.map((i) =>
+                    `${i.id}`.replace('item-', '')
+                  )}
                   onAddItem={() => {
                     setShowAddItemModal(true);
                     setPageState((prevState) => {
@@ -759,7 +874,6 @@ export default function KanbanBoardNew({
                           title={i.title}
                           id={i.id}
                           key={i.id}
-                          status={i.status}
                           project={getProjectInfo?.data?.project}
                         />
                       ))}
@@ -774,7 +888,6 @@ export default function KanbanBoardNew({
                 <Items
                   id={activeId}
                   title={findItemTitle(activeId)}
-                  status={findItemById(activeId)?.status}
                   project={getProjectInfo?.data?.project}
                 />
               )}
@@ -786,7 +899,6 @@ export default function KanbanBoardNew({
                       key={i.id}
                       title={i.title}
                       id={i.id}
-                      status={i.status}
                       project={getProjectInfo?.data?.project}
                     />
                   ))}

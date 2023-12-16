@@ -81,6 +81,7 @@ const typeDefs = gql`
     createdAt: String
     updatedAt: String
     priority: Int
+    archived: Boolean
     comments: [IssueComment]
     tags: [ProjectTag]
   }
@@ -195,6 +196,7 @@ const typeDefs = gql`
     title: String
     description: String
     priority: Int
+    archived: Boolean
     tagIds: [String]
   }
 

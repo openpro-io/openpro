@@ -227,7 +227,9 @@ fastify.get('/uploads/:file', async (request, reply) => {
 //   reply.send(buffer);
 // });
 
-fastify.ready().then(() => {
+fastify.ready((err) => {
+  if (err) throw err;
+
   socketInit(fastify.io);
 });
 

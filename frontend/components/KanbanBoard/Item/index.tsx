@@ -15,11 +15,10 @@ import { priorityToIcon } from '@/components/Icons';
 type ItemsType = {
   id: UniqueIdentifier;
   title: string;
-  status: any;
   project: any;
 };
 
-const Items = ({ id, title, status, project }: ItemsType) => {
+const Items = ({ id, title, project }: ItemsType) => {
   const pathname = usePathname();
   const searchParams = useSearchParams()!;
   const [isMouseDown, setIsMouseDown] = useState(false);
@@ -40,6 +39,14 @@ const Items = ({ id, title, status, project }: ItemsType) => {
 
   const issueId = `${id}`.replace('item-', '');
 
+  const { data: issueData } = useFragment({
+    fragment: ISSUE_FIELDS,
+    from: {
+      __typename: 'Issue',
+      id: issueId,
+    },
+  });
+
   const createQueryString = useCallback(
     (name: string, value: string) => {
       const params = new URLSearchParams(searchParams);
@@ -50,28 +57,20 @@ const Items = ({ id, title, status, project }: ItemsType) => {
     [searchParams]
   );
 
-  const { data } = useFragment({
-    fragment: ISSUE_FIELDS,
-    from: {
-      __typename: 'Issue',
-      id: issueId,
-    },
-  });
-
   const isFiltered = () => {
     if (searchParams.has('text')) {
-      return !data?.title
+      return !issueData?.title
         ?.toLowerCase()
         .includes(searchParams.get('text')?.toLowerCase() as string);
     }
 
     if (searchParams.has('tagIds')) {
       const tagIds = searchParams.get('tagIds')?.split(',');
-      return !data?.tags?.some((tag: any) => tagIds?.includes(tag?.id));
+      return !issueData?.tags?.some((tag: any) => tagIds?.includes(tag?.id));
     }
 
     if (searchParams.has('selectedUserId')) {
-      return data?.assignee?.id !== searchParams.get('selectedUserId');
+      return issueData?.assignee?.id !== searchParams.get('selectedUserId');
     }
   };
 
@@ -101,9 +100,9 @@ const Items = ({ id, title, status, project }: ItemsType) => {
         <div className='space-y-2'>
           <div className='text-sm'>{title}</div>
           <div className='max-w-full'>
-            {data?.tags && (
+            {issueData?.tags && (
               <div className='flex flex-wrap gap-1'>
-                {data?.tags?.map((tag: any) => (
+                {issueData?.tags?.map((tag: any) => (
                   <div
                     key={tag?.id}
                     className='rounded-md bg-neutral px-2 py-1 text-xs text-primary'
@@ -116,7 +115,9 @@ const Items = ({ id, title, status, project }: ItemsType) => {
           </div>
           <div
             className={classNames(
-              status?.name?.toLowerCase() === 'done' ? 'line-through' : '',
+              issueData?.status?.name?.toLowerCase() === 'done'
+                ? 'line-through'
+                : '',
               `flex items-center justify-between`
             )}
           >
@@ -128,13 +129,13 @@ const Items = ({ id, title, status, project }: ItemsType) => {
             </div>
 
             <div className='col-span-1 col-start-12 flex space-x-1 justify-self-end'>
-              {data.priority !== 3 && (
-                <div>{priorityToIcon(data.priority)}</div>
+              {issueData?.priority !== 3 && (
+                <div>{priorityToIcon(issueData?.priority)}</div>
               )}
 
               <div>
                 <Avatar
-                  person={formatUser(data?.assignee)}
+                  person={formatUser(issueData?.assignee)}
                   className='h-6 w-6 align-middle'
                 />
               </div>

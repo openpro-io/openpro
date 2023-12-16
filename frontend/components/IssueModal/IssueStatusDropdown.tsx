@@ -72,20 +72,20 @@ const IssueStatusDropdown = ({
   });
 
   // TODO: !! Fix this to just push to the end of the viewState array for the destination status column
-  useEffect(() => {
-    if (called && boardId) {
-      updateBoard({
-        variables: {
-          input: {
-            id: `${boardId}`,
-            viewState: [],
-          },
-        },
-      });
-
-      reset();
-    }
-  }, [called]);
+  // useEffect(() => {
+  //   if (called && boardId) {
+  //     updateBoard({
+  //       variables: {
+  //         input: {
+  //           id: `${boardId}`,
+  //           viewState: [],
+  //         },
+  //       },
+  //     });
+  //
+  //     reset();
+  //   }
+  // }, [called]);
 
   return (
     <Menu as='div' className='relative inline-block text-left'>

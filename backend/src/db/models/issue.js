@@ -60,6 +60,11 @@ export default (sequelize, DataTypes) => {
         field: 'priority',
         defaultValue: 3,
       },
+      archived: {
+        type: DataTypes.BOOLEAN,
+        field: 'archived',
+        defaultValue: false,
+      },
       createdAt: {
         field: 'created_at',
         type: DataTypes.DATE,
