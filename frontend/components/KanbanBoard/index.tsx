@@ -69,7 +69,14 @@ interface PageState {
   saveToBackend: boolean;
 }
 
-export default function KanbanBoardNew({
+const getIssueFragment = (issueId: string) => {
+  return apolloClient.readFragment({
+    id: `Issue:${issueId}`,
+    fragment: ISSUE_FIELDS,
+  });
+};
+
+export default function KanbanBoard({
   projectId,
   boardId,
 }: {
@@ -129,13 +136,6 @@ export default function KanbanBoardNew({
       setIsIssueModalOpen(false);
     }
   }, [selectedIssueId]);
-
-  const getIssueFragment = (issueId: string) => {
-    return apolloClient.readFragment({
-      id: `Issue:${issueId}`,
-      fragment: ISSUE_FIELDS,
-    });
-  };
 
   const onAddContainer = async () => {
     if (!containerName) return;
