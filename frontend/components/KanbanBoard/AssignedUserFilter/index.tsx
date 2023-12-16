@@ -55,6 +55,26 @@ const UserAvatarBubble = ({
       );
     }
 
+    // If no avatar, show initials if first and last name present
+    if (selectedPerson.firstName && selectedPerson.lastName) {
+      return (
+        <div
+          className={classNames(
+            disable && 'z-9 opacity-60',
+            'group relative z-99 cursor-pointer hover:z-999'
+          )}
+        >
+          <span className='ring-ring-surface-overlay inline-flex h-8 w-8 items-center justify-center rounded-full bg-surface-overlay ring-2'>
+            <span className='text-sm font-medium leading-none text-primary'>
+              {selectedPerson.firstName[0]}
+              {selectedPerson.lastName[0]}
+            </span>
+          </span>
+        </div>
+      );
+    }
+
+    // If no avatar and no first and last name, show icon
     return (
       <div
         className={classNames(

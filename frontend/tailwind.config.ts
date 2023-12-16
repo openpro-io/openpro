@@ -53,6 +53,10 @@ const config: Config = {
       'meta-7': '#FF6766',
       'meta-8': '#F0950C',
       'meta-9': '#E5E7EB',
+      'ring-surface-overlay': convertToRGB('--ring-color-surface-overlay'),
+      'ring-surface-overlay-hovered': convertToRGB(
+        '--ring-color-surface-overlay-hovered'
+      ),
       openProLight: {},
       openProDark: {},
       background: {
