@@ -183,17 +183,20 @@ services:
 
 ### Backend Environment Variables (`-e`)
 
-| Env                 | Description                                                                                                                          | Default | Required           |
-|---------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------|--------------------|
-| HTTP_PORT           | The port of the http server                                                                                                          | 8080    | :x:                |
-| SQL_URI             | This is a full URI for sql. Looks like `postgres://postgres:postgres@postgresql-db:5432/postgres`                                    |         | :heavy_check_mark: |
-| BUCKET_NAME         | The minio primary bucket used for storing assets.                                                                                    | uploads | :heavy_check_mark: |
-| USE_MINIO           | Should we use minio. There is a possibility to fallback to disk but its WIP.                                                         | 1       | :x:                |
-| MINIO_PORT          | The port for communication of asset transfer.                                                                                        | 9000    | :x:                |
-| MINIO_HOST          | The hostname for communication of asset transfer. Example is container name `openpro-minio`                                          |         | :heavy_check_mark: |
-| MINIO_ROOT_USER     | The username for communication of asset transfer. This can be an iam aws access key.                                                 |         | :heavy_check_mark: |
-| MINIO_ROOT_PASSWORD | The password for communication of asset transfer.This can be an iam aws secret key.                                                  |         | :heavy_check_mark: |
-| FRONTEND_HOSTNAME   | This tells the backend how to talk to the frontend. This is usually a container to container call. Example is `http://frontend:3000` |         | :heavy_check_mark: |
+| Env                      | Description                                                                                                                          | Default | Value Type | Required           |
+|--------------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------|------------|--------------------|
+| HTTP_PORT                | The port of the http server                                                                                                          | 8080    | number     | :x:                |
+| SQL_URI                  | This is a full URI for sql. Looks like `postgres://postgres:postgres@postgresql-db:5432/postgres`                                    |         | string     | :heavy_check_mark: |
+| BUCKET_NAME              | The minio primary bucket used for storing assets.                                                                                    | uploads | string     | :heavy_check_mark: |
+| USE_MINIO                | Should we use minio. There is a possibility to fallback to disk but its WIP.                                                         | 1       | boolean    | :x:                |
+| MINIO_PORT               | The port for communication of asset transfer.                                                                                        | 9000    | number     | :x:                |
+| MINIO_HOST               | The hostname for communication of asset transfer. Example is container name `openpro-minio`                                          |         | string     | :heavy_check_mark: |
+| MINIO_ROOT_USER          | The username for communication of asset transfer. This can be an iam aws access key.                                                 |         | string     | :heavy_check_mark: |
+| MINIO_ROOT_PASSWORD      | The password for communication of asset transfer.This can be an iam aws secret key.                                                  |         | string     | :heavy_check_mark: |
+| FRONTEND_HOSTNAME        | This tells the backend how to talk to the frontend. This is usually a container to container call. Example is `http://frontend:3000` |         | string     | :heavy_check_mark: |
+| ALLOW_SIGNUP             | If this is false then your site goes into invite only mode.                                                                          |         | boolean    | :x:                |
+| ALLOW_LOGIN_EMAILS_LIST  | A list of comma seperated emails to allow signing in. IE `a@abc.com,b@def.com`                                                       |         | string     | :x:                |
+| ALLOW_LOGIN_DOMAINS_LIST | A list of comma seperated domains to allow signing in. IE `abc.com,def.com`                                                          |         | string     | :x:                |
 
 ### Frontend Ports (`-p`)
 

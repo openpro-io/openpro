@@ -34,7 +34,8 @@
     "sinon-chai": "^3.7.0",
     "socket.io": "^4.7.2",
     "umzug": "^3.4.0",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "yn": "^5.0.0"
   },
   "devDependencies": {
     "chai": "^4.3.10",

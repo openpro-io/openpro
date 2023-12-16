@@ -3,7 +3,16 @@ import { ApolloServer } from '@apollo/server';
 import { fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
 import typeDefs from './type-defs.js';
 import resolvers from './resolvers.js';
-import { HTTP_PORT, BUCKET_NAME, CORS_ORIGIN, FRONTEND_HOSTNAME, ENABLE_FASTIFY_LOGGING } from './services/config.js';
+import {
+  HTTP_PORT,
+  BUCKET_NAME,
+  CORS_ORIGIN,
+  FRONTEND_HOSTNAME,
+  ENABLE_FASTIFY_LOGGING,
+  ALLOW_SIGNUP,
+  ALLOW_LOGIN_EMAILS_LIST,
+  ALLOW_LOGIN_DOMAINS_LIST,
+} from './services/config.js';
 import { db } from './db/index.js';
 import { GraphQLError } from 'graphql/error/index.js';
 import * as cors from '@fastify/cors';
@@ -94,6 +103,14 @@ const myContextFunction = async (request) => {
   const token = request.headers.authorization || '';
   let user = null;
 
+  // Allow if introspection query only
+  if (!Array.isArray(request.body) && request?.body?.query?.includes('IntrospectionQuery')) {
+    return {
+      db,
+      user,
+    };
+  }
+
   // TODO: maybe we dont make this optional
   if (token) {
     try {
@@ -102,11 +119,34 @@ const myContextFunction = async (request) => {
         headers: { Authorization: request.headers.authorization },
       });
 
+      // TODO: We can inject from DB here the whitelist domains and emails in addition to ENV vars
+
+      if (ALLOW_LOGIN_EMAILS_LIST.length > 0 && !ALLOW_LOGIN_EMAILS_LIST.includes(data.email)) {
+        throw new GraphQLError('Email is not allowed to login', {
+          extensions: {
+            code: 'UNAUTHENTICATED',
+            http: { status: 401 },
+          },
+        });
+      }
+
+      if (
+        ALLOW_LOGIN_DOMAINS_LIST.length > 0 &&
+        !ALLOW_LOGIN_DOMAINS_LIST.includes(data.email.split('@')[1].toLowerCase())
+      ) {
+        throw new GraphQLError('Email is not allowed to login', {
+          extensions: {
+            code: 'UNAUTHENTICATED',
+            http: { status: 401 },
+          },
+        });
+      }
+
       const externalId = `${data.provider}__${data.sub}`;
 
       user = await db.sequelize.models.User.findOne({ where: { externalId } });
 
-      if (!user) {
+      if (!user && ALLOW_SIGNUP) {
         try {
           const [firstName, lastName] = data.name.split(' ');
 
@@ -131,14 +171,6 @@ const myContextFunction = async (request) => {
         console.error({ e });
       }
     }
-  }
-
-  // Allow if introspection query only
-  if (!Array.isArray(request.body) && request?.body?.query?.includes('IntrospectionQuery')) {
-    return {
-      db,
-      user,
-    };
   }
 
   // optionally block the user
