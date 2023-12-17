@@ -16,7 +16,7 @@ const EditorRenderOnly = ({
     editorProps: {
       attributes: {
         class: classNames(
-          'prose min-w-full dark:prose-invert !focus:ring-0 prose-sm p-3 !focus:outline-none border-primary/20 rounded-b-lg hover:bg-gray-100',
+          'prose min-w-full dark:prose-invert !focus:ring-0 prose-sm p-3 !focus:outline-none border-primary/20 rounded-b-lg hover:bg-surface-overlay-hovered/70',
           className
         ),
       },
