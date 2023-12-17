@@ -51,9 +51,9 @@ export const ProtectedLayout = ({
   return <div className=''>{authorized && <>{children}</>}</div>;
 };
 
-const DEFAULT_LEFT_PANEL_MIN_SIZE = 1;
-const DEFAULT_LEFT_PANEL_DEFAULT_SIZE = 10;
-const DEFAULT_LEFT_PANEL_MAX_SIZE = 20;
+const DEFAULT_LEFT_PANEL_MIN_SIZE = 17;
+const DEFAULT_LEFT_PANEL_DEFAULT_SIZE = 17;
+const DEFAULT_LEFT_PANEL_MAX_SIZE = 30;
 
 // TODO: Lets make this way cleaner
 export default function MainLayout({
@@ -90,7 +90,6 @@ export default function MainLayout({
       <PanelGroup
         autoSaveId='react-resizable-panels-main-layout'
         direction='horizontal'
-        // onLayout={onLayout}
       >
         {/* @ts-ignore */}
         <Panel
@@ -102,7 +101,6 @@ export default function MainLayout({
         >
           <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         </Panel>
-        {/*<PanelResizeHandle className='z-10 -ml-1 w-1 hover:bg-blue-800' />*/}
         <ResizeHandle
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
