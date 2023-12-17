@@ -1,7 +1,7 @@
 'use client';
 
 import { EditorContent, useEditor } from '@tiptap/react';
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CoreEditorExtensions } from '@/components/Editor/extensions';
 import { findTableAncestor } from '@/components/Editor/utils';
 import { startImageUpload } from '@/components/Editor/plugins/upload-image';
@@ -9,9 +9,23 @@ import { ImageResizer } from '@/components/Editor/extensions/image/image-resize'
 import { useMutation } from '@apollo/client';
 import { UPLOAD_ASSET_MUTATION } from '@/gql/gql-queries-mutations';
 import { EditorToolbar } from '@/components/Editor/toolbar';
-import { NEXT_PUBLIC_API_URL } from '@/services/config';
+import { NEXT_PUBLIC_API_URL, PUBLIC_NEXTAUTH_URL } from '@/services/config';
+import { HocuspocusProvider } from '@hocuspocus/provider';
+import Collaboration from '@tiptap/extension-collaboration';
+import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
+import { useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { getUserColor } from '@/services/utils';
+import { classNames } from '@/services/utils';
+import axios from 'axios';
 
 export * as EditorRenderOnly from './EditorRenderOnly';
+
+const getToken = async () => {
+  const { data } = await axios.get(`${PUBLIC_NEXTAUTH_URL}/api/get-jwt`);
+
+  return data.token;
+};
 
 const Editor = ({
   onUpdateCallback,
@@ -20,9 +34,15 @@ const Editor = ({
   onUpdateCallback: (data: any) => void;
   defaultContent?: string;
 }) => {
-  const [isSubmitting, setIsSubmitting] = React.useState<any>();
-  const [shouldShowAlert, setShouldShowAlert] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = useState<any>();
+  const [shouldShowAlert, setShouldShowAlert] = useState(false);
   const [uploadAsset] = useMutation(UPLOAD_ASSET_MUTATION);
+  const [connected, setConnected] = useState(false);
+  const { data: userSession } = useSession();
+  // TODO: We want the issue ID for doc name. We may refactor this later
+  const searchParams = useSearchParams()!;
+  const params = new URLSearchParams(searchParams);
+  const selectedIssueId = params.get('selectedIssueId');
 
   const saveToServer = async (file: File) => {
     const fileExtension = file.type.split('/')[1];
@@ -62,8 +82,63 @@ const Editor = ({
     console.log('CANCEL IMAGE UPLOAD');
   };
 
+  // Set up the Hocuspocus WebSocket provider
+  const provider = useMemo(
+    () =>
+      new HocuspocusProvider({
+        url: `ws://${NEXT_PUBLIC_API_URL?.replace(
+          'http://',
+          ''
+        )}/collaboration`,
+        name: selectedIssueId ? `issue-${selectedIssueId}` : 'default-document',
+        token: getToken,
+        onConnect: () => setConnected(true),
+        onDisconnect: () => setConnected(false),
+        onStatus: (status) => {
+          if (['connecting', 'connected'].includes(status.status)) {
+            setConnected(true);
+          }
+          if (status.status === 'disconnected') setConnected(false);
+        },
+      }),
+    [selectedIssueId]
+  );
+
+  useEffect(() => {
+    // Remove the provider on component unmount
+    return () => {
+      provider.destroy();
+    };
+  }, []);
+
+  useEffect(() => {
+    const getCurrentlyViewingUsers = (event: any) => {
+      console.log('AWARENESS', event);
+    };
+
+    // Update status changes
+    provider.on('awarenessUpdate', getCurrentlyViewingUsers);
+
+    return () => {
+      provider.off('awarenessUpdate', getCurrentlyViewingUsers);
+    };
+  }, []);
+
   const editor = useEditor({
-    extensions: [...CoreEditorExtensions(deleteFile, cancelUploadImage)],
+    extensions: [
+      ...CoreEditorExtensions(deleteFile, cancelUploadImage),
+      Collaboration.configure({
+        document: provider.document,
+      }),
+      // Register the collaboration cursor extension
+      CollaborationCursor.configure({
+        provider: provider,
+        user: {
+          name: userSession?.user?.name,
+          color: getUserColor(`${userSession?.user?.id}`, 'hex'),
+        },
+      }),
+    ],
     onUpdate: ({ editor }) => {
       if (onUpdateCallback) onUpdateCallback(editor.getJSON());
 
@@ -165,6 +240,24 @@ const Editor = ({
           <ImageResizer editor={editor} />
         )}
       </EditorContent>
+      <div className='flex justify-between pb-1 pt-1 text-sm'>
+        <div>
+          <span
+            className={classNames(
+              connected ? 'text-green-500' : 'test-red-500',
+              'ml-1 mr-1'
+            )}
+          >
+            ●
+          </span>
+          {connected && editor
+            ? `${editor.storage.collaborationCursor.users.length} user${
+                editor.storage.collaborationCursor.users.length === 1 ? '' : 's'
+              } viewing this document`
+            : 'offline'}
+        </div>
+        <div>{userSession?.user?.name}</div>
+      </div>
     </div>
   );
 };

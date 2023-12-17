@@ -34,6 +34,7 @@ export const CoreEditorExtensions = (
   cancelUploadImage?: () => any
 ) => [
   StarterKit.configure({
+    history: false,
     bulletList: {
       HTMLAttributes: {
         class: 'list-disc list-outside leading-3 -mt-2',

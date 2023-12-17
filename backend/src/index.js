@@ -21,6 +21,8 @@ import processRequest from 'graphql-upload/processRequest.mjs';
 import { minioClient } from './services/minio-client.js';
 import fastifyIO from 'fastify-socket.io';
 import { socketInit } from './socket/index.js';
+import { Server } from '@hocuspocus/server';
+import { fastifyWebsocket } from '@fastify/websocket';
 
 const fastify = Fastify({
   logger: ENABLE_FASTIFY_LOGGING,
@@ -67,6 +69,50 @@ fastify.register(fastifyIO, {
   cors: {
     origin: ['localhost', CORS_ORIGIN, 'http://localhost:3000'],
   },
+});
+
+fastify.register(fastifyWebsocket, {
+  options: { maxPayload: 1048576 },
+});
+
+const hocuspocusServer = Server.configure({
+  port: HTTP_PORT,
+  address: '0.0.0.0',
+  async onAuthenticate(data) {
+    const { token } = data;
+
+    if (!token) {
+      console.warn('Throwing exception to tiptap user');
+      throw new Error('Not authorized!');
+    }
+
+    const {
+      data: { provider, sub },
+    } = await axios.get(`${FRONTEND_HOSTNAME}/api/verify-jwt`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const externalId = `${provider}__${sub}`;
+
+    const user = await db.sequelize.models.User.findOne({ where: { externalId } });
+
+    return {
+      user,
+    };
+  },
+});
+
+fastify.register(async function (fastify) {
+  fastify.get('/collaboration', { websocket: true }, (connection /* SocketStream */, req /* FastifyRequest */) => {
+    const context = {
+      user: {
+        id: 1234,
+        name: 'Jane',
+      },
+    };
+
+    hocuspocusServer.handleConnection(connection.socket, req, context);
+  });
 });
 
 // Handle all requests that have the `Content-Type` header set as multipart

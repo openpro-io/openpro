@@ -19,6 +19,8 @@
     "@apollo/server": "^4.9.5",
     "@as-integrations/fastify": "^2.1.1",
     "@fastify/cors": "^8.4.1",
+    "@fastify/websocket": "^8.3.0",
+    "@hocuspocus/server": "^2.8.1",
     "axios": "^1.6.0",
     "fastify": "^4.24.3",
     "fastify-graceful-shutdown": "^3.5.1",
@@ -36,6 +38,8 @@
     "socket.io": "^4.7.2",
     "umzug": "^3.4.0",
     "uuid": "^9.0.1",
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.10",
     "yn": "^5.0.0"
   },
   "devDependencies": {
