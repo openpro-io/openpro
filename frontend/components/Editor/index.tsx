@@ -86,10 +86,7 @@ const Editor = ({
   const provider = useMemo(
     () =>
       new HocuspocusProvider({
-        url: `ws://${NEXT_PUBLIC_API_URL?.replace(
-          'http://',
-          ''
-        )}/collaboration`,
+        url: `ws://${new URL(`${NEXT_PUBLIC_API_URL}`).host}/collaboration`,
         name: selectedIssueId ? `issue-${selectedIssueId}` : 'default-document',
         token: getToken,
         onConnect: () => setConnected(true),
