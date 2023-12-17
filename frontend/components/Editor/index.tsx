@@ -18,8 +18,10 @@ import { useSession } from 'next-auth/react';
 import { getUserColor } from '@/services/utils';
 import { classNames } from '@/services/utils';
 import axios from 'axios';
-
+import * as Y from 'yjs';
 export * as EditorRenderOnly from './EditorRenderOnly';
+
+const doc = new Y.Doc();
 
 const getToken = async () => {
   const { data } = await axios.get(`${PUBLIC_NEXTAUTH_URL}/api/get-jwt`);
@@ -92,6 +94,7 @@ const Editor = ({
             : 'ws'
         }://${new URL(`${NEXT_PUBLIC_API_URL}`).host}/collaboration`,
         name: selectedIssueId ? `issue-${selectedIssueId}` : 'default-document',
+        document: doc,
         token: getToken,
         onConnect: () => setConnected(true),
         onDisconnect: () => setConnected(false),
