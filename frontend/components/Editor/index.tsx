@@ -111,19 +111,6 @@ const Editor = ({
     };
   }, []);
 
-  useEffect(() => {
-    const getCurrentlyViewingUsers = (event: any) => {
-      console.log('AWARENESS', event);
-    };
-
-    // Update status changes
-    provider.on('awarenessUpdate', getCurrentlyViewingUsers);
-
-    return () => {
-      provider.off('awarenessUpdate', getCurrentlyViewingUsers);
-    };
-  }, []);
-
   const editor = useEditor({
     extensions: [
       ...CoreEditorExtensions(deleteFile, cancelUploadImage),
