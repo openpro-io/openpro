@@ -30,6 +30,10 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         field: 'comment',
       },
+      commentRaw: {
+        type: DataTypes.BLOB,
+        field: 'comment_raw',
+      },
       createdAt: {
         field: 'created_at',
         type: DataTypes.DATE,

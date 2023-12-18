@@ -95,26 +95,39 @@ const hocuspocusServer = Server.configure({
           return descriptionAsUnit8Array.length === 0 ? null : descriptionAsUnit8Array;
         }
 
-        // if (entityType === 'comment' && entityField === 'comment') {
-        // TODO: query issue comment by commentId
-        //   const comment = await db.sequelize.models.IssueComment.findOne({
-        //     where: {
-        //       id: entityId,
-        //     },
-        //   });
-        //
-        //   const commentAsUnit8Array = new Uint8Array(issue.commentRaw);
-        //   return commentAsUnit8Array.length === 0 ? null : commentAsUnit8Array;
-        // }
+        if (entityType === 'comment' && entityField === 'comment') {
+          const comment = await db.sequelize.models.IssueComment.findOne({
+            where: {
+              id: entityId,
+            },
+          });
+
+          if (!comment) return null;
+
+          const commentAsUnit8Array = new Uint8Array(comment.commentRaw);
+          return commentAsUnit8Array.length === 0 ? null : commentAsUnit8Array;
+        }
       },
       store: async ({ documentName, state }) => {
         const [entityType, entityId, entityField] = documentName.split('.');
 
-        // TODO: we more types like comments
         if (entityType === 'issue' && entityField === 'description') {
           await db.sequelize.models.Issue.update(
             {
               descriptionRaw: state,
+            },
+            {
+              where: {
+                id: entityId,
+              },
+            }
+          );
+        }
+
+        if (entityType === 'comment' && entityField === 'comment') {
+          await db.sequelize.models.IssueComment.update(
+            {
+              commentRaw: state,
             },
             {
               where: {

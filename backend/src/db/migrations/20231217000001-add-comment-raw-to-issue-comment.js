@@ -1,7 +1,7 @@
 'use strict';
 
-const TABLE_NAME = 'issues';
-const COLUMN_NAME = 'description_raw';
+const TABLE_NAME = 'issue_comments';
+const COLUMN_NAME = 'comment_raw';
 
 /** @type {import('sequelize-cli').Migration} */
 export default {

@@ -51,13 +51,15 @@ export const IssueCommentEditorTipTap = ({
     setEditorContent(data);
   };
 
+  // comment.0.comment is set because this currently is always a NEW comment which has no ID yet
+  // TODO: lets adjust this to be more dynamic and adapt to the current comment ID
   return (
     <div className='flex gap-1 pb-10'>
       <Avatar person={getMe?.data?.me} className='h-8 w-8' />
       <div className='flex-1 flex-col'>
         {showEditor && (
           <Editor
-            documentName={`issue.${selectedIssueId}.comment`}
+            documentName={`comment.0.comment`}
             onUpdateCallback={onUpdateCallback}
           />
         )}
