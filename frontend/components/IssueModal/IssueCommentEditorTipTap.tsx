@@ -51,12 +51,6 @@ export const IssueCommentEditorTipTap = ({
     setEditorContent(data);
   };
 
-  useEffect(() => {
-    if (!editorContent) return;
-
-    console.log({ editorContent });
-  }, [editorContent]);
-
   return (
     <div className='flex gap-1 pb-10'>
       <Avatar person={getMe?.data?.me} className='h-8 w-8' />

@@ -54,12 +54,6 @@ export const IssueDescription = ({ issueId }: { issueId?: string }) => {
     setEditorContent(data);
   };
 
-  useEffect(() => {
-    if (!editorContent) return;
-
-    console.log({ editorContent });
-  }, [editorContent]);
-
   return (
     <div className='pb-10 pt-10'>
       <div className='pb-5 text-2xl'>Description</div>
