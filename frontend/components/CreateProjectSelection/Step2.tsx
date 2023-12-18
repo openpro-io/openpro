@@ -14,7 +14,6 @@ const createProjectValidationQuery = async ({
   name?: string;
   key?: string;
 }) => {
-  console.log({ name, key });
   const response = await apolloClient.query({
     fetchPolicy: 'network-only',
     query: CREATE_PROJECT_VALIDATION_QUERY,
