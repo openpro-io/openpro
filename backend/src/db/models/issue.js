@@ -55,6 +55,10 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         field: 'description',
       },
+      descriptionRaw: {
+        type: DataTypes.BLOB,
+        field: 'description_raw',
+      },
       priority: {
         type: DataTypes.INTEGER,
         field: 'priority',

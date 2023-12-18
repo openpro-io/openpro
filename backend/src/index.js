@@ -23,6 +23,7 @@ import fastifyIO from 'fastify-socket.io';
 import { socketInit } from './socket/index.js';
 import { Server } from '@hocuspocus/server';
 import { fastifyWebsocket } from '@fastify/websocket';
+import { Database } from '@hocuspocus/extension-database';
 
 const fastify = Fastify({
   logger: ENABLE_FASTIFY_LOGGING,
@@ -78,6 +79,53 @@ fastify.register(fastifyWebsocket, {
 const hocuspocusServer = Server.configure({
   port: HTTP_PORT,
   address: '0.0.0.0',
+  extensions: [
+    new Database({
+      fetch: async ({ documentName }) => {
+        const [entityType, entityId, entityField] = documentName.split('.');
+
+        if (entityType === 'issue' && entityField === 'description') {
+          const issue = await db.sequelize.models.Issue.findOne({
+            where: {
+              id: entityId,
+            },
+          });
+
+          const descriptionAsUnit8Array = new Uint8Array(issue.descriptionRaw);
+          return descriptionAsUnit8Array.length === 0 ? null : descriptionAsUnit8Array;
+        }
+
+        // if (entityType === 'comment' && entityField === 'comment') {
+        // TODO: query issue comment by commentId
+        //   const comment = await db.sequelize.models.IssueComment.findOne({
+        //     where: {
+        //       id: entityId,
+        //     },
+        //   });
+        //
+        //   const commentAsUnit8Array = new Uint8Array(issue.commentRaw);
+        //   return commentAsUnit8Array.length === 0 ? null : commentAsUnit8Array;
+        // }
+      },
+      store: async ({ documentName, state }) => {
+        const [entityType, entityId, entityField] = documentName.split('.');
+
+        // TODO: we more types like comments
+        if (entityType === 'issue' && entityField === 'description') {
+          await db.sequelize.models.Issue.update(
+            {
+              descriptionRaw: state,
+            },
+            {
+              where: {
+                id: entityId,
+              },
+            }
+          );
+        }
+      },
+    }),
+  ],
   async onAuthenticate(data) {
     const { token } = data;
 

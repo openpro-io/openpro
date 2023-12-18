@@ -55,7 +55,12 @@ export const IssueCommentEditorTipTap = ({
     <div className='flex gap-1 pb-10'>
       <Avatar person={getMe?.data?.me} className='h-8 w-8' />
       <div className='flex-1 flex-col'>
-        {showEditor && <Editor onUpdateCallback={onUpdateCallback} />}
+        {showEditor && (
+          <Editor
+            documentName={`issue.${selectedIssueId}.comment`}
+            onUpdateCallback={onUpdateCallback}
+          />
+        )}
         {/* COMPONENT HERE */}
         {!showEditor && (
           <article

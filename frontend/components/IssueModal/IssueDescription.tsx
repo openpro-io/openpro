@@ -57,12 +57,6 @@ export const IssueDescription = ({ issueId }: { issueId?: string }) => {
   return (
     <div className='pb-10 pt-10'>
       <div className='pb-5 text-2xl'>Description</div>
-      {showEditor && (
-        <Editor
-          onUpdateCallback={onUpdateCallback}
-          defaultContent={defaultContent}
-        />
-      )}
       {!showEditor && (
         <div onClick={() => setShowEditor(true)}>
           {!defaultContent && (
@@ -78,36 +72,43 @@ export const IssueDescription = ({ issueId }: { issueId?: string }) => {
       )}
 
       {showEditor && (
-        <div className='gap-x-1 pb-10'>
-          <Button
-            text='Cancel'
-            variant='transparent'
-            onClick={() => {
-              if (!selectedIssueId) return;
-              setShowEditor(false);
-            }}
-            classes='float-right mt-2 shadow-none hover:bg-gray-400 hover:bg-opacity-10'
+        <>
+          <Editor
+            onUpdateCallback={onUpdateCallback}
+            defaultContent={defaultContent}
+            documentName={`issue.${selectedIssueId}.description`}
           />
-
-          <Button
-            text='Save'
-            onClick={() => {
-              if (!selectedIssueId) return;
-
-              updateDescription({
-                variables: {
-                  input: {
-                    id: selectedIssueId,
-                    description: JSON.stringify(editorContent),
-                  },
-                },
-              }).then(() => {
+          <div className='gap-x-1 pb-10'>
+            <Button
+              text='Cancel'
+              variant='transparent'
+              onClick={() => {
+                if (!selectedIssueId) return;
                 setShowEditor(false);
-              });
-            }}
-            classes='float-right mt-2'
-          />
-        </div>
+              }}
+              classes='float-right mt-2 shadow-none hover:bg-gray-400 hover:bg-opacity-10'
+            />
+
+            <Button
+              text='Save'
+              onClick={() => {
+                if (!selectedIssueId) return;
+
+                updateDescription({
+                  variables: {
+                    input: {
+                      id: selectedIssueId,
+                      description: JSON.stringify(editorContent),
+                    },
+                  },
+                }).then(() => {
+                  setShowEditor(false);
+                });
+              }}
+              classes='float-right mt-2'
+            />
+          </div>
+        </>
       )}
     </div>
   );

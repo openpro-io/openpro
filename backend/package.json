@@ -20,6 +20,7 @@
     "@as-integrations/fastify": "^2.1.1",
     "@fastify/cors": "^8.4.1",
     "@fastify/websocket": "^8.3.0",
+    "@hocuspocus/extension-database": "^2.8.1",
     "@hocuspocus/server": "^2.8.1",
     "axios": "^1.6.0",
     "fastify": "^4.24.3",
