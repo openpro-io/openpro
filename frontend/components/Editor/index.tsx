@@ -36,14 +36,9 @@ const Editor = ({
   documentName?: string;
 }) => {
   const [isSubmitting, setIsSubmitting] = useState<any>();
-  const [shouldShowAlert, setShouldShowAlert] = useState(false);
   const [uploadAsset] = useMutation(UPLOAD_ASSET_MUTATION);
   const [connected, setConnected] = useState(false);
   const { data: userSession } = useSession();
-  // TODO: We want the issue ID for doc name. We may refactor this later
-  const searchParams = useSearchParams()!;
-  const params = new URLSearchParams(searchParams);
-  const selectedIssueId = params.get('selectedIssueId');
 
   const saveToServer = async (file: File) => {
     const fileExtension = file.type.split('/')[1];
@@ -83,7 +78,6 @@ const Editor = ({
     console.log('CANCEL IMAGE UPLOAD');
   };
 
-  // Set up the Hocuspocus WebSocket provider
   const provider = useMemo(() => {
     return new HocuspocusProvider({
       url: `${
@@ -118,7 +112,6 @@ const Editor = ({
       Collaboration.configure({
         document: provider.document,
       }),
-      // Register the collaboration cursor extension
       CollaborationCursor.configure({
         provider: provider,
         user: {
@@ -129,11 +122,6 @@ const Editor = ({
     ],
     onUpdate: ({ editor }) => {
       if (onUpdateCallback) onUpdateCallback(editor.getJSON());
-
-      // for instant feedback loop
-      setIsSubmitting?.('submitting');
-      setShouldShowAlert?.(true);
-      // onChange?.(editor.getJSON(), getTrimmedHTML(editor.getHTML()));
     },
     editorProps: {
       handleDOMEvents: {
@@ -214,6 +202,10 @@ const Editor = ({
     // content: defaultContent ?? '',
   });
 
+  const userCount = editor?.storage.collaborationCursor.users.filter(
+    (u: any) => u.name
+  ).length;
+
   return (
     <div>
       <section className='flex h-14 flex-wrap items-center border-l border-r border-t border-primary/20 bg-editor-toolbar pb-2 pl-5 pr-2 pt-2'>
@@ -239,8 +231,8 @@ const Editor = ({
             ●
           </span>
           {connected && editor
-            ? `${editor.storage.collaborationCursor.users.length} user${
-                editor.storage.collaborationCursor.users.length === 1 ? '' : 's'
+            ? `${userCount} user${
+                userCount === 1 ? '' : 's'
               } viewing this document`
             : 'offline'}
         </div>
