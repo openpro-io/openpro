@@ -59,7 +59,7 @@ export const IssueCommentEditorTipTap = ({
       <div className='flex-1 flex-col'>
         {showEditor && (
           <Editor
-            documentName={`comment.0.comment`}
+            documentName={`issueComment.0.comment`}
             onUpdateCallback={onUpdateCallback}
           />
         )}

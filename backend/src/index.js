@@ -95,7 +95,7 @@ const hocuspocusServer = Server.configure({
           return descriptionAsUnit8Array.length === 0 ? null : descriptionAsUnit8Array;
         }
 
-        if (entityType === 'comment' && entityField === 'comment') {
+        if (entityType === 'issueComment' && entityField === 'comment') {
           const comment = await db.sequelize.models.IssueComment.findOne({
             where: {
               id: entityId,
@@ -124,7 +124,7 @@ const hocuspocusServer = Server.configure({
           );
         }
 
-        if (entityType === 'comment' && entityField === 'comment') {
+        if (entityType === 'issueComment' && entityField === 'comment') {
           await db.sequelize.models.IssueComment.update(
             {
               commentRaw: state,
