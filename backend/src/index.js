@@ -83,6 +83,7 @@ const hocuspocusServer = Server.configure({
     new Database({
       fetch: async ({ documentName }) => {
         const [entityType, entityId, entityField] = documentName.split('.');
+        console.log({ action: 'Fetching tiptap document', documentName, entityType, entityId, entityField });
 
         if (entityType === 'issue' && entityField === 'description') {
           const issue = await db.sequelize.models.Issue.findOne({
@@ -209,6 +210,8 @@ const myContextFunction = async (request) => {
   // get the user token from the headers
   const token = request.headers.authorization || '';
   let user = null;
+
+  return { db, user };
 
   // Allow if introspection query only
   if (!Array.isArray(request.body) && request?.body?.query?.includes('IntrospectionQuery')) {
