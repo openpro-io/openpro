@@ -84,6 +84,10 @@ const typeDefs = gql`
     archived: Boolean
     comments: [IssueComment]
     tags: [ProjectTag]
+
+    links: [Issue]
+    linkType: String
+    linkedIssueId: String
   }
 
   type Column {

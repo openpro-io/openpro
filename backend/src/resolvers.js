@@ -485,6 +485,19 @@ const resolvers = {
       if (searchOperator === 'or') queryOperator = Op.or;
 
       return db.sequelize.models.Issue.findAll({
+        include: [
+          {
+            model: db.sequelize.models.Issue,
+            as: 'linkedIssues',
+            through: {
+              attributes: [
+                ['issue_id', 'issueId'],
+                ['linked_issue_id', 'linkedIssueId'],
+                ['link_type', 'linkType'],
+              ],
+            },
+          },
+        ],
         where: {
           [queryOperator]: whereOr,
         },

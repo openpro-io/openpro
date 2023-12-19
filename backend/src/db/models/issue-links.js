@@ -56,10 +56,5 @@ export default (sequelize, DataTypes) => {
     }
   );
 
-  IssueLink.associate = ({ Issue }) => {
-    IssueLink.belongsTo(Issue, { foreignKey: 'issue_id' });
-    IssueLink.belongsTo(Issue, { foreignKey: 'linked_issue_id' });
-  };
-
   return IssueLink;
 };
