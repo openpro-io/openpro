@@ -1,7 +1,6 @@
 name: Codium-AI PR Agent
 env:
   PR_REVIEWER.REQUIRE_TESTS_REVIEW: "false"
-  PR_CODE_SUGGESTIONS.NUM_CODE_SUGGESTIONS: 1
 on:
   pull_request:
   issue_comment:
