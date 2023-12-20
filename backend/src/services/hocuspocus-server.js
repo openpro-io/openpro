@@ -12,7 +12,6 @@ const hocuspocusServer = Server.configure({
       fetch: ({ documentName }) => {
         return new Promise(async (resolve, reject) => {
           const [entityType, entityId, entityField] = documentName.split('.');
-          console.log({ action: 'Fetching tiptap document', documentName, entityType, entityId, entityField });
 
           if (entityType === 'issue' && entityField === 'description') {
             let issue = null;
@@ -30,7 +29,6 @@ const hocuspocusServer = Server.configure({
             if (!issue || !issue?.descriptionRaw) resolve(null);
 
             const descriptionAsUnit8Array = new Uint8Array(issue.descriptionRaw);
-            console.log({ descriptionAsUnit8Array, issue });
             resolve(descriptionAsUnit8Array.length === 0 ? null : descriptionAsUnit8Array);
           }
 
@@ -95,13 +93,10 @@ const hocuspocusServer = Server.configure({
       verifyJwt = await axios.get(`${FRONTEND_HOSTNAME}/api/verify-jwt`, {
         headers: {
           authorization: `Bearer ${token}`,
-          cookie: data.requestHeaders.cookie,
-          'user-agent': data.requestHeaders['user-agent'],
         },
       });
     } catch (e) {
-      console.error({ onAuthenticated: true, e });
-      throw new Error('Unable to verify!');
+      throw new Error('Unable to verify tiptap user!');
     }
 
     const {
@@ -111,8 +106,6 @@ const hocuspocusServer = Server.configure({
     const externalId = `${provider}__${sub}`;
 
     const user = await db.sequelize.models.User.findOne({ where: { externalId } });
-
-    console.log({ hocuspocusOnAuth: true, user: user ? user.toJSON() : null });
 
     return {
       user: user ? user.toJSON() : null,
