@@ -23,6 +23,10 @@ const IssueLinkedIssues = ({
     variables: { input: { id: issueId } },
   });
 
+  if (error) {
+    return <div>Error loading linked issues</div>;
+  }
+
   const links: Links = data?.issue?.links
     ? groupBy(data.issue.links, 'linkType')
     : {};
