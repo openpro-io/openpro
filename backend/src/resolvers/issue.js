@@ -1,12 +1,12 @@
 export const issueResolvers = {
   links: async (parent, args, { db }) => {
     return [
-      ...parent.linkedToIssues.map((issue) => ({
+      ...parent.linkedToIssues?.map((issue) => ({
         ...issue.toJSON(),
         linkType: issue.IssueLinks.linkType,
         linkedIssueId: parent.id,
       })),
-      ...parent.linkedByIssues.map((issue) => ({
+      ...parent.linkedByIssues?.map((issue) => ({
         ...issue.toJSON(),
         linkType: issue.IssueLinks.linkTypeInverted,
         linkedIssueId: parent.id,

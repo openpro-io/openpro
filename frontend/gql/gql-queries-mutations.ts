@@ -121,6 +121,11 @@ export const GET_ISSUE_QUERY = gql(/* GraphQL */ `
   query GetIssue($input: QueryIssueInput) {
     issue(input: $input) {
       ...IssueFields
+      links {
+        ...IssueFields
+        linkType
+        linkedIssueId
+      }
     }
   }
 `);
