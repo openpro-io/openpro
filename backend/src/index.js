@@ -93,6 +93,7 @@ const hocuspocusServer = Server.configure({
           });
 
           const descriptionAsUnit8Array = new Uint8Array(issue.descriptionRaw);
+          console.log({ descriptionAsUnit8Array, issue });
           return descriptionAsUnit8Array.length === 0 ? null : descriptionAsUnit8Array;
         }
 
