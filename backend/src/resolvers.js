@@ -488,7 +488,18 @@ const resolvers = {
         include: [
           {
             model: db.sequelize.models.Issue,
-            as: 'linkedIssues',
+            as: 'linkedToIssues',
+            through: {
+              attributes: [
+                ['issue_id', 'issueId'],
+                ['linked_issue_id', 'linkedIssueId'],
+                ['link_type', 'linkType'],
+              ],
+            },
+          },
+          {
+            model: db.sequelize.models.Issue,
+            as: 'linkedByIssues',
             through: {
               attributes: [
                 ['issue_id', 'issueId'],

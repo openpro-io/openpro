@@ -1,6 +1,16 @@
 'use strict';
 
 export default (sequelize, DataTypes) => {
+  const inverseLinkType = {
+    blocks: 'blocked_by',
+    blocked_by: 'blocks',
+    duplicates: 'duplicated_by',
+    duplicated_by: 'duplicates',
+    relates_to: 'relates_to',
+    clones: 'is_cloned_by',
+    is_cloned_by: 'clones',
+  };
+
   const IssueLink = sequelize.define(
     'IssueLinks',
     {
@@ -22,7 +32,13 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         field: 'link_type',
         validate: {
-          isIn: [['blocks', 'blocked_by', 'relates_to', 'duplicates', 'duplicated_by', 'clones', 'is_cloned_by']],
+          isIn: [Object.keys(inverseLinkType)],
+        },
+      },
+      linkTypeInverted: {
+        type: DataTypes.STRING,
+        get() {
+          return inverseLinkType?.[this.getDataValue('linkType')];
         },
       },
       linkedIssueId: {
@@ -55,6 +71,8 @@ export default (sequelize, DataTypes) => {
       ],
     }
   );
+
+  IssueLink.inverseLinkType = inverseLinkType;
 
   return IssueLink;
 };

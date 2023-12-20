@@ -1,13 +1,17 @@
 export const issueResolvers = {
   links: async (parent, args, { db }) => {
-    return parent.linkedIssues.map((issue) => {
-      // TODO: omit issue.IssueLinks in final response
-      return {
+    return [
+      ...parent.linkedToIssues.map((issue) => ({
         ...issue.toJSON(),
         linkType: issue.IssueLinks.linkType,
         linkedIssueId: parent.id,
-      };
-    });
+      })),
+      ...parent.linkedByIssues.map((issue) => ({
+        ...issue.toJSON(),
+        linkType: issue.IssueLinks.linkTypeInverted,
+        linkedIssueId: parent.id,
+      })),
+    ];
   },
   tags: async (parent, args, { db }) => {
     const issueTags = await db.sequelize.models.IssueTag.findAll({ where: { issueId: parent.id } });

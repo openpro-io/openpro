@@ -102,7 +102,13 @@ export default (sequelize, DataTypes) => {
       through: IssueLinks,
       foreignKey: 'issue_id',
       otherKey: 'linked_issue_id',
-      as: 'linkedIssues',
+      as: 'linkedToIssues',
+    });
+    Issue.belongsToMany(Issue, {
+      through: IssueLinks,
+      foreignKey: 'linked_issue_id',
+      otherKey: 'issue_id',
+      as: 'linkedByIssues',
     });
   };
 
