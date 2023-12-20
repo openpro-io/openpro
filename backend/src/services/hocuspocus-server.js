@@ -1,7 +1,8 @@
 import { Server } from '@hocuspocus/server';
-import { HTTP_PORT } from './config.js';
+import { FRONTEND_HOSTNAME, HTTP_PORT } from './config.js';
 import { Database } from '@hocuspocus/extension-database';
 import { db } from '../db/index.js';
+import axios from 'axios';
 
 const hocuspocusServer = Server.configure({
   port: HTTP_PORT,
@@ -80,28 +81,42 @@ const hocuspocusServer = Server.configure({
       },
     }),
   ],
-  // async onAuthenticate(data) {
-  //   const { token } = data;
-  //
-  //   if (!token) {
-  //     console.warn('Throwing exception to tiptap user');
-  //     throw new Error('Not authorized!');
-  //   }
-  //
-  //   const {
-  //     data: { provider, sub },
-  //   } = await axios.get(`${FRONTEND_HOSTNAME}/api/verify-jwt`, {
-  //     headers: { Authorization: `Bearer ${token}` },
-  //   });
-  //
-  //   const externalId = `${provider}__${sub}`;
-  //
-  //   const user = await db.sequelize.models.User.findOne({ where: { externalId } });
-  //
-  //   return {
-  //     user,
-  //   };
-  // },
+  async onAuthenticate(data) {
+    const { token } = data;
+
+    if (!token) {
+      console.warn('Throwing exception to tiptap user');
+      throw new Error('Not authorized!');
+    }
+
+    let verifyJwt = {};
+
+    try {
+      verifyJwt = await axios.get(`${FRONTEND_HOSTNAME}/api/verify-jwt`, {
+        headers: {
+          cookie: data.requestHeaders.cookie,
+          'user-agent': data.requestHeaders['user-agent'],
+        },
+      });
+    } catch (e) {
+      console.error({ onAuthenticated: true, e });
+      throw new Error('Unable to verify!');
+    }
+
+    const {
+      data: { provider, sub },
+    } = verifyJwt;
+
+    const externalId = `${provider}__${sub}`;
+
+    const user = await db.sequelize.models.User.findOne({ where: { externalId } });
+
+    console.log({ hocuspocusOnAuth: true, user: user ? user.toJSON() : null });
+
+    return {
+      user: user ? user.toJSON() : null,
+    };
+  },
 });
 
 export default hocuspocusServer;
