@@ -84,6 +84,10 @@ const typeDefs = gql`
     archived: Boolean
     comments: [IssueComment]
     tags: [ProjectTag]
+
+    links: [Issue]
+    linkType: String
+    linkedIssueId: String
   }
 
   type Column {
@@ -175,6 +179,8 @@ const typeDefs = gql`
   input QueryIssueInput {
     id: String
     projectId: String
+    search: String
+    searchOperator: String
     sortBy: [SortBy]
   }
 

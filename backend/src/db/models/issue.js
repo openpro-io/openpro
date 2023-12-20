@@ -1,7 +1,5 @@
 'use strict';
 
-import IssueStatuses from './issue-statuses.js';
-
 export default (sequelize, DataTypes) => {
   const Issue = sequelize.define(
     'Issue',
@@ -69,6 +67,10 @@ export default (sequelize, DataTypes) => {
         field: 'archived',
         defaultValue: false,
       },
+      parentId: {
+        type: DataTypes.INTEGER,
+        field: 'parent_id',
+      },
       createdAt: {
         field: 'created_at',
         type: DataTypes.DATE,
@@ -93,9 +95,21 @@ export default (sequelize, DataTypes) => {
     }
   );
 
-  Issue.associate = ({ IssueComment, IssueBoard, IssueStatuses }) => {
+  Issue.associate = ({ IssueComment, IssueBoard, IssueLinks, Issue }) => {
     Issue.hasMany(IssueComment, { foreignKey: 'issue_id', onDelete: 'CASCADE' });
     Issue.hasMany(IssueBoard, { foreignKey: 'issue_id', onDelete: 'CASCADE' });
+    Issue.belongsToMany(Issue, {
+      through: IssueLinks,
+      foreignKey: 'issue_id',
+      otherKey: 'linked_issue_id',
+      as: 'linkedToIssues',
+    });
+    Issue.belongsToMany(Issue, {
+      through: IssueLinks,
+      foreignKey: 'linked_issue_id',
+      otherKey: 'issue_id',
+      as: 'linkedByIssues',
+    });
   };
 
   return Issue;

@@ -133,6 +133,9 @@ export type Issue = {
   createdAt?: Maybe<Scalars['String']['output']>;
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  linkType?: Maybe<Scalars['String']['output']>;
+  linkedIssueId?: Maybe<Scalars['String']['output']>;
+  links?: Maybe<Array<Maybe<Issue>>>;
   priority?: Maybe<Scalars['Int']['output']>;
   projectId?: Maybe<Scalars['String']['output']>;
   reporter?: Maybe<User>;

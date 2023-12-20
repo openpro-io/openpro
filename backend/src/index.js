@@ -114,7 +114,7 @@ await apollo.start();
 
 const myContextFunction = async (request) => {
   // get the user token from the headers
-  const token = request.headers.authorization || '';
+  const token = request.headers.authorization;
   let user = null;
 
   // Allow if introspection query only
