@@ -19,6 +19,7 @@ import { getUserColor } from '@/services/utils';
 import { classNames } from '@/services/utils';
 import axios from 'axios';
 export * as EditorRenderOnly from './EditorRenderOnly';
+import * as Y from 'yjs';
 
 const getToken = async () => {
   const { data } = await axios.get(`${PUBLIC_NEXTAUTH_URL}/api/get-jwt`);
@@ -86,7 +87,7 @@ const Editor = ({
           : 'ws'
       }://${new URL(`${NEXT_PUBLIC_API_URL}`).host}/collaboration`,
       name: documentName ?? 'default-document',
-      // document: new Y.Doc(),
+      document: new Y.Doc(),
       token: getToken,
       onConnect: () => setConnected(true),
       onDisconnect: () => setConnected(false),
