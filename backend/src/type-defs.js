@@ -179,6 +179,8 @@ const typeDefs = gql`
   input QueryIssueInput {
     id: String
     projectId: String
+    search: String
+    searchOperator: String
     sortBy: [SortBy]
   }
 
