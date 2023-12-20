@@ -81,34 +81,40 @@ const hocuspocusServer = Server.configure({
   address: '0.0.0.0',
   extensions: [
     new Database({
-      fetch: async ({ documentName }) => {
-        const [entityType, entityId, entityField] = documentName.split('.');
-        console.log({ action: 'Fetching tiptap document', documentName, entityType, entityId, entityField });
+      fetch: ({ documentName }) => {
+        return new Promise(async (resolve, reject) => {
+          const [entityType, entityId, entityField] = documentName.split('.');
+          console.log({ action: 'Fetching tiptap document', documentName, entityType, entityId, entityField });
 
-        if (entityType === 'issue' && entityField === 'description') {
-          const issue = await db.sequelize.models.Issue.findOne({
-            where: {
-              id: entityId,
-            },
-          });
+          if (entityType === 'issue' && entityField === 'description') {
+            const issue = await db.sequelize.models.Issue.findOne({
+              where: {
+                id: entityId,
+              },
+            });
 
-          const descriptionAsUnit8Array = new Uint8Array(issue.descriptionRaw);
-          console.log({ descriptionAsUnit8Array, issue });
-          return descriptionAsUnit8Array.length === 0 ? null : descriptionAsUnit8Array;
-        }
+            if (!issue) resolve(null);
 
-        if (entityType === 'issueComment' && entityField === 'comment') {
-          const comment = await db.sequelize.models.IssueComment.findOne({
-            where: {
-              id: entityId,
-            },
-          });
+            const descriptionAsUnit8Array = new Uint8Array(issue.descriptionRaw);
+            console.log({ descriptionAsUnit8Array, issue });
+            resolve(descriptionAsUnit8Array.length === 0 ? null : descriptionAsUnit8Array);
+          }
 
-          if (!comment) return null;
+          if (entityType === 'issueComment' && entityField === 'comment') {
+            const comment = await db.sequelize.models.IssueComment.findOne({
+              where: {
+                id: entityId,
+              },
+            });
 
-          const commentAsUnit8Array = new Uint8Array(comment.commentRaw);
-          return commentAsUnit8Array.length === 0 ? null : commentAsUnit8Array;
-        }
+            if (!comment) resolve(null);
+
+            const commentAsUnit8Array = new Uint8Array(comment.commentRaw);
+            resolve(commentAsUnit8Array.length === 0 ? null : commentAsUnit8Array);
+          }
+
+          resolve(null);
+        });
       },
       store: async ({ documentName, state }) => {
         const [entityType, entityId, entityField] = documentName.split('.');
