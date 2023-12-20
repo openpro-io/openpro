@@ -87,13 +87,19 @@ const hocuspocusServer = Server.configure({
           console.log({ action: 'Fetching tiptap document', documentName, entityType, entityId, entityField });
 
           if (entityType === 'issue' && entityField === 'description') {
-            const issue = await db.sequelize.models.Issue.findOne({
-              where: {
-                id: entityId,
-              },
-            });
+            let issue = null;
 
-            if (!issue) resolve(null);
+            try {
+              issue = await db.sequelize.models.Issue.findOne({
+                where: {
+                  id: entityId,
+                },
+              });
+            } catch (e) {
+              reject(e);
+            }
+
+            if (!issue || !issue?.descriptionRaw) resolve(null);
 
             const descriptionAsUnit8Array = new Uint8Array(issue.descriptionRaw);
             console.log({ descriptionAsUnit8Array, issue });
@@ -147,28 +153,28 @@ const hocuspocusServer = Server.configure({
       },
     }),
   ],
-  async onAuthenticate(data) {
-    const { token } = data;
-
-    if (!token) {
-      console.warn('Throwing exception to tiptap user');
-      throw new Error('Not authorized!');
-    }
-
-    const {
-      data: { provider, sub },
-    } = await axios.get(`${FRONTEND_HOSTNAME}/api/verify-jwt`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const externalId = `${provider}__${sub}`;
-
-    const user = await db.sequelize.models.User.findOne({ where: { externalId } });
-
-    return {
-      user,
-    };
-  },
+  // async onAuthenticate(data) {
+  //   const { token } = data;
+  //
+  //   if (!token) {
+  //     console.warn('Throwing exception to tiptap user');
+  //     throw new Error('Not authorized!');
+  //   }
+  //
+  //   const {
+  //     data: { provider, sub },
+  //   } = await axios.get(`${FRONTEND_HOSTNAME}/api/verify-jwt`, {
+  //     headers: { Authorization: `Bearer ${token}` },
+  //   });
+  //
+  //   const externalId = `${provider}__${sub}`;
+  //
+  //   const user = await db.sequelize.models.User.findOne({ where: { externalId } });
+  //
+  //   return {
+  //     user,
+  //   };
+  // },
 });
 
 fastify.register(async function (fastify) {
