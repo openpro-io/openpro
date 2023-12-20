@@ -94,6 +94,7 @@ const hocuspocusServer = Server.configure({
     try {
       verifyJwt = await axios.get(`${FRONTEND_HOSTNAME}/api/verify-jwt`, {
         headers: {
+          authorization: `Bearer ${token}`,
           cookie: data.requestHeaders.cookie,
           'user-agent': data.requestHeaders['user-agent'],
         },
