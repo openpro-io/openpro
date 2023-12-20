@@ -1,3 +1,4 @@
+name: Codium-AI PR Agent
 on:
   pull_request:
   issue_comment:
