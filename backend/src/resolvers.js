@@ -62,7 +62,8 @@ const resolvers = {
 
       await board.save();
 
-      emitBoardUpdatedEvent(io, board.toJSON());
+      // TODO: fix
+      // emitBoardUpdatedEvent(io, board.toJSON());
 
       return board;
     },
@@ -233,7 +234,8 @@ const resolvers = {
 
       await issue.save();
 
-      emitIssueUpdatedEvent(io, issue.toJSON());
+      // TODO: fix
+      // emitIssueUpdatedEvent(io, issue.toJSON());
 
       const issueStatus = await db.sequelize.models.IssueStatuses.findByPk(issueStatusId ?? issue.issueStatusId);
 
@@ -454,19 +456,37 @@ const resolvers = {
       });
       return boardInfo;
     },
-    issues: (parent, { input: { projectId, id } }, { db }) => {
+    issues: (parent, { input: { projectId, id, search, searchOperator } }, { db }) => {
       if (!projectId && !id) {
         throw new Error('Must provide either projectId or id');
       }
 
       let whereOr = [];
+      let queryOperator = Op.or;
 
       if (projectId) whereOr = [...whereOr, { projectId: Number(projectId) }];
       if (id) whereOr = [...whereOr, { id: Number(id) }];
+      if (search) {
+        whereOr = [
+          ...whereOr,
+          {
+            [Op.or]: {
+              title: {
+                [Op.like]: `%${search}%`,
+              },
+              id: {
+                [Op.like]: search,
+              },
+            },
+          },
+        ];
+      }
+      if (searchOperator === 'and') queryOperator = Op.and;
+      if (searchOperator === 'or') queryOperator = Op.or;
 
       return db.sequelize.models.Issue.findAll({
         where: {
-          [Op.or]: whereOr,
+          [queryOperator]: whereOr,
         },
       });
     },

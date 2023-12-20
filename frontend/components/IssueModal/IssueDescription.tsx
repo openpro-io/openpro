@@ -13,8 +13,7 @@ import EditorRenderOnly from '@/components/Editor/EditorRenderOnly';
 
 export const IssueDescription = ({ issueId }: { issueId?: string }) => {
   const searchParams = useSearchParams()!;
-  const params = new URLSearchParams(searchParams);
-  const selectedIssueId = issueId ?? params.get('selectedIssueId');
+  const selectedIssueId = issueId ?? searchParams.get('selectedIssueId');
 
   const [editorContent, setEditorContent] = React.useState(undefined);
   const [showEditor, setShowEditor] = React.useState(false);
@@ -94,6 +93,7 @@ export const IssueDescription = ({ issueId }: { issueId?: string }) => {
               onClick={() => {
                 if (!selectedIssueId) return;
 
+                console.log({ editorContent, selectedIssueId });
                 updateDescription({
                   variables: {
                     input: {
