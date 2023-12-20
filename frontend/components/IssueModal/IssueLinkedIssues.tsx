@@ -27,9 +27,9 @@ const IssueLinkedIssues = ({ issueId }: { issueId?: string }) => {
   return (
     <>
       <div className='pb-5 text-2xl'>Linked Issues</div>
-      {blockedIssues.map((blockedIssue) => (
+      {blockedIssues.map(({ id, key, subject, priority, status }) => (
         <div
-          key={blockedIssue.id}
+          key={id}
           className='group flex overflow-hidden rounded border border-primary/10 bg-surface-overlay px-2 shadow-sm hover:cursor-pointer hover:bg-surface-overlay-hovered'
         >
           <div className='relative m-1 flex w-full items-center gap-x-1 p-1'>
@@ -37,18 +37,18 @@ const IssueLinkedIssues = ({ issueId }: { issueId?: string }) => {
               <CheckIcon className='h-6 w-6 text-blue-500' />
             </div>
             <div className='text-link-active hover:underline'>
-              {blockedIssue.key}
+              {key}
             </div>
             <div className='ml-4 shrink grow basis-0'>
               <div className='flex'>
                 <div className='grow hover:underline'>
-                  {blockedIssue.subject}
+                  {subject}
                 </div>
               </div>
             </div>
-            <div className='flex'>{priorityToIcon(blockedIssue.priority)}</div>
+            <div className='flex'>{priorityToIcon(priority)}</div>
             <div className='flex items-center justify-center rounded-md bg-blue-500 px-2 text-primary-inverted'>
-              {blockedIssue.status}
+              {status}
             </div>
             <div className='right-0 opacity-0 hover:cursor-pointer hover:rounded-md hover:bg-surface-overlay group-hover:opacity-100'>
               <XMarkIcon className='h-6 w-6' />
