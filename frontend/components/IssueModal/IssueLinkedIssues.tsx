@@ -18,10 +18,14 @@ const IssueLinkedIssues = ({
   issueId?: string;
   projectKey?: string;
 }) => {
-  const { data, error } = useQuery(GET_ISSUE_QUERY, {
+  const { data, error, loading } = useQuery(GET_ISSUE_QUERY, {
     skip: !issueId,
     variables: { input: { id: issueId } },
   });
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   if (error) {
     return <div>Error loading linked issues</div>;
