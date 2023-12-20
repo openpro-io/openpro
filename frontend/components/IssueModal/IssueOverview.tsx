@@ -8,6 +8,7 @@ import IssueComments from '@/components/IssueModal/IssueComments';
 import ResizeHandle from '@/components/Panels/ResizeHandle';
 import IssueStatusDropdown from '@/components/IssueModal/IssueStatusDropdown';
 import IssueDetails from '@/components/IssueModal/IssueDetails';
+import IssueLinkedIssues from '@/components/IssueModal/IssueLinkedIssues';
 
 const defaultLayout = [70, 30];
 
@@ -41,6 +42,9 @@ const IssueOverview = ({
                 </div>
                 <div>
                   <IssueDescription issueId={issueId} />
+                </div>
+                <div>
+                  <IssueLinkedIssues issueId={issueId} />
                 </div>
                 <div className='pt-5'>
                   <IssueComments issueId={issueId} />

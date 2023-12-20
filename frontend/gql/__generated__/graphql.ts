@@ -352,6 +352,8 @@ export type QueryBoardInput = {
 export type QueryIssueInput = {
   id?: InputMaybe<Scalars['String']['input']>;
   projectId?: InputMaybe<Scalars['String']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  searchOperator?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Array<InputMaybe<SortBy>>>;
 };
 
