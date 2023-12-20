@@ -44,7 +44,10 @@ const IssueOverview = ({
                   <IssueDescription issueId={issueId} />
                 </div>
                 <div>
-                  <IssueLinkedIssues issueId={issueId} />
+                  <IssueLinkedIssues
+                    projectKey={projectKey}
+                    issueId={issueId}
+                  />
                 </div>
                 <div className='pt-5'>
                   <IssueComments issueId={issueId} />

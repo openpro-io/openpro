@@ -515,7 +515,32 @@ const resolvers = {
       });
     },
     issue: (parent, { input: { id } }, { db }) => {
-      return db.sequelize.models.Issue.findByPk(id);
+      return db.sequelize.models.Issue.findByPk(id, {
+        include: [
+          {
+            model: db.sequelize.models.Issue,
+            as: 'linkedToIssues',
+            through: {
+              attributes: [
+                ['issue_id', 'issueId'],
+                ['linked_issue_id', 'linkedIssueId'],
+                ['link_type', 'linkType'],
+              ],
+            },
+          },
+          {
+            model: db.sequelize.models.Issue,
+            as: 'linkedByIssues',
+            through: {
+              attributes: [
+                ['issue_id', 'issueId'],
+                ['linked_issue_id', 'linkedIssueId'],
+                ['link_type', 'linkType'],
+              ],
+            },
+          },
+        ],
+      });
     },
   },
 };
