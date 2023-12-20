@@ -44,7 +44,7 @@ const UserAvatarBubble = ({
           <img
             src={selectedPerson.avatarUrl ?? ''}
             alt='User'
-            className='inline-block h-8 w-8 rounded-full ring-2 ring-white'
+            className='-mt-2 inline-block h-9 w-9 rounded-full ring-2 ring-white'
           />
           {enableTooltip && (
             <div className='absolute -left-10 -top-20 mt-12 hidden w-max rounded bg-gray-800 px-2 py-1 text-sm text-white opacity-75 shadow-lg group-hover:block'>
@@ -64,7 +64,7 @@ const UserAvatarBubble = ({
             'group relative z-99 cursor-pointer hover:z-999'
           )}
         >
-          <span className='ring-ring-surface-overlay inline-flex h-8 w-8 items-center justify-center rounded-full bg-surface-overlay ring-2'>
+          <span className='inline-flex h-8 w-8 items-center justify-center rounded-full bg-surface-overlay ring-2 ring-ring-surface-overlay'>
             <span className='text-sm font-medium leading-none text-primary'>
               {selectedPerson.firstName[0]}
               {selectedPerson.lastName[0]}
