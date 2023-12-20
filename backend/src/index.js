@@ -117,8 +117,6 @@ const myContextFunction = async (request) => {
   const token = request.headers.authorization || '';
   let user = null;
 
-  return { db, user };
-
   // Allow if introspection query only
   if (!Array.isArray(request.body) && request?.body?.query?.includes('IntrospectionQuery')) {
     return {
