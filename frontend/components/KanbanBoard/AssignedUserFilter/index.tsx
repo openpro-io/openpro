@@ -64,7 +64,7 @@ const UserAvatarBubble = ({
             'group relative z-99 cursor-pointer hover:z-999'
           )}
         >
-          <span className='inline-flex h-8 w-8 items-center justify-center rounded-full bg-surface-overlay ring-2 ring-ring-surface-overlay'>
+          <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface-overlay ring-2 ring-inset ring-ring-surface-overlay'>
             <span className='text-sm font-medium leading-none text-primary'>
               {selectedPerson.firstName[0]}
               {selectedPerson.lastName[0]}
@@ -82,7 +82,7 @@ const UserAvatarBubble = ({
           'group relative z-99 cursor-pointer hover:z-999'
         )}
       >
-        <span className='inline-block h-8 w-8 overflow-hidden rounded-full bg-surface ring-2 ring-white'>
+        <span className='inline-block h-9 w-9 overflow-hidden rounded-full bg-surface ring-2 ring-inset ring-white'>
           <svg
             className='h-full w-full text-gray-300'
             fill='currentColor'
