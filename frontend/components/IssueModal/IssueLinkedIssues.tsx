@@ -1,14 +1,197 @@
-import React from 'react';
-import { CheckIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import { Fragment, useEffect, useState } from 'react';
+import {
+  CheckIcon,
+  ChevronUpDownIcon,
+  XMarkIcon,
+} from '@heroicons/react/20/solid';
 import { priorityToIcon } from '@/components/Icons';
 import { GET_ISSUE_QUERY } from '@/gql/gql-queries-mutations';
 import { useQuery } from '@apollo/client';
 import { groupBy, lowerCase, startCase } from 'lodash';
 import { BsPlus } from 'react-icons/bs';
 import { Issue } from '@/gql/__generated__/graphql';
+import { Combobox, Listbox, Transition } from '@headlessui/react';
+import { Button } from '@/components/Button';
 
 type Links = {
   [key: string]: Issue[];
+};
+
+const linkTypes = [
+  { name: 'Blocks', value: 'blocks' },
+  { name: 'Blocked By', value: 'blocked_by' },
+  { name: 'Duplicates', value: 'duplicates' },
+  { name: 'Duplicated By', value: 'duplicated_by' },
+  { name: 'Relates To', value: 'relates_to' },
+  { name: 'Clones', value: 'clones' },
+  { name: 'Is Cloned By', value: 'is_cloned_by' },
+];
+
+const sampleIssues = [
+  { id: '1', title: 'test' },
+  { id: '2', title: 'test2' },
+];
+
+// TODO: Hide the handlebars
+// TODO: When searching show results expanded always
+const LinkIssueSearch = () => {
+  const [selected, setSelected] = useState();
+  const [query, setQuery] = useState('');
+
+  const filteredIssues =
+    query === ''
+      ? sampleIssues
+      : sampleIssues.filter((sampleIssue) =>
+          sampleIssue.title
+            .toLowerCase()
+            .replace(/\s+/g, '')
+            .includes(query.toLowerCase().replace(/\s+/g, ''))
+        );
+
+  return (
+    <div className='w-full min-w-full'>
+      <Combobox value={selected} onChange={setSelected}>
+        <div className='relative mt-1 rounded-lg border border-primary/20'>
+          <div className='relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm'>
+            <Combobox.Input
+              className='w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0'
+              displayValue={(issue: any) => issue.title}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder='Search for an issue'
+            />
+            <Combobox.Button className='absolute inset-y-0 right-0 flex items-center pr-2'>
+              <ChevronUpDownIcon
+                className='h-5 w-5 text-gray-400'
+                aria-hidden='true'
+              />
+            </Combobox.Button>
+          </div>
+          <Transition
+            as={Fragment}
+            leave='transition ease-in duration-100'
+            leaveFrom='opacity-100'
+            leaveTo='opacity-0'
+            afterLeave={() => setQuery('')}
+          >
+            <Combobox.Options className='absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm'>
+              {filteredIssues.length === 0 && query !== '' ? (
+                <div className='relative cursor-default select-none px-4 py-2 text-gray-700'>
+                  Nothing found.
+                </div>
+              ) : (
+                filteredIssues.map((issue) => (
+                  <Combobox.Option
+                    key={issue.id}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                        active ? 'bg-teal-600 text-white' : 'text-gray-900'
+                      }`
+                    }
+                    value={issue}
+                  >
+                    {({ selected, active }) => (
+                      <>
+                        <span
+                          className={`block truncate ${
+                            selected ? 'font-medium' : 'font-normal'
+                          }`}
+                        >
+                          {issue.title}
+                        </span>
+                        {selected ? (
+                          <span
+                            className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                              active ? 'text-white' : 'text-teal-600'
+                            }`}
+                          >
+                            <CheckIcon className='h-5 w-5' aria-hidden='true' />
+                          </span>
+                        ) : null}
+                      </>
+                    )}
+                  </Combobox.Option>
+                ))
+              )}
+            </Combobox.Options>
+          </Transition>
+        </div>
+      </Combobox>
+    </div>
+  );
+};
+
+const LinkIssueTypeDropdown = ({
+  selectedLinkType,
+}: {
+  selectedLinkType?: string;
+}) => {
+  const [selected, setSelected] = useState(linkTypes[0]);
+
+  useEffect(() => {
+    if (selectedLinkType) {
+      const linkType = linkTypes.find(
+        (link) => link.value === selectedLinkType
+      );
+      if (linkType) setSelected(linkType);
+    }
+  }, [selectedLinkType]);
+
+  return (
+    <div className='w-72'>
+      <Listbox value={selected} onChange={setSelected}>
+        <div className='relative mt-1 rounded-lg border border-primary/20'>
+          <Listbox.Button className='relative w-full cursor-default rounded-lg bg-surface-overlay py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm'>
+            <span className='block truncate'>{selected.name}</span>
+            <span className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2'>
+              <ChevronUpDownIcon
+                className='h-5 w-5 text-gray-400'
+                aria-hidden='true'
+              />
+            </span>
+          </Listbox.Button>
+          <Transition
+            as={Fragment}
+            leave='transition ease-in duration-100'
+            leaveFrom='opacity-100'
+            leaveTo='opacity-0'
+          >
+            <Listbox.Options className='absolute z-99 mt-1 max-h-60 w-full overflow-auto rounded-md bg-surface-overlay py-1 text-primary shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm'>
+              {linkTypes.map((link, linkIdx) => (
+                <Listbox.Option
+                  key={linkIdx}
+                  className={({ active }) =>
+                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                      active
+                        ? 'bg-surface-overlay-hovered text-primary'
+                        : 'text-primary'
+                    }`
+                  }
+                  value={link}
+                >
+                  {({ selected }) => (
+                    <>
+                      <span
+                        className={`block truncate ${
+                          selected ? 'font-medium' : 'font-normal'
+                        }`}
+                      >
+                        {link.name}
+                      </span>
+                      {selected ? (
+                        <span className='absolute inset-y-0 left-0 flex items-center pl-3 text-blue-500'>
+                          <CheckIcon className='h-5 w-5' aria-hidden='true' />
+                        </span>
+                      ) : null}
+                    </>
+                  )}
+                </Listbox.Option>
+              ))}
+            </Listbox.Options>
+          </Transition>
+        </div>
+      </Listbox>
+    </div>
+  );
 };
 
 const IssueLinkedIssues = ({
@@ -18,6 +201,7 @@ const IssueLinkedIssues = ({
   issueId?: string;
   projectKey?: string;
 }) => {
+  const [showCreateLink, setShowCreateLink] = useState(false);
   const { data, error, loading } = useQuery(GET_ISSUE_QUERY, {
     skip: !issueId,
     variables: { input: { id: issueId } },
@@ -39,7 +223,12 @@ const IssueLinkedIssues = ({
     <>
       <div className='flex items-center justify-between align-middle'>
         <div className='text-2xl'>Linked Issues</div>
-        <div className='rounded-md hover:cursor-pointer hover:bg-surface-overlay-hovered'>
+        <div
+          className='rounded-md hover:cursor-pointer hover:bg-surface-overlay-hovered'
+          onClick={() => {
+            setShowCreateLink(true);
+          }}
+        >
           <BsPlus className='h-6 w-6' />
         </div>
       </div>
@@ -77,6 +266,35 @@ const IssueLinkedIssues = ({
           ))}
         </div>
       ))}
+      {showCreateLink && (
+        <>
+          <div className='flex items-center gap-x-1 pt-2'>
+            <LinkIssueTypeDropdown />
+            <div className='grow'>
+              <LinkIssueSearch />
+            </div>
+          </div>
+          <div className='flex justify-between pt-1'>
+            <div></div>
+            <div className='space-x-1'>
+              <Button
+                variant='primary'
+                onClick={() => {
+                  //   TODO:
+                }}
+              >
+                Link
+              </Button>
+              <Button
+                variant='transparent'
+                onClick={() => setShowCreateLink(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 };
