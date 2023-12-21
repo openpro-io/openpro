@@ -50,7 +50,7 @@ const UploadImagesPlugin = (cancelUploadImage?: () => any) =>
 
           cancelButton.appendChild(svgElement);
           placeholder.appendChild(cancelButton);
-          const deco = Decoration.widget(pos + 1, placeholder, {
+          const deco = Decoration.widget(pos, placeholder, {
             id,
           });
           set = set.add(tr.doc, [deco]);

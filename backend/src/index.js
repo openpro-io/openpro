@@ -217,7 +217,13 @@ fastify.post(
 fastify.get('/uploads/:file', async (request, reply) => {
   // TODO: make sure logged in
   const { file } = request.params;
-  return await minioClient.getObject(BUCKET_NAME, file);
+
+  const result = await minioClient.getObject(BUCKET_NAME, file);
+
+  reply.header('Content-Type', result.headers['content-type']);
+  reply.header('Content-Length', result.headers['content-length']);
+
+  return reply.send(result);
 });
 
 // TODO: this used to read from filesystem
