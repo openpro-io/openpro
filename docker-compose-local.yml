@@ -52,7 +52,11 @@ services:
     networks:
       - dev_env
     entrypoint: >
-      /bin/sh -c " /usr/bin/mc config host add openpro-minio http://\$MINIO_HOST:\$MINIO_PORT \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD; /usr/bin/mc mb openpro-minio/\$BUCKET_NAME; /usr/bin/mc anonymous set download openpro-minio/\$BUCKET_NAME; exit 0; "
+      /bin/sh -c "
+        /usr/bin/mc config host add openpro-minio http://$${MINIO_HOST}:$${MINIO_PORT} $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD};
+        /usr/bin/mc mb openpro-minio/$${BUCKET_NAME};
+        /usr/bin/mc anonymous set download openpro-minio/$${BUCKET_NAME}; exit 0;
+      "
     depends_on:
       - openpro-minio
 
