@@ -172,9 +172,9 @@ const LinkIssueTypeDropdown = ({
             leaveTo='opacity-0'
           >
             <Listbox.Options className='absolute z-99 mt-1 max-h-60 w-full overflow-auto rounded-md bg-surface-overlay py-1 text-primary shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm'>
-              {linkTypes.map((link, linkIdx) => (
+              {linkTypes.map((link) => (
                 <Listbox.Option
-                  key={linkIdx}
+                  key={link.value}
                   className={({ active }) =>
                     `relative cursor-default select-none py-2 pl-10 pr-4 ${
                       active
