@@ -71,6 +71,10 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         field: 'parent_id',
       },
+      vectorSearch: {
+        type: DataTypes.TSVECTOR,
+        field: 'vector_search',
+      },
       createdAt: {
         field: 'created_at',
         type: DataTypes.DATE,
@@ -91,6 +95,7 @@ export default (sequelize, DataTypes) => {
         { unique: false, fields: ['assignee_id'] },
         { unique: false, fields: ['reporter_id'] },
         { unique: false, fields: ['issue_status_id'] },
+        { unique: false, fields: ['vector_search'], using: 'gin' },
       ],
     }
   );

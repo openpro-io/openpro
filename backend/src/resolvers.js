@@ -457,10 +457,6 @@ const resolvers = {
       return boardInfo;
     },
     issues: (parent, { input: { projectId, id, search, searchOperator } }, { db }) => {
-      if (!projectId && !id) {
-        throw new Error('Must provide either projectId or id');
-      }
-
       let whereOr = [];
       let queryOperator = Op.or;
 
@@ -471,8 +467,8 @@ const resolvers = {
           ...whereOr,
           {
             [Op.or]: {
-              title: {
-                [Op.iLike]: `%${search}%`,
+              vectorSearch: {
+                [Op.match]: db.Sequelize.fn('to_tsquery', search),
               },
               id: {
                 [Op.eq]: search.replace(/[^0-9]/g, '') || null,
