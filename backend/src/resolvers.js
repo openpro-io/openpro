@@ -472,10 +472,10 @@ const resolvers = {
           {
             [Op.or]: {
               title: {
-                [Op.like]: `%${search}%`,
+                [Op.iLike]: `%${search}%`,
               },
               id: {
-                [Op.like]: search,
+                [Op.eq]: search.replace(/[^0-9]/g, '') || null,
               },
             },
           },
