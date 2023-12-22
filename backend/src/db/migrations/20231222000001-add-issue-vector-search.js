@@ -10,30 +10,17 @@ export default {
   async up(queryInterface, Sequelize) {
     const { sequelize } = queryInterface;
 
-    return sequelize
-      .query(
-        `ALTER TABLE "${TABLE_NAME}" ADD COLUMN "${COLUMN_NAME}" TSVECTOR GENERATED ALWAYS AS (to_tsvector('english', ${SEARCH_FIELDS.join(
-          " || ' ' || "
-        )})) STORED;`
-      )
-      .then(() => {
-        console.log('Values added: Creating Index');
-        return sequelize
-          .query(`CREATE INDEX ${INDEX_NAME} ON "${TABLE_NAME}" USING gin("${COLUMN_NAME}");`)
-          .catch(console.log);
-      });
+    await sequelize.query(
+      `ALTER TABLE "${TABLE_NAME}" ADD COLUMN "${COLUMN_NAME}" TSVECTOR GENERATED ALWAYS AS (to_tsvector('english', ${SEARCH_FIELDS.join(
+        " || ' ' || "
+      )})) STORED;`
+    );
+    await sequelize.query(`CREATE INDEX ${INDEX_NAME} ON "${TABLE_NAME}" USING gin("${COLUMN_NAME}");`);
   },
   async down(queryInterface, Sequelize) {
     const { sequelize } = queryInterface;
 
-    return sequelize
-      .query(`DROP INDEX ${INDEX_NAME} ON "${TABLE_NAME}"`)
-      .then(() => {
-        console.log('removed index');
-        return sequelize.query(`ALTER TABLE "${TABLE_NAME}" DROP COLUMN "${COLUMN_NAME}"`).catch(console.log);
-      })
-      .then(() => {
-        console.log('removed column');
-      });
+    await sequelize.query(`DROP INDEX ${INDEX_NAME} ON "${TABLE_NAME}"`);
+    await sequelize.query(`ALTER TABLE "${TABLE_NAME}" DROP COLUMN "${COLUMN_NAME}"`);
   },
 };
