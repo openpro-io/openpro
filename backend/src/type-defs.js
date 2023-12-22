@@ -75,6 +75,7 @@ const typeDefs = gql`
     title: String!
     description: String
     projectId: String
+    project: Project
     status: IssueStatus
     reporter: User
     assignee: User

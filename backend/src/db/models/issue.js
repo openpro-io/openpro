@@ -100,7 +100,8 @@ export default (sequelize, DataTypes) => {
     }
   );
 
-  Issue.associate = ({ IssueComment, IssueBoard, IssueLinks, Issue }) => {
+  Issue.associate = ({ IssueComment, IssueBoard, IssueLinks, Issue, Project }) => {
+    Issue.belongsTo(Project, { foreignKey: 'project_id' });
     Issue.hasMany(IssueComment, { foreignKey: 'issue_id', onDelete: 'CASCADE' });
     Issue.hasMany(IssueBoard, { foreignKey: 'issue_id', onDelete: 'CASCADE' });
     Issue.belongsToMany(Issue, {

@@ -32,6 +32,17 @@ export const PROJECT_FIELDS = gql(/* GraphQL */ `
   }
 `);
 
+export const PROJECT_ONLY_FIELDS = gql(/* GraphQL */ `
+  fragment ProjectOnlyFields on Project {
+    id
+    name
+    key
+    description
+    createdAt
+    updatedAt
+  }
+`);
+
 export const ISSUE_FIELDS = gql(/* GraphQL */ `
   fragment IssueFields on Issue {
     id
@@ -121,6 +132,22 @@ export const GET_ISSUE_QUERY = gql(/* GraphQL */ `
   query GetIssue($input: QueryIssueInput) {
     issue(input: $input) {
       ...IssueFields
+      links {
+        ...IssueFields
+        linkType
+        linkedIssueId
+      }
+    }
+  }
+`);
+
+export const GET_ISSUES_QUERY = gql(/* GraphQL */ `
+  query GetIssues($input: QueryIssueInput) {
+    issues(input: $input) {
+      ...IssueFields
+      project {
+        ...ProjectOnlyFields
+      }
       links {
         ...IssueFields
         linkType

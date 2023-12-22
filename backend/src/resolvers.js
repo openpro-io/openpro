@@ -483,6 +483,9 @@ const resolvers = {
       return db.sequelize.models.Issue.findAll({
         include: [
           {
+            model: db.sequelize.models.Project,
+          },
+          {
             model: db.sequelize.models.Issue,
             as: 'linkedToIssues',
             through: {

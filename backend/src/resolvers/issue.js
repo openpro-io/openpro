@@ -35,4 +35,5 @@ export const issueResolvers = {
   assignee: (parent, args, { db }) => {
     return db.sequelize.models.User.findByPk(parent.assigneeId);
   },
+  project: (parent) => parent.Project,
 };

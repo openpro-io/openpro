@@ -1,17 +1,18 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import {
   CheckIcon,
   ChevronUpDownIcon,
   XMarkIcon,
 } from '@heroicons/react/20/solid';
 import { priorityToIcon } from '@/components/Icons';
-import { GET_ISSUE_QUERY } from '@/gql/gql-queries-mutations';
-import { useQuery } from '@apollo/client';
+import { GET_ISSUE_QUERY, GET_ISSUES_QUERY } from '@/gql/gql-queries-mutations';
+import { useLazyQuery, useQuery } from '@apollo/client';
 import { groupBy, lowerCase, startCase } from 'lodash';
 import { BsPlus } from 'react-icons/bs';
 import { Issue } from '@/gql/__generated__/graphql';
 import { Combobox, Listbox, Transition } from '@headlessui/react';
 import { Button } from '@/components/Button';
+import { debounce } from 'lodash';
 
 type Links = {
   [key: string]: Issue[];
@@ -27,26 +28,40 @@ const linkTypes = [
   { name: 'Is Cloned By', value: 'is_cloned_by' },
 ];
 
-const sampleIssues = [
-  { id: '1', title: 'test' },
-  { id: '2', title: 'test2' },
-];
-
 // TODO: Hide the handlebars
 // TODO: When searching show results expanded always
 const LinkIssueSearch = () => {
   const [selected, setSelected] = useState();
   const [query, setQuery] = useState('');
 
-  const filteredIssues =
-    query === ''
-      ? sampleIssues
-      : sampleIssues.filter((sampleIssue) =>
-          sampleIssue.title
-            .toLowerCase()
-            .replace(/\s+/g, '')
-            .includes(query.toLowerCase().replace(/\s+/g, ''))
-        );
+  const [searchIssues, { data, error, loading }] = useLazyQuery(
+    GET_ISSUES_QUERY,
+    {
+      fetchPolicy: 'network-only',
+    }
+  );
+
+  useEffect(() => {
+    if (query) {
+      searchIssues({ variables: { input: { search: query } } });
+    }
+  }, [query]);
+
+  const handleChange = (e: any) => {
+    setQuery(e.target.value);
+  };
+
+  const debouncedResults = useMemo(() => {
+    return debounce(handleChange, 300);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      debouncedResults.cancel();
+    };
+  });
+
+  const filteredIssues = data?.issues ? data.issues : [];
 
   return (
     <div className='w-full min-w-full'>
@@ -56,7 +71,7 @@ const LinkIssueSearch = () => {
             <Combobox.Input
               className='w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0'
               displayValue={(issue: any) => issue.title}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={debouncedResults}
               placeholder='Search for an issue'
             />
             <Combobox.Button className='absolute inset-y-0 right-0 flex items-center pr-2'>
@@ -79,11 +94,11 @@ const LinkIssueSearch = () => {
                   Nothing found.
                 </div>
               ) : (
-                filteredIssues.map((issue) => (
+                filteredIssues.map((issue: any) => (
                   <Combobox.Option
                     key={issue.id}
                     className={({ active }) =>
-                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                      `relative cursor-default select-none py-2 pl-2 pr-4 ${
                         active ? 'bg-teal-600 text-white' : 'text-gray-900'
                       }`
                     }
@@ -96,7 +111,7 @@ const LinkIssueSearch = () => {
                             selected ? 'font-medium' : 'font-normal'
                           }`}
                         >
-                          {issue.title}
+                          {issue.project.key}-{issue.id}: {issue.title}
                         </span>
                         {selected ? (
                           <span
