@@ -135,6 +135,7 @@ const LinkIssueSearch = () => {
   );
 };
 
+// TODO: there is a CSS bug that crops the dropdown in a modal
 const LinkIssueTypeDropdown = ({
   selectedLinkType,
 }: {
