@@ -28,6 +28,12 @@ type LinkIssueCreate = {
   linkType?: string;
 };
 
+type IssueLink = {
+  issueId: string;
+  linkedIssueId: string;
+  linkType: string;
+};
+
 const linkTypes = [
   { name: 'Blocks', value: 'blocks' },
   { name: 'Blocked By', value: 'blocked_by' },
@@ -271,6 +277,62 @@ const IssueLinkedIssues = ({
   const [createIssueLink] = useMutation(CREATE_ISSUE_LINK_MUTATION);
   const [deleteIssueLink] = useMutation(DELETE_ISSUE_LINK_MUTATION);
 
+  const handleDeleteIssueLink = ({
+    issueId,
+    linkedIssueId,
+    linkType,
+  }: IssueLink) => {
+    if (!issueId || !linkedIssueId || !linkType) {
+      return;
+    }
+
+    return deleteIssueLink({
+      refetchQueries: [
+        {
+          query: GET_ISSUE_QUERY,
+          variables: { input: { id: issueId } },
+        },
+      ],
+      variables: {
+        input: {
+          issueId,
+          linkedIssueId,
+          linkType,
+        },
+      },
+    });
+  };
+
+  const handleCreateIssueLink = ({
+    issueId,
+    linkedIssueId,
+    linkType,
+  }: IssueLink) => {
+    if (!issueId || !linkedIssueId || !linkType) {
+      return;
+    }
+
+    return createIssueLink({
+      onCompleted: () => {
+        setShowCreateLink(false);
+        setLinkIssueCreate({});
+      },
+      refetchQueries: [
+        {
+          query: GET_ISSUE_QUERY,
+          variables: { input: { id: issueId } },
+        },
+      ],
+      variables: {
+        input: {
+          issueId,
+          linkedIssueId,
+          linkType,
+        },
+      },
+    });
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -326,24 +388,15 @@ const IssueLinkedIssues = ({
                   <div
                     className='right-0 opacity-0 hover:cursor-pointer hover:rounded-md hover:bg-surface-overlay group-hover:opacity-100'
                     onClick={() => {
-                      if (id && linkType && linkedIssueId) {
-                        deleteIssueLink({
-                          refetchQueries: [
-                            {
-                              query: GET_ISSUE_QUERY,
-                              variables: { input: { id: issueId } },
-                            },
-                          ],
-                          // The reversing of variables is intentional here
-                          variables: {
-                            input: {
-                              issueId: linkedIssueId,
-                              linkedIssueId: id,
-                              linkType,
-                            },
-                          },
-                        });
+                      if (!id || !linkedIssueId || !linkType) {
+                        return;
                       }
+
+                      handleDeleteIssueLink({
+                        issueId: linkedIssueId,
+                        linkedIssueId: id,
+                        linkType,
+                      });
                     }}
                   >
                     <XMarkIcon className='h-6 w-6' />
@@ -368,32 +421,20 @@ const IssueLinkedIssues = ({
               <Button
                 variant='primary'
                 onClick={() => {
-                  // TODO: move this out into component handler
-                  // TODO: there is a bug when you add a link to same issue twice it only shows last one
                   if (
-                    linkIssueCreate?.selectedIssue?.id &&
-                    linkIssueCreate?.linkType
+                    !issueId ||
+                    !linkIssueCreate?.selectedIssue?.id ||
+                    !linkIssueCreate?.linkType
                   ) {
-                    createIssueLink({
-                      onCompleted: () => {
-                        setShowCreateLink(false);
-                        setLinkIssueCreate({});
-                      },
-                      refetchQueries: [
-                        {
-                          query: GET_ISSUE_QUERY,
-                          variables: { input: { id: issueId } },
-                        },
-                      ],
-                      variables: {
-                        input: {
-                          issueId: issueId,
-                          linkedIssueId: linkIssueCreate.selectedIssue.id,
-                          linkType: linkIssueCreate.linkType,
-                        },
-                      },
-                    });
+                    return;
                   }
+
+                  // TODO: there is a bug when you add a link to same issue twice it only shows last one
+                  handleCreateIssueLink({
+                    issueId: issueId,
+                    linkedIssueId: linkIssueCreate.selectedIssue.id,
+                    linkType: linkIssueCreate.linkType,
+                  });
                 }}
               >
                 Link
