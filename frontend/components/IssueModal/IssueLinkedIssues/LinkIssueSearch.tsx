@@ -14,6 +14,21 @@ const LinkIssueSearch = ({
 }) => {
   const [selected, setSelected] = useState({});
   const [query, setQuery] = useState('');
+  const [searchIssues, { data, error, loading }] = useLazyQuery(
+    GET_ISSUES_QUERY,
+    {
+      fetchPolicy: 'network-only',
+    }
+  );
+  const handleChange = (e: any) => {
+    setQuery(e.target.value);
+  };
+
+  const debouncedResults = useMemo(() => {
+    return debounce(handleChange, 300);
+  }, []);
+
+  // TODO: Reduce useEffect hooks if we can here.
 
   useEffect(() => {
     if (selected && stateCallback) {
@@ -24,26 +39,11 @@ const LinkIssueSearch = ({
     }
   }, [selected]);
 
-  const [searchIssues, { data, error, loading }] = useLazyQuery(
-    GET_ISSUES_QUERY,
-    {
-      fetchPolicy: 'network-only',
-    }
-  );
-
   useEffect(() => {
     if (query) {
       searchIssues({ variables: { input: { search: query } } });
     }
   }, [query]);
-
-  const handleChange = (e: any) => {
-    setQuery(e.target.value);
-  };
-
-  const debouncedResults = useMemo(() => {
-    return debounce(handleChange, 300);
-  }, []);
 
   useEffect(() => {
     return () => {
