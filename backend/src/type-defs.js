@@ -75,6 +75,7 @@ const typeDefs = gql`
     title: String!
     description: String
     projectId: String
+    project: Project
     status: IssueStatus
     reporter: User
     assignee: User
@@ -285,6 +286,18 @@ const typeDefs = gql`
     lastName: String
   }
 
+  input CreateIssueLinkInput {
+    issueId: String!
+    linkType: String!
+    linkedIssueId: String!
+  }
+
+  input DeleteIssueLinkInput {
+    issueId: String!
+    linkType: String!
+    linkedIssueId: String!
+  }
+
   # Mutations
   type Mutation {
     createProject(input: CreateProjectInput): Project
@@ -307,6 +320,9 @@ const typeDefs = gql`
     assignAssetAsAvatar(input: AssignAssetAsAvatarInput!): Asset
 
     createIssueComment(input: CreateIssueCommentInput!): IssueComment
+
+    createIssueLink(input: CreateIssueLinkInput!): MessageAndStatus
+    deleteIssueLink(input: DeleteIssueLinkInput!): MessageAndStatus
 
     updateMe(input: UpdateMeInput!): User
   }

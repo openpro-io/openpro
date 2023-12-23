@@ -1,6 +1,7 @@
 import React from 'react';
 import { classNames } from '@/services/utils';
 
+// TODO: make small/medium/large variants
 export const Button = ({
   text,
   variant,

@@ -71,6 +71,10 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         field: 'parent_id',
       },
+      vectorSearch: {
+        type: DataTypes.TSVECTOR,
+        field: 'vector_search',
+      },
       createdAt: {
         field: 'created_at',
         type: DataTypes.DATE,
@@ -91,11 +95,13 @@ export default (sequelize, DataTypes) => {
         { unique: false, fields: ['assignee_id'] },
         { unique: false, fields: ['reporter_id'] },
         { unique: false, fields: ['issue_status_id'] },
+        { unique: false, fields: ['vector_search'], using: 'gin' },
       ],
     }
   );
 
-  Issue.associate = ({ IssueComment, IssueBoard, IssueLinks, Issue }) => {
+  Issue.associate = ({ IssueComment, IssueBoard, IssueLinks, Issue, Project }) => {
+    Issue.belongsTo(Project, { foreignKey: 'project_id' });
     Issue.hasMany(IssueComment, { foreignKey: 'issue_id', onDelete: 'CASCADE' });
     Issue.hasMany(IssueBoard, { foreignKey: 'issue_id', onDelete: 'CASCADE' });
     Issue.belongsToMany(Issue, {

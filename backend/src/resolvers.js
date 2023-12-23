@@ -13,6 +13,33 @@ import { emitBoardUpdatedEvent, emitIssueUpdatedEvent } from './socket/events.js
 const resolvers = {
   Upload: GraphQLUpload,
   Mutation: {
+    deleteIssueLink: async (parent, { input: { issueId, linkType, linkedIssueId } }, { db }) => {
+      await db.sequelize.models.IssueLinks.destroy({
+        where: {
+          issueId,
+          linkType,
+          linkedIssueId,
+        },
+      });
+
+      return { message: 'success', status: 'success' };
+    },
+    createIssueLink: async (parent, { input: { issueId, linkType, linkedIssueId } }, { db }) => {
+      const issue = await db.sequelize.models.Issue.findByPk(issueId);
+      const linkedIssue = await db.sequelize.models.Issue.findByPk(linkedIssueId);
+
+      if (!issue || !linkedIssue) {
+        throw new Error('Issue not found');
+      }
+
+      await db.sequelize.models.IssueLinks.create({
+        issueId,
+        linkType,
+        linkedIssueId,
+      });
+
+      return { message: 'success', status: 'success' };
+    },
     updateMe: async (parent, { input }, { db, user }) => {
       const { firstName, lastName } = input;
 
@@ -457,10 +484,6 @@ const resolvers = {
       return boardInfo;
     },
     issues: (parent, { input: { projectId, id, search, searchOperator } }, { db }) => {
-      if (!projectId && !id) {
-        throw new Error('Must provide either projectId or id');
-      }
-
       let whereOr = [];
       let queryOperator = Op.or;
 
@@ -471,11 +494,11 @@ const resolvers = {
           ...whereOr,
           {
             [Op.or]: {
-              title: {
-                [Op.like]: `%${search}%`,
+              vectorSearch: {
+                [Op.match]: db.Sequelize.fn('to_tsquery', search),
               },
               id: {
-                [Op.like]: search,
+                [Op.eq]: search.replace(/[^0-9]/g, '') || null,
               },
             },
           },
@@ -486,6 +509,9 @@ const resolvers = {
 
       return db.sequelize.models.Issue.findAll({
         include: [
+          {
+            model: db.sequelize.models.Project,
+          },
           {
             model: db.sequelize.models.Issue,
             as: 'linkedToIssues',

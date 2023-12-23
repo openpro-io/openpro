@@ -6,6 +6,7 @@ import { DateTime } from 'luxon';
 import {
   ISSUE_COMMENT_FIELDS,
   ISSUE_FIELDS,
+  PROJECT_ONLY_FIELDS,
   USER_FIELDS,
   VIEW_STATE_FIELDS,
   VIEW_STATE_ISSUE_STATUS_FIELDS,
@@ -72,6 +73,7 @@ export const apolloClient = new ApolloClient({
       ${VIEW_STATE_ITEM_FIELDS}
       ${VIEW_STATE_ISSUE_STATUS_FIELDS}
       ${VIEW_STATE_FIELDS}
+      ${PROJECT_ONLY_FIELDS}
     `),
     typePolicies: {
       Board: {
