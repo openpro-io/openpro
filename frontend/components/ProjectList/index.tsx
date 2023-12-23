@@ -11,7 +11,15 @@ import { useQuery } from '@apollo/client';
 import { GET_PROJECTS } from '@/gql/gql-queries-mutations';
 import { GetProjectsQuery, Project } from '@/gql/__generated__/graphql';
 
-const cols = ['ID', 'Name', 'Key', 'Board Style', 'Description', ''];
+const cols = [
+  'ID',
+  'Name',
+  'Key',
+  'Board Style',
+  'Visibility',
+  'Description',
+  '',
+];
 
 // TODO: Make this its own component?
 const ProjectOptionsDropdown = () => {
@@ -204,6 +212,9 @@ const ProjectList = () => {
                       {project?.boards?.[0]
                         ? project?.boards?.[0].style
                         : 'Kanban'}
+                    </td>
+                    <td className='whitespace-nowrap px-3 py-1'>
+                      {project?.visibility}
                     </td>
                     <td className='whitespace-nowrap px-3 py-1'>
                       {project?.description}

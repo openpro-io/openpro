@@ -312,35 +312,25 @@ const resolvers = {
       return { message: 'issue deleted', status: 'success' };
     },
     createProject: async (parent, { input }, { db }) => {
+      // TODO: we should do a sequelize transaction here
       const project = await db.sequelize.models.Project.create({
         name: input.name,
         key: input.key,
+        visibility: input.visibility ?? 'INTERNAL',
       });
 
-      // TODO: maybe promise all here?
+      const projectId = Number(project.id);
 
       // TODO: We should create mappings for these statuses
-      const issueStatuses = await db.sequelize.models.IssueStatuses.bulkCreate([
-        {
-          projectId: Number(project.id),
-          name: 'Backlog',
-        },
-        {
-          projectId: Number(project.id),
-          name: 'To Do',
-        },
-        {
-          projectId: Number(project.id),
-          name: 'In Progress',
-        },
-        {
-          projectId: Number(project.id),
-          name: 'Done',
-        },
-      ]);
+      const issueStatuses = await db.sequelize.models.IssueStatuses.bulkCreate(
+        ['Backlog', 'To Do', 'In Progress', 'Done'].map((name) => ({
+          projectId,
+          name,
+        }))
+      );
 
       const board = await db.sequelize.models.Board.create({
-        projectId: Number(project.id),
+        projectId,
         name: input?.boardName ?? 'default',
         style: input.boardStyle,
         viewState: issueStatuses.map((is) => ({

@@ -6,6 +6,7 @@ export const PROJECT_FIELDS = gql(/* GraphQL */ `
     name
     key
     description
+    visibility
     createdAt
     updatedAt
     boards {
@@ -37,6 +38,7 @@ export const PROJECT_ONLY_FIELDS = gql(/* GraphQL */ `
     id
     name
     key
+    visibility
     description
     createdAt
     updatedAt
@@ -293,9 +295,7 @@ export const CREATE_ISSUE_STATUS_MUTATION = gql(/* GraphQL */ `
 export const CREATE_PROJECT_MUTATION = gql(/* GraphQL */ `
   mutation CreateProject($input: CreateProjectInput) {
     createProject(input: $input) {
-      id
-      name
-      description
+      ...ProjectOnlyFields
       boards {
         id
         style
@@ -312,11 +312,7 @@ export const CREATE_PROJECT_MUTATION = gql(/* GraphQL */ `
 export const GET_PROJECTS = gql(/* GraphQL */ `
   query GetProjects($input: QueryProjectInput) {
     projects(input: $input) {
-      id
-      name
-      key
-      createdAt
-      issueCount
+      ...ProjectOnlyFields
       boards {
         id
         style
