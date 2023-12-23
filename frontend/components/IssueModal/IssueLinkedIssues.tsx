@@ -7,6 +7,7 @@ import {
 import { priorityToIcon } from '@/components/Icons';
 import {
   CREATE_ISSUE_LINK_MUTATION,
+  DELETE_ISSUE_LINK_MUTATION,
   GET_ISSUE_QUERY,
   GET_ISSUES_QUERY,
 } from '@/gql/gql-queries-mutations';
@@ -268,6 +269,7 @@ const IssueLinkedIssues = ({
     variables: { input: { id: issueId } },
   });
   const [createIssueLink] = useMutation(CREATE_ISSUE_LINK_MUTATION);
+  const [deleteIssueLink] = useMutation(DELETE_ISSUE_LINK_MUTATION);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -299,33 +301,57 @@ const IssueLinkedIssues = ({
           <div className='pb-1 pt-2 text-lg opacity-80'>
             {startCase(lowerCase(linkType))}
           </div>
-          {links[linkType].map(({ id, title, priority, status }) => (
-            <div
-              key={id}
-              className='group flex overflow-hidden rounded border border-primary/10 bg-surface-overlay px-2 shadow-sm hover:cursor-pointer hover:bg-surface-overlay-hovered'
-            >
-              <div className='relative m-1 flex w-full items-center gap-x-1 p-1'>
-                <div>
-                  <CheckIcon className='h-6 w-6 text-blue-500' />
-                </div>
-                <div className='text-link-active hover:underline'>
-                  {projectKey}-{id}
-                </div>
-                <div className='ml-4 shrink grow basis-0'>
-                  <div className='flex'>
-                    <div className='grow hover:underline'>{title}</div>
+          {links[linkType].map(
+            ({ id, title, priority, status, linkType, linkedIssueId }) => (
+              <div
+                key={id}
+                className='group flex overflow-hidden rounded border border-primary/10 bg-surface-overlay px-2 shadow-sm hover:cursor-pointer hover:bg-surface-overlay-hovered'
+              >
+                <div className='relative m-1 flex w-full items-center gap-x-1 p-1'>
+                  <div>
+                    <CheckIcon className='h-6 w-6 text-blue-500' />
+                  </div>
+                  <div className='text-link-active hover:underline'>
+                    {projectKey}-{id}
+                  </div>
+                  <div className='ml-4 shrink grow basis-0'>
+                    <div className='flex'>
+                      <div className='grow hover:underline'>{title}</div>
+                    </div>
+                  </div>
+                  <div className='flex'>{priorityToIcon(Number(priority))}</div>
+                  <div className='flex items-center justify-center rounded-md bg-blue-500 px-2 text-primary-inverted'>
+                    {status?.name}
+                  </div>
+                  <div
+                    className='right-0 opacity-0 hover:cursor-pointer hover:rounded-md hover:bg-surface-overlay group-hover:opacity-100'
+                    onClick={() => {
+                      if (id && linkType && linkedIssueId) {
+                        deleteIssueLink({
+                          refetchQueries: [
+                            {
+                              query: GET_ISSUE_QUERY,
+                              variables: { input: { id: issueId } },
+                            },
+                          ],
+                          // The reversing of variables is intentional here
+                          variables: {
+                            input: {
+                              issueId: linkedIssueId,
+                              linkedIssueId: id,
+                              linkType,
+                            },
+                          },
+                        });
+                      }
+                    }}
+                  >
+                    <XMarkIcon className='h-6 w-6' />
                   </div>
                 </div>
-                <div className='flex'>{priorityToIcon(Number(priority))}</div>
-                <div className='flex items-center justify-center rounded-md bg-blue-500 px-2 text-primary-inverted'>
-                  {status?.name}
-                </div>
-                <div className='right-0 opacity-0 hover:cursor-pointer hover:rounded-md hover:bg-surface-overlay group-hover:opacity-100'>
-                  <XMarkIcon className='h-6 w-6' />
-                </div>
               </div>
-            </div>
-          ))}
+            )
+          )}
         </div>
       ))}
       {showCreateLink && (

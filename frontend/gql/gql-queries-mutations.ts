@@ -422,3 +422,12 @@ export const CREATE_ISSUE_LINK_MUTATION = gql(/* GraphQL */ `
     }
   }
 `);
+
+export const DELETE_ISSUE_LINK_MUTATION = gql(/* GraphQL */ `
+  mutation DeleteIssueLink($input: DeleteIssueLinkInput!) {
+    deleteIssueLink(input: $input) {
+      message
+      status
+    }
+  }
+`);
