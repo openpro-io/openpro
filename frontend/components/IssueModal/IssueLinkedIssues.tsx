@@ -18,6 +18,13 @@ import { Issue } from '@/gql/__generated__/graphql';
 import { Combobox, Listbox, Transition } from '@headlessui/react';
 import { Button } from '@/components/Button';
 import { debounce } from 'lodash';
+import type { Route } from 'next';
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from 'next/navigation';
 
 type Links = {
   [key: string]: Issue[];
@@ -266,6 +273,10 @@ const IssueLinkedIssues = ({
   issueId?: string;
   projectKey?: string;
 }) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams);
+  const pathname = usePathname();
   const [showCreateLink, setShowCreateLink] = useState(false);
   const [linkIssueCreate, setLinkIssueCreate] = useState<
     LinkIssueCreate | undefined
@@ -333,6 +344,15 @@ const IssueLinkedIssues = ({
     });
   };
 
+  const handleOpenIssue = ({ id }: { id: string }) => {
+    if (!id) return;
+
+    params.set('selectedIssueId', id);
+
+    const newPath = pathname + '?' + params.toString();
+    router.replace(newPath as Route);
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -373,12 +393,20 @@ const IssueLinkedIssues = ({
                   <div>
                     <CheckIcon className='h-6 w-6 text-blue-500' />
                   </div>
-                  <div className='text-link-active hover:underline'>
+                  <div
+                    className='text-link-active hover:underline'
+                    onClick={() => handleOpenIssue({ id })}
+                  >
                     {projectKey}-{id}
                   </div>
                   <div className='ml-4 shrink grow basis-0'>
                     <div className='flex'>
-                      <div className='grow hover:underline'>{title}</div>
+                      <div
+                        className='grow hover:underline'
+                        onClick={() => handleOpenIssue({ id })}
+                      >
+                        {title}
+                      </div>
                     </div>
                   </div>
                   <div className='flex'>{priorityToIcon(Number(priority))}</div>
