@@ -46,6 +46,7 @@ const documents = {
     "\n  query GetBoardIssues($input: QueryBoardInput!) {\n    board(input: $input) {\n      id\n      name\n      viewState {\n        ...ViewStateFields\n      }\n      backlogEnabled\n      settings\n      containerOrder\n      issues {\n        ...IssueFields\n      }\n    }\n  }\n": types.GetBoardIssuesDocument,
     "\n  mutation UpdateMe($input: UpdateMeInput!) {\n    updateMe(input: $input) {\n      ...UserFields\n    }\n  }\n": types.UpdateMeDocument,
     "\n  mutation CreateIssueLink($input: CreateIssueLinkInput!) {\n    createIssueLink(input: $input) {\n      message\n      status\n    }\n  }\n": types.CreateIssueLinkDocument,
+    "\n  mutation DeleteIssueLink($input: DeleteIssueLinkInput!) {\n    deleteIssueLink(input: $input) {\n      message\n      status\n    }\n  }\n": types.DeleteIssueLinkDocument,
 };
 
 /**
@@ -194,6 +195,10 @@ export function gql(source: "\n  mutation UpdateMe($input: UpdateMeInput!) {\n  
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  mutation CreateIssueLink($input: CreateIssueLinkInput!) {\n    createIssueLink(input: $input) {\n      message\n      status\n    }\n  }\n"): (typeof documents)["\n  mutation CreateIssueLink($input: CreateIssueLinkInput!) {\n    createIssueLink(input: $input) {\n      message\n      status\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  mutation DeleteIssueLink($input: DeleteIssueLinkInput!) {\n    deleteIssueLink(input: $input) {\n      message\n      status\n    }\n  }\n"): (typeof documents)["\n  mutation DeleteIssueLink($input: DeleteIssueLinkInput!) {\n    deleteIssueLink(input: $input) {\n      message\n      status\n    }\n  }\n"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};
