@@ -6,6 +6,12 @@ const typeDefs = gql`
   # in the resolver map below.
   scalar Upload
 
+  enum ProjectVisibility {
+    PUBLIC
+    INTERNAL
+    PRIVATE
+  }
+
   enum Order {
     ASC
     DESC
@@ -61,6 +67,7 @@ const typeDefs = gql`
     description: String
     imageId: Int
     status: String
+    visibility: ProjectVisibility
     createdAt: String
     updatedAt: String
     boards: [Board]
@@ -159,6 +166,7 @@ const typeDefs = gql`
     name: String!
     key: String!
     description: String
+    visibility: ProjectVisibility
     boardName: String!
     boardStyle: BoardStyle!
   }

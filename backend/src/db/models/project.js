@@ -24,6 +24,13 @@ export default (sequelize, DataTypes) => {
       status: {
         type: DataTypes.STRING,
       },
+      visibility: {
+        type: DataTypes.STRING,
+        defaultValue: 'internal',
+        validate: {
+          isIn: [['PRIVATE', 'INTERNAL', 'PUBLIC']],
+        },
+      },
       createdAt: {
         type: DataTypes.DATE,
         field: 'created_at',
