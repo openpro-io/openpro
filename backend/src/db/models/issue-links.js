@@ -36,7 +36,8 @@ export default (sequelize, DataTypes) => {
         },
       },
       linkTypeInverted: {
-        type: DataTypes.STRING,
+        type: DataTypes.VIRTUAL,
+        set(value) {},
         get() {
           return inverseLinkType?.[this.getDataValue('linkType')];
         },

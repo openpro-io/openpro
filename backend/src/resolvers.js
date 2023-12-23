@@ -13,6 +13,22 @@ import { emitBoardUpdatedEvent, emitIssueUpdatedEvent } from './socket/events.js
 const resolvers = {
   Upload: GraphQLUpload,
   Mutation: {
+    createIssueLink: async (parent, { input: { issueId, linkType, linkedIssueId } }, { db }) => {
+      const issue = await db.sequelize.models.Issue.findByPk(issueId);
+      const linkedIssue = await db.sequelize.models.Issue.findByPk(linkedIssueId);
+
+      if (!issue || !linkedIssue) {
+        throw new Error('Issue not found');
+      }
+
+      await db.sequelize.models.IssueLinks.create({
+        issueId,
+        linkType,
+        linkedIssueId,
+      });
+
+      return { message: 'success', status: 'success' };
+    },
     updateMe: async (parent, { input }, { db, user }) => {
       const { firstName, lastName } = input;
 

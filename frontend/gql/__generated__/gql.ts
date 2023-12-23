@@ -15,13 +15,15 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
 const documents = {
     "\n                fragment UpdateIssueStatus on Issue {\n                  id\n                  status {\n                    id\n                    name\n                  }\n                }\n              ": types.UpdateIssueStatusFragmentDoc,
     "\n  fragment ProjectFields on Project {\n    id\n    name\n    key\n    description\n    createdAt\n    updatedAt\n    boards {\n      id\n      name\n      viewState {\n        ...ViewStateFields\n      }\n      backlogEnabled\n      settings\n      createdAt\n      updatedAt\n    }\n    issueStatuses {\n      id\n      name\n      projectId\n      createdAt\n      updatedAt\n    }\n    issues {\n      ...IssueFields\n    }\n  }\n": types.ProjectFieldsFragmentDoc,
+    "\n  fragment ProjectOnlyFields on Project {\n    id\n    name\n    key\n    description\n    createdAt\n    updatedAt\n  }\n": types.ProjectOnlyFieldsFragmentDoc,
     "\n  fragment IssueFields on Issue {\n    id\n    title\n    description\n    projectId\n    priority\n    archived\n    tags {\n      id\n      name\n      projectId\n      createdAt\n      updatedAt\n    }\n    status {\n      id\n      name\n      projectId\n    }\n    reporter {\n      ...UserFields\n    }\n    assignee {\n      ...UserFields\n    }\n    comments {\n      ...IssueCommentFields\n    }\n    createdAt\n    updatedAt\n  }\n": types.IssueFieldsFragmentDoc,
     "\n  fragment UserFields on User {\n    id\n    email\n    firstName\n    lastName\n    avatarUrl\n  }\n": types.UserFieldsFragmentDoc,
     "\n  fragment IssueCommentFields on IssueComment {\n    id\n    comment\n    reporter {\n      ...UserFields\n    }\n    issueId\n    createdAt\n    updatedAt\n  }\n": types.IssueCommentFieldsFragmentDoc,
     "\n  fragment ViewStateIssueStatusFields on ViewStateIssueStatus {\n    id\n    name\n    projectId\n  }\n": types.ViewStateIssueStatusFieldsFragmentDoc,
     "\n  fragment ViewStateItemFields on ViewStateItem {\n    id\n    title\n    status {\n      ...ViewStateIssueStatusFields\n    }\n  }\n": types.ViewStateItemFieldsFragmentDoc,
     "\n  fragment ViewStateFields on ViewState {\n    id\n    title\n    items {\n      ...ViewStateItemFields\n    }\n  }\n": types.ViewStateFieldsFragmentDoc,
-    "\n  query GetIssue($input: QueryIssueInput) {\n    issue(input: $input) {\n      ...IssueFields\n    }\n  }\n": types.GetIssueDocument,
+    "\n  query GetIssue($input: QueryIssueInput) {\n    issue(input: $input) {\n      ...IssueFields\n      links {\n        ...IssueFields\n        linkType\n        linkedIssueId\n      }\n    }\n  }\n": types.GetIssueDocument,
+    "\n  query GetIssues($input: QueryIssueInput) {\n    issues(input: $input) {\n      ...IssueFields\n      project {\n        ...ProjectOnlyFields\n      }\n      links {\n        ...IssueFields\n        linkType\n        linkedIssueId\n      }\n    }\n  }\n": types.GetIssuesDocument,
     "\n  query GetProjectInfo(\n    $input: QueryProjectInput\n    $issueInput: QueryIssueInput\n  ) {\n    project(input: $input) {\n      id\n      name\n      key\n      description\n      boards {\n        id\n        viewState {\n          ...ViewStateFields\n        }\n        backlogEnabled\n        containerOrder\n      }\n      issueStatuses {\n        id\n        projectId\n        name\n        createdAt\n      }\n      issues(input: $issueInput) {\n        ...IssueFields\n      }\n    }\n  }\n": types.GetProjectInfoDocument,
     "\n  mutation CreateIssue($input: CreateIssueInput) {\n    createIssue(input: $input) {\n      ...IssueFields\n    }\n  }\n": types.CreateIssueDocument,
     "\n  mutation CreateIssueComment($input: CreateIssueCommentInput!) {\n    createIssueComment(input: $input) {\n      ...IssueCommentFields\n    }\n  }\n": types.CreateIssueCommentDocument,
@@ -43,6 +45,7 @@ const documents = {
     "\n  query GetBoardInfo($input: QueryBoardInput!) {\n    board(input: $input) {\n      id\n      name\n      viewState {\n        ...ViewStateFields\n      }\n      backlogEnabled\n      settings\n      containerOrder\n    }\n  }\n": types.GetBoardInfoDocument,
     "\n  query GetBoardIssues($input: QueryBoardInput!) {\n    board(input: $input) {\n      id\n      name\n      viewState {\n        ...ViewStateFields\n      }\n      backlogEnabled\n      settings\n      containerOrder\n      issues {\n        ...IssueFields\n      }\n    }\n  }\n": types.GetBoardIssuesDocument,
     "\n  mutation UpdateMe($input: UpdateMeInput!) {\n    updateMe(input: $input) {\n      ...UserFields\n    }\n  }\n": types.UpdateMeDocument,
+    "\n  mutation CreateIssueLink($input: CreateIssueLinkInput!) {\n    createIssueLink(input: $input) {\n      message\n      status\n    }\n  }\n": types.CreateIssueLinkDocument,
 };
 
 /**
@@ -70,6 +73,10 @@ export function gql(source: "\n  fragment ProjectFields on Project {\n    id\n  
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function gql(source: "\n  fragment ProjectOnlyFields on Project {\n    id\n    name\n    key\n    description\n    createdAt\n    updatedAt\n  }\n"): (typeof documents)["\n  fragment ProjectOnlyFields on Project {\n    id\n    name\n    key\n    description\n    createdAt\n    updatedAt\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function gql(source: "\n  fragment IssueFields on Issue {\n    id\n    title\n    description\n    projectId\n    priority\n    archived\n    tags {\n      id\n      name\n      projectId\n      createdAt\n      updatedAt\n    }\n    status {\n      id\n      name\n      projectId\n    }\n    reporter {\n      ...UserFields\n    }\n    assignee {\n      ...UserFields\n    }\n    comments {\n      ...IssueCommentFields\n    }\n    createdAt\n    updatedAt\n  }\n"): (typeof documents)["\n  fragment IssueFields on Issue {\n    id\n    title\n    description\n    projectId\n    priority\n    archived\n    tags {\n      id\n      name\n      projectId\n      createdAt\n      updatedAt\n    }\n    status {\n      id\n      name\n      projectId\n    }\n    reporter {\n      ...UserFields\n    }\n    assignee {\n      ...UserFields\n    }\n    comments {\n      ...IssueCommentFields\n    }\n    createdAt\n    updatedAt\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -94,7 +101,11 @@ export function gql(source: "\n  fragment ViewStateFields on ViewState {\n    id
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  query GetIssue($input: QueryIssueInput) {\n    issue(input: $input) {\n      ...IssueFields\n    }\n  }\n"): (typeof documents)["\n  query GetIssue($input: QueryIssueInput) {\n    issue(input: $input) {\n      ...IssueFields\n    }\n  }\n"];
+export function gql(source: "\n  query GetIssue($input: QueryIssueInput) {\n    issue(input: $input) {\n      ...IssueFields\n      links {\n        ...IssueFields\n        linkType\n        linkedIssueId\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetIssue($input: QueryIssueInput) {\n    issue(input: $input) {\n      ...IssueFields\n      links {\n        ...IssueFields\n        linkType\n        linkedIssueId\n      }\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  query GetIssues($input: QueryIssueInput) {\n    issues(input: $input) {\n      ...IssueFields\n      project {\n        ...ProjectOnlyFields\n      }\n      links {\n        ...IssueFields\n        linkType\n        linkedIssueId\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetIssues($input: QueryIssueInput) {\n    issues(input: $input) {\n      ...IssueFields\n      project {\n        ...ProjectOnlyFields\n      }\n      links {\n        ...IssueFields\n        linkType\n        linkedIssueId\n      }\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -179,6 +190,10 @@ export function gql(source: "\n  query GetBoardIssues($input: QueryBoardInput!) 
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  mutation UpdateMe($input: UpdateMeInput!) {\n    updateMe(input: $input) {\n      ...UserFields\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateMe($input: UpdateMeInput!) {\n    updateMe(input: $input) {\n      ...UserFields\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  mutation CreateIssueLink($input: CreateIssueLinkInput!) {\n    createIssueLink(input: $input) {\n      message\n      status\n    }\n  }\n"): (typeof documents)["\n  mutation CreateIssueLink($input: CreateIssueLinkInput!) {\n    createIssueLink(input: $input) {\n      message\n      status\n    }\n  }\n"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};

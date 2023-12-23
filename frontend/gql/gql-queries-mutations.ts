@@ -413,3 +413,12 @@ export const UPDATE_ME = gql(/* GraphQL */ `
     }
   }
 `);
+
+export const CREATE_ISSUE_LINK_MUTATION = gql(/* GraphQL */ `
+  mutation CreateIssueLink($input: CreateIssueLinkInput!) {
+    createIssueLink(input: $input) {
+      message
+      status
+    }
+  }
+`);

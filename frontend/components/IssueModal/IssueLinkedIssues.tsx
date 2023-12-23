@@ -5,8 +5,12 @@ import {
   XMarkIcon,
 } from '@heroicons/react/20/solid';
 import { priorityToIcon } from '@/components/Icons';
-import { GET_ISSUE_QUERY, GET_ISSUES_QUERY } from '@/gql/gql-queries-mutations';
-import { useLazyQuery, useQuery } from '@apollo/client';
+import {
+  CREATE_ISSUE_LINK_MUTATION,
+  GET_ISSUE_QUERY,
+  GET_ISSUES_QUERY,
+} from '@/gql/gql-queries-mutations';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
 import { groupBy, lowerCase, startCase } from 'lodash';
 import { BsPlus } from 'react-icons/bs';
 import { Issue } from '@/gql/__generated__/graphql';
@@ -16,6 +20,11 @@ import { debounce } from 'lodash';
 
 type Links = {
   [key: string]: Issue[];
+};
+
+type LinkIssueCreate = {
+  selectedIssue?: Issue;
+  linkType?: string;
 };
 
 const linkTypes = [
@@ -30,9 +39,22 @@ const linkTypes = [
 
 // TODO: Hide the handlebars
 // TODO: When searching show results expanded always
-const LinkIssueSearch = () => {
-  const [selected, setSelected] = useState();
+const LinkIssueSearch = ({
+  stateCallback,
+}: {
+  stateCallback?: (args: any) => void;
+}) => {
+  const [selected, setSelected] = useState({});
   const [query, setQuery] = useState('');
+
+  useEffect(() => {
+    if (selected && stateCallback) {
+      stateCallback((prevState: any) => ({
+        ...prevState,
+        selectedIssue: selected,
+      }));
+    }
+  }, [selected]);
 
   const [searchIssues, { data, error, loading }] = useLazyQuery(
     GET_ISSUES_QUERY,
@@ -70,7 +92,7 @@ const LinkIssueSearch = () => {
           <div className='relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm'>
             <Combobox.Input
               className='w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0'
-              displayValue={(issue: any) => issue.title}
+              displayValue={(issue: any) => issue?.title}
               onChange={debouncedResults}
               placeholder='Search for an issue'
             />
@@ -138,17 +160,37 @@ const LinkIssueSearch = () => {
 // TODO: there is a CSS bug that crops the dropdown in a modal
 const LinkIssueTypeDropdown = ({
   selectedLinkType,
+  stateCallback,
 }: {
   selectedLinkType?: string;
+  stateCallback?: (args: any) => void;
 }) => {
   const [selected, setSelected] = useState(linkTypes[0]);
+
+  useEffect(() => {
+    if (stateCallback) {
+      stateCallback((prevState: any) => ({
+        ...prevState,
+        linkType: selected.value,
+      }));
+    }
+  }, [selected]);
 
   useEffect(() => {
     if (selectedLinkType) {
       const linkType = linkTypes.find(
         (link) => link.value === selectedLinkType
       );
-      if (linkType) setSelected(linkType);
+      if (linkType) {
+        setSelected(linkType);
+
+        if (stateCallback) {
+          stateCallback((prevState: any) => ({
+            ...prevState,
+            linkType: linkType.value,
+          }));
+        }
+      }
     }
   }, [selectedLinkType]);
 
@@ -218,10 +260,14 @@ const IssueLinkedIssues = ({
   projectKey?: string;
 }) => {
   const [showCreateLink, setShowCreateLink] = useState(false);
+  const [linkIssueCreate, setLinkIssueCreate] = useState<
+    LinkIssueCreate | undefined
+  >({});
   const { data, error, loading } = useQuery(GET_ISSUE_QUERY, {
     skip: !issueId,
     variables: { input: { id: issueId } },
   });
+  const [createIssueLink] = useMutation(CREATE_ISSUE_LINK_MUTATION);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -285,9 +331,9 @@ const IssueLinkedIssues = ({
       {showCreateLink && (
         <>
           <div className='flex items-center gap-x-1 pt-2'>
-            <LinkIssueTypeDropdown />
+            <LinkIssueTypeDropdown stateCallback={setLinkIssueCreate} />
             <div className='grow'>
-              <LinkIssueSearch />
+              <LinkIssueSearch stateCallback={setLinkIssueCreate} />
             </div>
           </div>
           <div className='flex justify-between pt-1'>
@@ -296,7 +342,32 @@ const IssueLinkedIssues = ({
               <Button
                 variant='primary'
                 onClick={() => {
-                  //   TODO:
+                  // TODO: move this out into component handler
+                  // TODO: there is a bug when you add a link to same issue twice it only shows last one
+                  if (
+                    linkIssueCreate?.selectedIssue?.id &&
+                    linkIssueCreate?.linkType
+                  ) {
+                    createIssueLink({
+                      onCompleted: () => {
+                        setShowCreateLink(false);
+                        setLinkIssueCreate({});
+                      },
+                      refetchQueries: [
+                        {
+                          query: GET_ISSUE_QUERY,
+                          variables: { input: { id: issueId } },
+                        },
+                      ],
+                      variables: {
+                        input: {
+                          issueId: issueId,
+                          linkedIssueId: linkIssueCreate.selectedIssue.id,
+                          linkType: linkIssueCreate.linkType,
+                        },
+                      },
+                    });
+                  }
                 }}
               >
                 Link
