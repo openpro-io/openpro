@@ -26,6 +26,7 @@ const Dashboard: React.FC = () => {
         input: {
           name: createProjectData.name,
           key: createProjectData.key,
+          visibility: createProjectData.visibility,
           description: '',
           boardName: 'Default',
           boardStyle: createProjectData.projectTypeName.toUpperCase(),

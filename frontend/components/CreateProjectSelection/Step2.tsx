@@ -1,10 +1,12 @@
-import { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, Fragment, SetStateAction } from 'react';
 import { CreateProjectDetails } from '@/constants/types';
-import { useFormik } from 'formik';
+import { useField, useFormik, useFormikContext } from 'formik';
 import { object, string } from 'yup';
 import { apolloClient } from '@/services/apollo-client';
 import { CREATE_PROJECT_VALIDATION_QUERY } from '@/gql/gql-queries-mutations';
 import { Button } from '@/components/Button';
+import { Listbox, Transition } from '@headlessui/react';
+import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
 
 // Function to check if the field is unique
 const createProjectValidationQuery = async ({
@@ -27,6 +29,12 @@ const createProjectValidationQuery = async ({
 
   return response.data.createProjectValidation.status === 'success';
 };
+
+const projectVisibilityOptions = [
+  { key: 'PRIVATE', value: 'PRIVATE' },
+  { key: 'INTERNAL', value: 'INTERNAL' },
+  { key: 'PUBLIC', value: 'PUBLIC' },
+];
 
 const projectDetailsSchema = object({
   name: string()
@@ -53,7 +61,95 @@ const projectDetailsSchema = object({
 
       return await createProjectValidationQuery({ key: value });
     }),
+  visibility: string()
+    .oneOf(projectVisibilityOptions.map((x) => x.value))
+    .required(),
 });
+
+interface FormikProps {
+  initialValues: {
+    [key: string]: string;
+  };
+  values: {
+    [key: string]: string;
+  };
+  setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void;
+  // include other needed formik methods and properties here
+}
+
+interface SelectProps {
+  formik: FormikProps;
+  name: string;
+  label: string;
+  options: { key: string; value: string }[];
+}
+
+const ProjectVisibilityDropdown: React.FC<SelectProps> = ({
+  formik,
+  name,
+  label,
+  options,
+}) => {
+  return (
+    <Listbox
+      name={name}
+      value={formik.values[name]}
+      onChange={(value: string) => {
+        console.log({ value });
+        formik.setFieldValue(name, value);
+      }}
+    >
+      <div className='relative mt-1'>
+        <Listbox.Button className='relative w-full cursor-default rounded-lg bg-surface-overlay py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm'>
+          <span className='block truncate'>{formik.values[name]}</span>
+          <span className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2'>
+            <ChevronUpDownIcon
+              className='h-5 w-5 text-gray-400'
+              aria-hidden='true'
+            />
+          </span>
+        </Listbox.Button>
+        <Transition
+          as={Fragment}
+          leave='transition ease-in duration-100'
+          leaveFrom='opacity-100'
+          leaveTo='opacity-0'
+        >
+          <Listbox.Options className='absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-surface-overlay py-1 shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm'>
+            {options.map((option) => (
+              <Listbox.Option
+                key={option.key}
+                className={({ active }) =>
+                  `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                    active ? 'bg-blue-300 text-blue-900' : 'text-primary'
+                  }`
+                }
+                value={option.value}
+              >
+                {({ selected }) => (
+                  <>
+                    <span
+                      className={`block truncate ${
+                        selected ? 'font-medium' : 'font-normal'
+                      }`}
+                    >
+                      {option.value}
+                    </span>
+                    {selected ? (
+                      <span className='absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600'>
+                        <CheckIcon className='h-5 w-5' aria-hidden='true' />
+                      </span>
+                    ) : null}
+                  </>
+                )}
+              </Listbox.Option>
+            ))}
+          </Listbox.Options>
+        </Transition>
+      </div>
+    </Listbox>
+  );
+};
 
 // TODO: make sure key + name is unique in the database for projects
 const Step2 = ({
@@ -65,6 +161,7 @@ const Step2 = ({
     initialValues: {
       key: '',
       name: '',
+      visibility: 'INTERNAL',
     },
     validationSchema: projectDetailsSchema,
     onSubmit: (values) => {
@@ -146,6 +243,23 @@ const Step2 = ({
                 {formik.touched.key && formik.errors.key ? (
                   <div className='text-red-500'>{formik.errors.key}</div>
                 ) : null}
+              </div>
+            </div>
+
+            <div className='sm:col-span-4'>
+              <label
+                htmlFor='visibility'
+                className='block text-sm font-medium leading-6'
+              >
+                Visibility
+              </label>
+              <div className='mt-2'>
+                <ProjectVisibilityDropdown
+                  formik={formik}
+                  name='visibility'
+                  label='Visibility'
+                  options={projectVisibilityOptions}
+                />
               </div>
             </div>
           </div>

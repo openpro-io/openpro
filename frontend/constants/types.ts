@@ -86,6 +86,7 @@ export type IssueStatus = {
 export type CreateProjectDetails = {
   name: string;
   key: string;
+  visibility: string;
 };
 
 export type CreateProjectType = {
