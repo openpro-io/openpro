@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid';
@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@apollo/client';
 import { GET_PROJECTS } from '@/gql/gql-queries-mutations';
 import { GetProjectsQuery, Project } from '@/gql/__generated__/graphql';
+import Link from 'next/link';
 
 const cols = [
   'ID',
@@ -22,7 +23,7 @@ const cols = [
 ];
 
 // TODO: Make this its own component?
-const ProjectOptionsDropdown = () => {
+const ProjectOptionsDropdown = ({ projectId }: { projectId: string }) => {
   return (
     <Menu as='div' className='relative inline-block text-left'>
       <div>
@@ -48,12 +49,12 @@ const ProjectOptionsDropdown = () => {
           <div className='py-1'>
             <Menu.Item>
               {({ active }) => (
-                <a
-                  href='#'
+                <Link
+                  href={`/projects/${projectId}/settings`}
                   className={'block px-4 py-2 text-sm hover:bg-neutral-pressed'}
                 >
                   Project settings
-                </a>
+                </Link>
               )}
             </Menu.Item>
             <Menu.Item>
@@ -189,8 +190,13 @@ const ProjectList = () => {
                 {itemsOnPage?.map((project) => (
                   <tr
                     onClick={(e) => {
-                      // @ts-ignore
-                      if (e?.target?.id !== 'ProjectOptionsDropdown') {
+                      // TODO: lets better handle this
+                      const target = e?.target as HTMLAnchorElement;
+
+                      if (
+                        target?.id !== 'ProjectOptionsDropdown' &&
+                        (!target?.href || target?.href.trim() === '')
+                      ) {
                         push(
                           `/projects/${project.id}/boards/${project.boards?.[0]?.id}`
                         );
@@ -220,7 +226,7 @@ const ProjectList = () => {
                       {project?.description}
                     </td>
                     <td className='whitespace-nowrap px-3 py-1'>
-                      <ProjectOptionsDropdown />
+                      <ProjectOptionsDropdown projectId={`${project.id}`} />
                     </td>
                   </tr>
                 ))}

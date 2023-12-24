@@ -14,6 +14,7 @@ import ProjectTag from './project-tag.js';
 import IssueTag from './issue-tag.js';
 import IssueBoard from './issue-board.js';
 import IssueLinks from './issue-links.js';
+import ProjectPermissions from './project-permissions.js';
 
 export const db = {};
 
@@ -33,6 +34,7 @@ const init = async () => {
   db.IssueTag = IssueTag(db.sequelize, DataTypes);
   db.IssueBoard = IssueBoard(db.sequelize, DataTypes);
   db.IssueLinks = IssueLinks(db.sequelize, DataTypes);
+  db.ProjectPermissions = ProjectPermissions(db.sequelize, DataTypes);
 
   Object.values(db).forEach((model) => {
     if (model.associate) {

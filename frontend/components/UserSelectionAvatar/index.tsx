@@ -1,4 +1,4 @@
-import { User } from '@/constants/types';
+import { User } from '@/gql/__generated__/graphql';
 
 const UserSelectionAvatar = ({
   selectedPerson,

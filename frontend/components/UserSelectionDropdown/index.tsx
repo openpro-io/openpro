@@ -4,9 +4,8 @@ import { Combobox } from '@headlessui/react';
 import { classNames, formatUser } from '@/services/utils';
 import { useQuery } from '@apollo/client';
 import { GET_USERS } from '@/gql/gql-queries-mutations';
-import Image from 'next/image';
-import { User } from '@/constants/types';
 import UserSelectionAvatar from '@/components/UserSelectionAvatar';
+import { User } from '@/gql/__generated__/graphql';
 
 // TODO: Add unassigned user
 

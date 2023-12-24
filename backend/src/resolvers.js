@@ -13,6 +13,43 @@ import { emitBoardUpdatedEvent, emitIssueUpdatedEvent } from './socket/events.js
 const resolvers = {
   Upload: GraphQLUpload,
   Mutation: {
+    addUserToProject: async (parent, { input: { userId, projectId } }, { db }) => {
+      const existingPermission = await db.sequelize.models.ProjectPermission.findOne({
+        where: { userId, projectId },
+      });
+
+      if (existingPermission) {
+        return { message: 'User added to project', status: 'success' };
+      }
+
+      // Add the user to the project
+      await db.sequelize.models.ProjectPermission.create({
+        userId,
+        projectId,
+      });
+
+      return { message: 'User added to project', status: 'success' };
+    },
+    removeUserFromProject: async (parent, { input: { userId, projectId } }, { db, user }) => {
+      if (user.id === userId) {
+        throw new Error('You cannot remove yourself from the project');
+      }
+
+      const existingPermission = await db.sequelize.models.ProjectPermission.findOne({
+        where: { userId, projectId },
+      });
+
+      if (!existingPermission) {
+        throw new Error('User is not added to the project');
+      }
+
+      // Remove the user from the project
+      await db.sequelize.models.ProjectPermission.destroy({
+        where: { userId, projectId },
+      });
+
+      return { message: 'User removed from project', status: 'success' };
+    },
     deleteIssueLink: async (parent, { input: { issueId, linkType, linkedIssueId } }, { db }) => {
       await db.sequelize.models.IssueLinks.destroy({
         where: {
@@ -319,6 +356,11 @@ const resolvers = {
         visibility: input.visibility ?? 'INTERNAL',
       });
 
+      await db.sequelize.models.ProjectPermission.create({
+        userId: input.userId,
+        projectId: project.id,
+      });
+
       const projectId = Number(project.id);
 
       // TODO: We should create mappings for these statuses
@@ -363,6 +405,7 @@ const resolvers = {
     },
   },
   User: {
+    name: (parent) => `${parent?.firstName} ${parent?.lastName}`,
     avatarUrl: async (parent, args, { db }) => {
       const findAvatarAsset = await db.sequelize.models.Asset.findByPk(parent.avatarAssetId);
 
@@ -421,7 +464,14 @@ const resolvers = {
       }
     },
     projects: (parent, args, { db }) => {
-      return db.sequelize.models.Project.findAll();
+      return db.sequelize.models.Project.findAll({
+        include: [
+          {
+            model: db.sequelize.models.User,
+            as: 'users',
+          },
+        ],
+      });
     },
     createProjectValidation: async (parent, { input }, { db }) => {
       const { name, key } = input;
@@ -449,7 +499,14 @@ const resolvers = {
     },
     project: (parent, args, { db }) => {
       const { id } = args?.input;
-      return db.sequelize.models.Project.findByPk(id);
+      return db.sequelize.models.Project.findByPk(id, {
+        include: [
+          {
+            model: db.sequelize.models.User,
+            as: 'users',
+          },
+        ],
+      });
     },
     projectTags: (parent, { input: { projectId, id, name } }, { db }) => {
       const where = { projectId };

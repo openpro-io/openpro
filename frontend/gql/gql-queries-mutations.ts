@@ -30,6 +30,9 @@ export const PROJECT_FIELDS = gql(/* GraphQL */ `
     issues {
       ...IssueFields
     }
+    users {
+      ...UserFields
+    }
   }
 `);
 
@@ -83,6 +86,8 @@ export const USER_FIELDS = gql(/* GraphQL */ `
   fragment UserFields on User {
     id
     email
+    externalId
+    name
     firstName
     lastName
     avatarUrl
@@ -165,10 +170,10 @@ export const GET_PROJECT_INFO = gql(/* GraphQL */ `
     $issueInput: QueryIssueInput
   ) {
     project(input: $input) {
-      id
-      name
-      key
-      description
+      ...ProjectOnlyFields
+      users {
+        ...UserFields
+      }
       boards {
         id
         viewState {
@@ -422,6 +427,24 @@ export const CREATE_ISSUE_LINK_MUTATION = gql(/* GraphQL */ `
 export const DELETE_ISSUE_LINK_MUTATION = gql(/* GraphQL */ `
   mutation DeleteIssueLink($input: DeleteIssueLinkInput!) {
     deleteIssueLink(input: $input) {
+      message
+      status
+    }
+  }
+`);
+
+export const ADD_USER_TO_PROJECT_MUTATION = gql(/* GraphQL */ `
+  mutation AddUserToProject($input: AddUserToProjectInput!) {
+    addUserToProject(input: $input) {
+      message
+      status
+    }
+  }
+`);
+
+export const REMOVE_USER_FROM_PROJECT_MUTATION = gql(/* GraphQL */ `
+  mutation RemoveUserFromProject($input: RemoveUserFromProjectInput!) {
+    removeUserFromProject(input: $input) {
       message
       status
     }

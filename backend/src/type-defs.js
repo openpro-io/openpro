@@ -48,6 +48,7 @@ const typeDefs = gql`
     externalId: String
     firstName: String
     lastName: String
+    name: String
     email: String
     avatarUrl: String
   }
@@ -74,6 +75,7 @@ const typeDefs = gql`
     issueStatuses: [IssueStatus]
     issues(input: QueryIssueInput): [Issue]
     tags: [ProjectTag]
+    users: [User]
     issueCount: Int
   }
 
@@ -306,9 +308,22 @@ const typeDefs = gql`
     linkedIssueId: String!
   }
 
+  input AddUserToProjectInput {
+    userId: String!
+    projectId: String!
+  }
+
+  input RemoveUserFromProjectInput {
+    userId: String!
+    projectId: String!
+  }
+
   # Mutations
   type Mutation {
     createProject(input: CreateProjectInput): Project
+
+    addUserToProject(input: AddUserToProjectInput!): MessageAndStatus
+    removeUserFromProject(input: RemoveUserFromProjectInput!): MessageAndStatus
 
     createProjectTag(input: CreateProjectTagInput!): ProjectTag
     deleteProjectTag(input: DeleteProjectTagInput!): MessageAndStatus

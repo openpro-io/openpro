@@ -1,7 +1,7 @@
 import React from 'react';
 // import Image from 'next/image';
 import { classNames, formatUser } from '@/services/utils';
-import { User } from '@/constants/types';
+import { User } from '@/gql/__generated__/graphql';
 
 const DefaultAvatar = ({ className }: { className?: string }) => (
   <span

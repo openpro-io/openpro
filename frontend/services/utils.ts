@@ -1,4 +1,3 @@
-import { User } from '@/constants/types';
 import { cloneDeep, set } from 'lodash';
 import {
   NEXT_PUBLIC_API_URL,
@@ -7,6 +6,7 @@ import {
   PUBLIC_KEYCLOAK_URL,
   PUBLIC_NEXTAUTH_URL,
 } from '@/services/config';
+import { User } from '@/gql/__generated__/graphql';
 
 const registrationEndpoint = `${PUBLIC_KEYCLOAK_URL}/realms/${PUBLIC_KEYCLOAK_REALM}/protocol/openid-connect/registrations`;
 
@@ -45,7 +45,8 @@ export const formatUserFullName = (user: User): string => {
 export const formatUser = (user: User): User => ({
   ...user,
   avatarUrl: formatUserAvatarUrl(user?.avatarUrl),
-  name: formatUserFullName(user),
+  // @ts-ignore
+  name: user?.name ?? formatUserFullName(user),
 });
 
 // TODO: use nanoid

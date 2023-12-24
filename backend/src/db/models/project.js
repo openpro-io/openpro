@@ -1,4 +1,6 @@
 'use strict';
+import ProjectPermissions from './project-permissions.js';
+
 export default (sequelize, DataTypes) => {
   const Project = sequelize.define(
     'Project',
@@ -52,8 +54,14 @@ export default (sequelize, DataTypes) => {
     }
   );
 
-  Project.associate = ({ ProjectTag }) => {
+  Project.associate = ({ ProjectTag, Users, ProjectPermissions }) => {
     Project.hasMany(ProjectTag, { foreignKey: 'project_id' });
+    Project.belongsToMany(Users, {
+      through: ProjectPermissions,
+      foreignKey: 'project_id',
+      otherKey: 'user_id',
+      as: 'users',
+    });
   };
 
   return Project;
