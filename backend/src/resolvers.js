@@ -465,6 +465,7 @@ const resolvers = {
     },
     projects: (parent, args, { db }) => {
       return db.sequelize.models.Project.findAll({
+        order: [['id', 'ASC']],
         include: [
           {
             model: db.sequelize.models.User,
