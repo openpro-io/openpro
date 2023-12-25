@@ -150,9 +150,9 @@ const resolvers = {
       });
     },
     deleteIssueComment: async (parent, { input }, { db }) => {
-      const { id } = input;
+      const { commentId } = input;
 
-      const findIssueComment = await db.sequelize.models.IssueComment.findByPk(id);
+      const findIssueComment = await db.sequelize.models.IssueComment.findByPk(commentId);
 
       if (!findIssueComment) {
         throw new Error('Issue comment not found');
@@ -164,6 +164,20 @@ const resolvers = {
         message: 'deleted comment',
         status: 'success',
       };
+    },
+    updateIssueComment: async (parent, { input }, { db }) => {
+      const { commentId, comment } = input;
+
+      const findIssueComment = await db.sequelize.models.IssueComment.findByPk(commentId);
+
+      if (!findIssueComment) {
+        throw new Error('Issue comment not found');
+      }
+
+      findIssueComment.comment = comment;
+      await findIssueComment.save();
+
+      return findIssueComment;
     },
     deleteAsset: async (parent, { input }, { db }) => {
       const { assetId } = input;

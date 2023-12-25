@@ -211,6 +211,14 @@ export const CREATE_ISSUE_COMMENT_MUTATION = gql(/* GraphQL */ `
   }
 `);
 
+export const UPDATE_ISSUE_COMMENT_MUTATION = gql(/* GraphQL */ `
+  mutation UpdateIssueComment($input: UpdateIssueCommentInput!) {
+    updateIssueComment(input: $input) {
+      ...IssueCommentFields
+    }
+  }
+`);
+
 export const DELETE_ISSUE_COMMENT_MUTATION = gql(/* GraphQL */ `
   mutation DeleteIssueCommentMutations($input: DeleteIssueCommentInput!) {
     deleteIssueComment(input: $input) {
