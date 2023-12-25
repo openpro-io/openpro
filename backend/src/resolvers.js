@@ -334,16 +334,10 @@ const resolvers = {
     deleteIssue: async (parent, { input }, { db }) => {
       const { id } = input;
 
-      await db.sequelize.transaction(async (t) => {
-        await db.sequelize.models.Issue.destroy({
-          where: {
-            id,
-          },
-          transaction: t,
-        });
-
-        // TODO: not needed due to cascade
-        await db.sequelize.models.IssueComment.destroy({ where: { issueId: id }, transaction: t });
+      await db.sequelize.models.Issue.destroy({
+        where: {
+          id,
+        },
       });
 
       return { message: 'issue deleted', status: 'success' };
