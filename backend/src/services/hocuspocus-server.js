@@ -39,7 +39,7 @@ const hocuspocusServer = Server.configure({
               },
             });
 
-            if (!comment) resolve(null);
+            if (!comment) return resolve(null);
 
             const commentAsUnit8Array = new Uint8Array(comment.commentRaw);
             resolve(commentAsUnit8Array.length === 0 ? null : commentAsUnit8Array);
