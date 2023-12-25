@@ -149,6 +149,22 @@ const resolvers = {
         comment,
       });
     },
+    deleteIssueComment: async (parent, { input }, { db }) => {
+      const { id } = input;
+
+      const findIssueComment = await db.sequelize.models.IssueComment.findByPk(id);
+
+      if (!findIssueComment) {
+        throw new Error('Issue comment not found');
+      }
+
+      await findIssueComment.destroy();
+
+      return {
+        message: 'deleted comment',
+        status: 'success',
+      };
+    },
     deleteAsset: async (parent, { input }, { db }) => {
       const { assetId } = input;
 

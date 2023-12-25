@@ -2,15 +2,25 @@
 
 import React from 'react';
 import { formatUser } from '@/services/utils';
-import { useFragment } from '@apollo/client';
-import { ISSUE_FIELDS } from '@/gql/gql-queries-mutations';
+import { useFragment, useMutation } from '@apollo/client';
+import {
+  DELETE_ISSUE_COMMENT_MUTATION,
+  GET_ISSUE_QUERY,
+  ISSUE_FIELDS,
+} from '@/gql/gql-queries-mutations';
 import { useSearchParams } from 'next/navigation';
 import { DateTime } from 'luxon';
 import IssueCommentEditorTipTap from '@/components/IssueModal/IssueCommentEditorTipTap';
 import EditorRenderOnly from '@/components/Editor/EditorRenderOnly';
 import Avatar from '@/components/Avatar';
 
+type DeleteComment = {
+  commentId: string;
+  issueId: string;
+};
+
 const IssueComments = ({ issueId }: { issueId?: string }) => {
+  const [deleteIssueComment] = useMutation(DELETE_ISSUE_COMMENT_MUTATION);
   const searchParams = useSearchParams()!;
   const params = new URLSearchParams(searchParams);
   const selectedIssueId = issueId ?? params.get('selectedIssueId');
@@ -22,6 +32,26 @@ const IssueComments = ({ issueId }: { issueId?: string }) => {
       id: `${selectedIssueId}`,
     },
   });
+
+  const handleDeleteIssueComment = ({ commentId, issueId }: DeleteComment) => {
+    if (!issueId || !commentId) {
+      return;
+    }
+
+    return deleteIssueComment({
+      refetchQueries: [
+        {
+          query: GET_ISSUE_QUERY,
+          variables: { input: { id: issueId } },
+        },
+      ],
+      variables: {
+        input: {
+          id: commentId,
+        },
+      },
+    });
+  };
 
   return (
     <>
@@ -53,9 +83,21 @@ const IssueComments = ({ issueId }: { issueId?: string }) => {
                 </div>
                 <div>
                   {' '}
-                  <a href='#' className='hover:text-red-700'>
+                  <button
+                    onClick={() => {
+                      if (!comment.id || !issueId) {
+                        return;
+                      }
+
+                      handleDeleteIssueComment({
+                        issueId,
+                        commentId: comment.id,
+                      });
+                    }}
+                    className='hover:text-red-700'
+                  >
                     delete
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>

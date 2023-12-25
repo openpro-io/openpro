@@ -244,6 +244,10 @@ const typeDefs = gql`
     comment: String!
   }
 
+  input DeleteIssueCommentInput {
+    id: String!
+  }
+
   input CreateIssueStatusInput {
     projectId: String!
     name: String!
@@ -343,6 +347,7 @@ const typeDefs = gql`
     assignAssetAsAvatar(input: AssignAssetAsAvatarInput!): Asset
 
     createIssueComment(input: CreateIssueCommentInput!): IssueComment
+    deleteIssueComment(input: DeleteIssueCommentInput!): MessageAndStatus
 
     createIssueLink(input: CreateIssueLinkInput!): MessageAndStatus
     deleteIssueLink(input: DeleteIssueLinkInput!): MessageAndStatus

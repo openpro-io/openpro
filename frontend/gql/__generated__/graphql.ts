@@ -122,6 +122,10 @@ export type DeleteAssetInput = {
   assetId: Scalars['String']['input'];
 };
 
+export type DeleteIssueCommentInput = {
+  id: Scalars['String']['input'];
+};
+
 export type DeleteIssueInput = {
   id: Scalars['String']['input'];
 };
@@ -202,6 +206,7 @@ export type Mutation = {
   createProjectTag?: Maybe<ProjectTag>;
   deleteAsset?: Maybe<MessageAndStatus>;
   deleteIssue?: Maybe<MessageAndStatus>;
+  deleteIssueComment?: Maybe<MessageAndStatus>;
   deleteIssueLink?: Maybe<MessageAndStatus>;
   deleteProjectTag?: Maybe<MessageAndStatus>;
   removeUserFromProject?: Maybe<MessageAndStatus>;
@@ -264,6 +269,11 @@ export type MutationDeleteAssetArgs = {
 
 export type MutationDeleteIssueArgs = {
   input: DeleteIssueInput;
+};
+
+
+export type MutationDeleteIssueCommentArgs = {
+  input: DeleteIssueCommentInput;
 };
 
 
