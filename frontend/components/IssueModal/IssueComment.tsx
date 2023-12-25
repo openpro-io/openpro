@@ -9,12 +9,10 @@ import Editor from '@/components/Editor';
 import { Button } from '@/components/Button';
 
 const IssueComment = ({
-  issueId,
   comment,
   handleDeleteIssueComment,
   handleUpdateIssueComment,
 }: {
-  issueId: string;
   comment: any;
   handleDeleteIssueComment: ({ commentId }: { commentId: string }) => void;
   handleUpdateIssueComment: ({
@@ -57,7 +55,7 @@ const IssueComment = ({
             <Editor
               onUpdateCallback={onUpdateCallback}
               defaultContent={content}
-              documentName={`comment.${selectedCommentId}`}
+              documentName={`issueComment.${selectedCommentId}.comment`}
             />
             <div className='gap-x-1 pb-10'>
               <Button
