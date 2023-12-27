@@ -348,7 +348,7 @@ const resolvers = {
 
       return { message: 'issue deleted', status: 'success' };
     },
-    createProject: async (parent, { input }, { db }) => {
+    createProject: async (parent, { input }, { db, user }) => {
       // TODO: we should do a sequelize transaction here
       const project = await db.sequelize.models.Project.create({
         name: input.name,
@@ -357,7 +357,7 @@ const resolvers = {
       });
 
       await db.sequelize.models.ProjectPermission.create({
-        userId: input.userId,
+        userId: user.id,
         projectId: project.id,
       });
 
