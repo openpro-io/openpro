@@ -24,10 +24,12 @@ import 'highlight.js/styles/atom-one-dark.css';
 const lowlight = createLowlight(common);
 
 import ImageExtension from './image';
+import suggestion from './suggestion';
 
 import { DeleteImage } from '../types/delete-image';
 import { isValidHttpUrl } from '../utils';
 import { Typography } from '@tiptap/extension-typography';
+import { Mention } from '@tiptap/extension-mention';
 
 export const CoreEditorExtensions = (
   deleteFile: DeleteImage,
@@ -109,4 +111,11 @@ export const CoreEditorExtensions = (
   Typography,
   ColorHighlighter,
   SmilieReplacer,
+  Mention.configure({
+    HTMLAttributes: {
+      class:
+        'border border-primary rounded-md box-decoration-clone px-1 py-0.5 bg-surface-overlay-hovered',
+    },
+    suggestion,
+  }),
 ];
