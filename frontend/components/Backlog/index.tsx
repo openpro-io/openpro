@@ -57,22 +57,36 @@ type DNDType = {
   }[];
 };
 
+type BacklogState = {
+  isIssueModalOpen: boolean;
+  containers: DNDType[];
+  activeId: UniqueIdentifier | null;
+  currentContainerId: UniqueIdentifier | null;
+  containerName: string;
+  itemName: string;
+  showAddContainerModal: boolean;
+  showAddItemModal: boolean;
+  saveToBackend: boolean;
+};
+
 export default function Backlog({ projectId }: { projectId: string }) {
   const searchParams = useSearchParams()!;
   const params = new URLSearchParams(searchParams);
   const selectedIssueId = params.get('selectedIssueId');
 
-  const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
-  const [containers, setContainers] = useState<DNDType[]>([]);
-  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
-  const [currentContainerId, setCurrentContainerId] =
-    useState<UniqueIdentifier>();
-  const [containerName, setContainerName] = useState('');
-  const [itemName, setItemName] = useState('');
-  const [showAddContainerModal, setShowAddContainerModal] = useState(false);
-  const [showAddItemModal, setShowAddItemModal] = useState(false);
-  const [saveToBackend, setSaveToBackend] = useState(false);
   const { socket, connected, error } = useAuthenticatedSocket();
+
+  const [backlogState, setBacklogState] = useState<BacklogState>({
+    isIssueModalOpen: false,
+    containers: [],
+    activeId: null,
+    currentContainerId: null,
+    containerName: '',
+    itemName: '',
+    showAddContainerModal: false,
+    showAddItemModal: false,
+    saveToBackend: false,
+  });
 
   const [createIssue, createIssueProps] = useMutation(CREATE_ISSUE_MUTATION);
   const [updateIssue] = useMutation(UPDATE_ISSUE_MUTATION);
@@ -85,39 +99,51 @@ export default function Backlog({ projectId }: { projectId: string }) {
 
   // On page load we open the modal if there is a query param for the issue
   useEffect(() => {
-    if (selectedIssueId && !isIssueModalOpen) {
-      setIsIssueModalOpen(true);
-    } else if (!selectedIssueId && isIssueModalOpen) {
-      setIsIssueModalOpen(false);
+    if (selectedIssueId && !backlogState.isIssueModalOpen) {
+      setBacklogState({
+        ...backlogState,
+        isIssueModalOpen: true,
+      });
+    } else if (!selectedIssueId && backlogState.isIssueModalOpen) {
+      setBacklogState({
+        ...backlogState,
+        isIssueModalOpen: false,
+      });
     }
   }, [selectedIssueId]);
 
   const onAddContainer = async () => {
-    if (!containerName) return;
+    if (!backlogState.containerName) return;
 
     const newIssueStatusResp = await addIssueStatus({
-      variables: { input: { projectId, name: containerName } },
+      variables: { input: { projectId, name: backlogState.containerName } },
     });
 
     const newIssueStatus = newIssueStatusResp.data.createIssueStatus;
 
     const id = `container-${newIssueStatus.id}`;
-    setContainers([
-      ...containers,
-      {
-        id,
-        title: containerName,
-        items: [],
-      },
-    ]);
-    setContainerName('');
-    setShowAddContainerModal(false);
+
+    setBacklogState((prevState) => ({
+      ...prevState,
+      containers: [
+        ...prevState.containers,
+        {
+          id,
+          title: backlogState.containerName,
+          items: [],
+        },
+      ],
+      containerName: '',
+      showAddContainerModal: false,
+    }));
   };
 
   const onAddItem = async () => {
-    if (!itemName) return;
+    if (!backlogState.itemName) return;
 
-    const container = containers.find((item) => item.id === currentContainerId);
+    const container = backlogState.containers.find(
+      (item) => item.id === backlogState.currentContainerId
+    );
     if (!container) return;
 
     // @ts-ignore
@@ -132,7 +158,7 @@ export default function Backlog({ projectId }: { projectId: string }) {
       variables: {
         input: {
           projectId: `${projectId}`,
-          title: itemName,
+          title: backlogState.itemName,
           description: '',
           issueStatusId: `${
             issueStatusId > 0
@@ -150,7 +176,7 @@ export default function Backlog({ projectId }: { projectId: string }) {
     const notification = {
       type: 'notification',
       title: 'New Issue Created',
-      message: `Ticket title: ${itemName}`,
+      message: `Ticket title: ${backlogState.itemName}`,
       topic: `user:${session?.user?.id}`,
       tags: ['white_check_mark', 'openpro.notificationDuration=3000'],
     };
@@ -164,13 +190,17 @@ export default function Backlog({ projectId }: { projectId: string }) {
     const id = `item-${newIssue.id}`;
     container.items.push({
       id,
-      title: itemName,
+      title: backlogState.itemName,
       status: newIssue.status,
     });
-    setContainers([...containers]);
-    setItemName('');
-    setShowAddItemModal(false);
-    setSaveToBackend(true);
+
+    setBacklogState((prevState) => ({
+      ...prevState,
+      containers: [...prevState.containers],
+      itemName: '',
+      showAddItemModal: false,
+      saveToBackend: true,
+    }));
   };
 
   // This is called once we fetch data from server
@@ -211,16 +241,19 @@ export default function Backlog({ projectId }: { projectId: string }) {
         })),
     });
 
-    setContainers(buildContainers);
+    setBacklogState((prevState) => ({
+      ...prevState,
+      containers: buildContainers,
+    }));
   }, [getProjectInfo.data]);
 
   // Find the value of the items
   function findValueOfItems(id: UniqueIdentifier | undefined, type: string) {
     if (type === 'container') {
-      return containers.find((item) => item.id === id);
+      return backlogState.containers.find((item) => item.id === id);
     }
     if (type === 'item') {
-      return containers.find((container) =>
+      return backlogState.containers.find((container) =>
         container.items.find((item) => item.id === id)
       );
     }
@@ -278,8 +311,11 @@ export default function Backlog({ projectId }: { projectId: string }) {
 
   function handleDragStart(event: DragStartEvent) {
     const { active } = event;
-    const { id } = active;
-    setActiveId(id);
+
+    setBacklogState((prevState) => ({
+      ...prevState,
+      activeId: active.id,
+    }));
   }
 
   const handleDragMove = (event: DragMoveEvent) => {
@@ -301,10 +337,10 @@ export default function Backlog({ projectId }: { projectId: string }) {
       if (!activeContainer || !overContainer) return;
 
       // Find the index of the active and over container
-      const activeContainerIndex = containers.findIndex(
+      const activeContainerIndex = backlogState.containers.findIndex(
         (container) => container.id === activeContainer.id
       );
-      const overContainerIndex = containers.findIndex(
+      const overContainerIndex = backlogState.containers.findIndex(
         (container) => container.id === overContainer.id
       );
 
@@ -317,17 +353,20 @@ export default function Backlog({ projectId }: { projectId: string }) {
       );
       // In the same container
       if (activeContainerIndex === overContainerIndex) {
-        let newItems = [...containers];
+        let newItems = [...backlogState.containers];
         newItems[activeContainerIndex].items = arrayMove(
           newItems[activeContainerIndex].items,
           activeitemIndex,
           overitemIndex
         );
 
-        setContainers(newItems);
+        setBacklogState((prevState) => ({
+          ...prevState,
+          containers: newItems,
+        }));
       } else {
         // In different containers
-        let newItems = [...containers];
+        let newItems = [...backlogState.containers];
         const [removeditem] = newItems[activeContainerIndex].items.splice(
           activeitemIndex,
           1
@@ -337,7 +376,10 @@ export default function Backlog({ projectId }: { projectId: string }) {
           0,
           removeditem
         );
-        setContainers(newItems);
+        setBacklogState((prevState) => ({
+          ...prevState,
+          containers: newItems,
+        }));
       }
     }
 
@@ -357,10 +399,10 @@ export default function Backlog({ projectId }: { projectId: string }) {
       if (!activeContainer || !overContainer) return;
 
       // Find the index of the active and over container
-      const activeContainerIndex = containers.findIndex(
+      const activeContainerIndex = backlogState.containers.findIndex(
         (container) => container.id === activeContainer.id
       );
-      const overContainerIndex = containers.findIndex(
+      const overContainerIndex = backlogState.containers.findIndex(
         (container) => container.id === overContainer.id
       );
 
@@ -370,13 +412,16 @@ export default function Backlog({ projectId }: { projectId: string }) {
       );
 
       // Remove the active item from the active container and add it to the over container
-      let newItems = [...containers];
+      let newItems = [...backlogState.containers];
       const [removeditem] = newItems[activeContainerIndex].items.splice(
         activeitemIndex,
         1
       );
       newItems[overContainerIndex].items.push(removeditem);
-      setContainers(newItems);
+      setBacklogState((prevState) => ({
+        ...prevState,
+        containers: newItems,
+      }));
     }
   };
 
@@ -394,17 +439,20 @@ export default function Backlog({ projectId }: { projectId: string }) {
     ) {
       console.log('CONTAINER,CONTAINER');
       // Find the index of the active and over container
-      const activeContainerIndex = containers.findIndex(
+      const activeContainerIndex = backlogState.containers.findIndex(
         (container) => container.id === active.id
       );
-      const overContainerIndex = containers.findIndex(
+      const overContainerIndex = backlogState.containers.findIndex(
         (container) => container.id === over.id
       );
       // Swap the active and over container
-      let newItems = [...containers];
+      let newItems = [...backlogState.containers];
       newItems = arrayMove(newItems, activeContainerIndex, overContainerIndex);
-      setContainers(newItems);
-      console.log({ newItems, containers });
+
+      setBacklogState((prevState) => ({
+        ...prevState,
+        containers: newItems,
+      }));
     }
 
     // Handling item moving to another container
@@ -507,10 +555,10 @@ export default function Backlog({ projectId }: { projectId: string }) {
       // If the active or over container is not found, return
       if (!activeContainer || !overContainer) return;
       // Find the index of the active and over container
-      const activeContainerIndex = containers.findIndex(
+      const activeContainerIndex = backlogState.containers.findIndex(
         (container) => container.id === activeContainer.id
       );
-      const overContainerIndex = containers.findIndex(
+      const overContainerIndex = backlogState.containers.findIndex(
         (container) => container.id === overContainer.id
       );
       // Find the index of the active and over item
@@ -523,16 +571,19 @@ export default function Backlog({ projectId }: { projectId: string }) {
 
       // In the same container
       if (activeContainerIndex === overContainerIndex) {
-        let newItems = [...containers];
+        let newItems = [...backlogState.containers];
         newItems[activeContainerIndex].items = arrayMove(
           newItems[activeContainerIndex].items,
           activeitemIndex,
           overitemIndex
         );
-        setContainers(newItems);
+        setBacklogState((prevState) => ({
+          ...prevState,
+          containers: newItems,
+        }));
       } else {
         // In different containers
-        let newItems = [...containers];
+        let newItems = [...backlogState.containers];
         const [removeditem] = newItems[activeContainerIndex].items.splice(
           activeitemIndex,
           1
@@ -542,7 +593,10 @@ export default function Backlog({ projectId }: { projectId: string }) {
           0,
           removeditem
         );
-        setContainers(newItems);
+        setBacklogState((prevState) => ({
+          ...prevState,
+          containers: newItems,
+        }));
       }
     }
 
@@ -562,10 +616,10 @@ export default function Backlog({ projectId }: { projectId: string }) {
       // If the active or over container is not found, return
       if (!activeContainer || !overContainer) return;
       // Find the index of the active and over container
-      const activeContainerIndex = containers.findIndex(
+      const activeContainerIndex = backlogState.containers.findIndex(
         (container) => container.id === activeContainer.id
       );
-      const overContainerIndex = containers.findIndex(
+      const overContainerIndex = backlogState.containers.findIndex(
         (container) => container.id === overContainer.id
       );
       // Find the index of the active and over item
@@ -573,32 +627,48 @@ export default function Backlog({ projectId }: { projectId: string }) {
         (item) => item.id === active.id
       );
 
-      let newItems = [...containers];
+      let newItems = [...backlogState.containers];
       const [removeditem] = newItems[activeContainerIndex].items.splice(
         activeitemIndex,
         1
       );
 
       newItems[overContainerIndex].items.push(removeditem);
-      setContainers(newItems);
+      setBacklogState((prevState) => ({
+        ...prevState,
+        containers: newItems,
+      }));
     }
 
-    setSaveToBackend(true);
-    setActiveId(null);
+    setBacklogState((prevState) => ({
+      ...prevState,
+      saveToBackend: true,
+      activeId: null,
+    }));
   }
 
   return (
     <div className='mx-auto'>
       {/* Add Item Modal */}
-      <Modal showModal={showAddItemModal} setShowModal={setShowAddItemModal}>
+      <Modal
+        showModal={backlogState.showAddItemModal}
+        setShowModal={(value: boolean) => {
+          setBacklogState((prevState) => ({
+            ...prevState,
+            showAddItemModal: value,
+          }));
+        }}
+      >
         <div className='flex w-full flex-col items-start gap-y-4'>
           <h1 className='text-3xl font-bold'>Add Item</h1>
           <Input
             type='text'
             placeholder='Item Title'
             name='itemname'
-            value={itemName}
-            onChange={(e) => setItemName(e.target.value)}
+            value={backlogState.itemName}
+            onChange={(e) =>
+              setBacklogState({ ...backlogState, itemName: e.target.value })
+            }
           />
           <Button onClick={onAddItem}>Add Item</Button>
         </div>
@@ -613,15 +683,18 @@ export default function Backlog({ projectId }: { projectId: string }) {
             onDragMove={handleDragMove}
             onDragEnd={handleDragEnd}
           >
-            <SortableContext items={containers.map((i) => i.id)}>
-              {containers.map((container) => (
+            <SortableContext items={backlogState.containers.map((i) => i.id)}>
+              {backlogState.containers.map((container) => (
                 <Container
                   id={container.id}
                   title={container.title}
                   key={container.id}
                   onAddItem={() => {
-                    setShowAddItemModal(true);
-                    setCurrentContainerId(container.id);
+                    setBacklogState((prevState) => ({
+                      ...prevState,
+                      showAddItemModal: true,
+                      currentContainerId: container.id,
+                    }));
                   }}
                 >
                   <SortableContext items={container.items.map((i) => i.id)}>
@@ -642,32 +715,45 @@ export default function Backlog({ projectId }: { projectId: string }) {
             </SortableContext>
             <DragOverlay adjustScale={false}>
               {/* Drag Overlay For item Item */}
-              {activeId && activeId.toString().includes('item') && (
-                <Items
-                  id={activeId}
-                  title={findItemTitle(activeId)}
-                  status={findItemById(activeId)?.status}
-                  project={getProjectInfo?.data?.project}
-                />
-              )}
+              {backlogState.activeId &&
+                backlogState.activeId.toString().includes('item') && (
+                  <Items
+                    id={backlogState.activeId}
+                    title={findItemTitle(backlogState.activeId)}
+                    status={findItemById(backlogState.activeId)?.status}
+                    project={getProjectInfo?.data?.project}
+                  />
+                )}
               {/* Drag Overlay For Container */}
-              {activeId && activeId.toString().includes('container') && (
-                <Container id={activeId} title={findContainerTitle(activeId)}>
-                  {findContainerItems(activeId).map((i) => (
-                    <Items
-                      key={i.id}
-                      title={i.title}
-                      id={i.id}
-                      status={i.status}
-                      project={getProjectInfo?.data?.project}
-                    />
-                  ))}
-                </Container>
-              )}
+              {backlogState.activeId &&
+                backlogState.activeId.toString().includes('container') && (
+                  <Container
+                    id={backlogState.activeId}
+                    title={findContainerTitle(backlogState.activeId)}
+                  >
+                    {findContainerItems(backlogState.activeId).map((i) => (
+                      <Items
+                        key={i.id}
+                        title={i.title}
+                        id={i.id}
+                        status={i.status}
+                        project={getProjectInfo?.data?.project}
+                      />
+                    ))}
+                  </Container>
+                )}
             </DragOverlay>
           </DndContext>
 
-          <IssueModal open={isIssueModalOpen} setOpen={setIsIssueModalOpen}>
+          <IssueModal
+            open={backlogState.isIssueModalOpen}
+            setOpen={(value) => {
+              setBacklogState((prevState) => ({
+                ...prevState,
+                isIssueModalOpen: value,
+              }));
+            }}
+          >
             <IssueModalContents
               projectKey={getProjectInfo.data?.project.key ?? ''}
               issueId={selectedIssueId as string}
