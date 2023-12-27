@@ -79,7 +79,7 @@ export default forwardRef((props: Props, ref) => {
               cssItem,
               index === selectedIndex ? 'border-black' : ''
             )}
-            key={index}
+            key={item.id}
             onClick={() => selectItem(index)}
           >
             {item.name}
