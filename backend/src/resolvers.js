@@ -464,6 +464,7 @@ const resolvers = {
       }
     },
     projects: (parent, args, { db }) => {
+      // TODO: If project is internal only show projects that the user is a member of
       return db.sequelize.models.Project.findAll({
         order: [['id', 'ASC']],
         include: [
