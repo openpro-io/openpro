@@ -20,7 +20,7 @@ type Props = {
   command: (options: { id: string }) => void;
 };
 
-export default forwardRef((props: Props, ref) => {
+const MentionList = forwardRef((props: Props, ref) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const selectItem = (index: number) => {
@@ -91,3 +91,7 @@ export default forwardRef((props: Props, ref) => {
     </div>
   );
 });
+
+MentionList.displayName = 'MentionList';
+
+export default MentionList;
