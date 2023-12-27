@@ -98,7 +98,7 @@ const Items = ({ id, title, project }: ItemsType) => {
         }
       >
         <div className='space-y-2'>
-          <div className='text-sm'>{title}</div>
+          <div className='text-sm'>{issueData.title}</div>
           <div className='max-w-full'>
             {issueData?.tags && (
               <div className='flex flex-wrap gap-1'>
