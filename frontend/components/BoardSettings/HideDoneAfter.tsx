@@ -76,14 +76,14 @@ const HideDoneAfter = ({
           checked={enabled}
           onChange={handleEnableHideDoneAfterChange}
           className={classNames(
-            !!enabled ? 'bg-indigo-600' : 'bg-gray-200',
-            'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2'
+            enabled ? 'bg-indigo-600' : 'bg-surface-overlay-hovered',
+            'border-1 relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-indigo-600 focus:ring-offset-1'
           )}
         >
           <span
             aria-hidden='true'
             className={classNames(
-              !!enabled ? 'translate-x-5' : 'translate-x-0',
+              enabled ? 'translate-x-5' : 'translate-x-0',
               'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
             )}
           />
@@ -99,7 +99,7 @@ const HideDoneAfter = ({
             type='number'
             name='hideDoneAfter'
             id='hideDoneAfter'
-            className='block w-32 rounded-md border-gray-300 pr-5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
+            className='block w-32 rounded-md border-gray-300 bg-surface-overlay pr-5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
             value={hideDoneAfter}
             onChange={onDoneAfterDaysChange}
           />
