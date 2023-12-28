@@ -1,28 +1,29 @@
-import Fastify from 'fastify';
 import { ApolloServer } from '@apollo/server';
 import { fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
-import typeDefs from './type-defs.js';
-import resolvers from './resolvers.js';
+import * as cors from '@fastify/cors';
+import { fastifyWebsocket } from '@fastify/websocket';
+import axios from 'axios';
+import Fastify from 'fastify';
+import fastifyIO from 'fastify-socket.io';
+import processRequest from 'graphql-upload/processRequest.mjs';
+import { GraphQLError } from 'graphql/error/index.js';
+
+import { db } from './db/index.js';
+import resolvers from './resolvers/index.js';
 import {
-  HTTP_PORT,
+  ALLOW_LOGIN_DOMAINS_LIST,
+  ALLOW_LOGIN_EMAILS_LIST,
+  ALLOW_SIGNUP,
   BUCKET_NAME,
   CORS_ORIGIN,
-  FRONTEND_HOSTNAME,
   ENABLE_FASTIFY_LOGGING,
-  ALLOW_SIGNUP,
-  ALLOW_LOGIN_EMAILS_LIST,
-  ALLOW_LOGIN_DOMAINS_LIST,
+  FRONTEND_HOSTNAME,
+  HTTP_PORT,
 } from './services/config.js';
-import { db } from './db/index.js';
-import { GraphQLError } from 'graphql/error/index.js';
-import * as cors from '@fastify/cors';
-import axios from 'axios';
-import processRequest from 'graphql-upload/processRequest.mjs';
-import { minioClient } from './services/minio-client.js';
-import fastifyIO from 'fastify-socket.io';
-import { socketInit } from './socket/index.js';
-import { fastifyWebsocket } from '@fastify/websocket';
 import hocuspocusServer from './services/hocuspocus-server.js';
+import { minioClient } from './services/minio-client.js';
+import { socketInit } from './socket/index.js';
+import typeDefs from './type-defs.js';
 
 const fastify = Fastify({
   logger: ENABLE_FASTIFY_LOGGING,
