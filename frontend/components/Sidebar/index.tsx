@@ -1,23 +1,26 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+
+import { useQuery } from '@apollo/client';
+import { UserGroupIcon } from '@heroicons/react/24/solid';
+import type { Route } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
-import SidebarLinkGroup from './SidebarLinkGroup';
-import Image from 'next/image';
-import { UserGroupIcon } from '@heroicons/react/24/solid';
-import { useQuery } from '@apollo/client';
-import { GET_BOARD_INFO } from '@/gql/gql-queries-mutations';
-import { classNames } from '@/services/utils';
+import React, { useEffect, useRef, useState } from 'react';
+
+import ProjectIssues from '@/components/Sidebar/Links/ProjectIssues';
+import ProjectContainerSection from '@/components/Sidebar/ProjectContainerSection';
 import {
   REGEX_PROJECT_BOARD,
   REGEX_PROJECT_BOARD_BACKLOG,
   REGEX_PROJECT_ISSUES,
 } from '@/components/Sidebar/constants';
-import ProjectIssues from '@/components/Sidebar/Links/ProjectIssues';
-import type { Route } from 'next';
-import ProjectContainerSection from '@/components/Sidebar/ProjectContainerSection';
+import { GET_BOARD_INFO } from '@/gql/gql-queries-mutations';
 import useColorMode from '@/hooks/useColorMode';
 import useLocalStorage from '@/hooks/useLocalStorage';
+import { classNames } from '@/services/utils';
+
+import SidebarLinkGroup from './SidebarLinkGroup';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -127,7 +130,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           {/* <!-- Menu Group --> */}
           <div>
             {/* <!--  This is the project view sidebar--> */}
-            {pathname.includes('projects') && (
+            {pathname.includes('projects') && pathname !== '/projects' && (
               <>
                 <ul className='mb-6 flex flex-col gap-0.5'>
                   {/* <!-- Menu Item Project Board --> */}
@@ -217,7 +220,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             )}
 
             {/* <!-- We hide this navbar in non project view --> */}
-            {!pathname.includes('projects') && (
+            {(!pathname.includes('projects') ||
+              pathname === '/projects' ||
+              pathname === '/dashboard') && (
               <>
                 <ul className='mb-6 flex flex-col gap-0.5'>
                   {/* <!-- Menu Item Dashboard --> */}
@@ -234,6 +239,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             href='/dashboard'
                             className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-link duration-300 ease-in-out ${
                               pathname === '/' ||
+                              pathname === '/projects' ||
                               (pathname.includes('dashboard') &&
                                 'border-l-4 bg-link-active text-link-active')
                             }`}

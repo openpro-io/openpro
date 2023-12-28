@@ -1,9 +1,11 @@
 'use client';
-import React from 'react';
-import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
-import KanbanBoardNew from '../../../../../components/KanbanBoard';
-import { FaGear } from 'react-icons/fa6';
+
 import Link from 'next/link';
+import React from 'react';
+import { FaGear } from 'react-icons/fa6';
+
+import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
+import KanbanBoardNew from '@/components/KanbanBoard';
 
 const BoardIdPage = ({
   params,
@@ -16,6 +18,11 @@ const BoardIdPage = ({
     <>
       <Breadcrumb
         paths={[
+          {
+            name: 'Projects',
+            href: `/projects`,
+            current: true,
+          },
           {
             name: `Project ${projectId} Board`,
             href: `/projects/${projectId}/boards/${boardId}`,
