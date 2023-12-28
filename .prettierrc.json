@@ -1,0 +1,25 @@
+{
+  "semi": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "singleQuote": true,
+  "overrides": [
+    {
+      "files": ["backend/**/*.js"],
+      "options": {
+        "printWidth": 120,
+        "importOrder": ["^[./]"],
+        "importOrderSeparation": true,
+        "importOrderSortSpecifiers": true,
+        "plugins": ["@trivago/prettier-plugin-sort-imports"]
+      }
+    },
+    {
+      "files": ["frontend/**/*.{tsx,ts}"],
+      "options": {
+        "jsxSingleQuote": true,
+        "plugins": ["prettier-plugin-tailwindcss"]
+      }
+    }
+  ]
+}

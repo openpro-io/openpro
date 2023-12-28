@@ -20,6 +20,7 @@
     "@as-integrations/fastify": "^2.1.1",
     "@fastify/cors": "^8.4.1",
     "@fastify/websocket": "^8.3.0",
+    "@graphql-tools/merge": "^9.0.1",
     "@hocuspocus/extension-database": "^2.8.1",
     "@hocuspocus/server": "^2.8.1",
     "axios": "^1.6.0",
@@ -44,6 +45,7 @@
     "yn": "^5.0.0"
   },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "chai": "^4.3.10",
     "mocha": "^10.2.0",
     "prettier": "^3.0.3",
