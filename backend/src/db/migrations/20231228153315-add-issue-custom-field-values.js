@@ -1,7 +1,7 @@
 'use strict';
 
 const TABLE_NAME = 'issues';
-const COLUMN_NAME = 'custom_field_values';
+const COLUMN_NAME = 'custom_fields';
 
 /** @type {import('sequelize-cli').Migration} */
 export default {

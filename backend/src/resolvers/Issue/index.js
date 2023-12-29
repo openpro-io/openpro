@@ -167,7 +167,7 @@ const resolvers = {
       if (issue.reporterId === 0) issue.reporterId = null;
 
       if (customFieldId && customFieldValue) {
-        const customField = await db.sequelize.models.ProjectCustomField.findByPk(customFieldId);
+        const customField = await db.sequelize.models.ProjectCustomField.findByPk(Number(customFieldId));
         if (!customField) throw new Error('Custom field not found');
 
         let valueCasted = customFieldValue;
@@ -183,8 +183,8 @@ const resolvers = {
         };
 
         // TODO: investigate how to deep set the value instead of this to leverage DB level updating
-        issue.customFieldValues = issue.customFieldValues
-          ? values(merge(keyBy(issue.customFieldValues, 'id'), keyBy([customFieldObject], 'id')))
+        issue.customFields = issue.customFields
+          ? values(merge(keyBy(issue.customFields, 'id'), keyBy([customFieldObject], 'id')))
           : [customFieldObject];
       }
 
@@ -247,11 +247,6 @@ const resolvers = {
     },
   },
   Issue: {
-    customFieldValues: async (parent, args, { db }) => {
-      const values = parent.customFieldValues;
-      if (!values) return null;
-      //   TODO: Custom map to get the correct value
-    },
     links: async (parent, args, { db }) => {
       return [
         ...parent.linkedToIssues?.map((issue) => ({

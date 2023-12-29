@@ -125,7 +125,7 @@ const typeDefs = gql`
     linkType: String
     linkedIssueId: String
 
-    customFieldValues: [CustomFieldValue]
+    customFields: [CustomFieldValue]
   }
 
   type Column {
