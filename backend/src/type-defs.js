@@ -12,6 +12,13 @@ const typeDefs = gql`
     PRIVATE
   }
 
+  enum CUSTOM_FIELD_TYPE {
+    TEXT
+    NUMBER
+    DATE
+    BOOLEAN
+  }
+
   enum Order {
     ASC
     DESC
@@ -77,6 +84,25 @@ const typeDefs = gql`
     tags: [ProjectTag]
     users: [User]
     issueCount: Int
+    customFields: [CustomField]
+  }
+
+  type CustomField {
+    id: ID!
+    projectId: String!
+    fieldName: String!
+    fieldType: CUSTOM_FIELD_TYPE!
+    createdAt: String
+    updatedAt: String
+  }
+
+  type CustomFieldValue {
+    id: ID!
+    customFieldId: String!
+    customField: CustomField
+    value: String!
+    createdAt: String
+    updatedAt: String
   }
 
   type Issue {
@@ -98,6 +124,8 @@ const typeDefs = gql`
     links: [Issue]
     linkType: String
     linkedIssueId: String
+
+    customFieldValues: [CustomFieldValue]
   }
 
   type Column {
@@ -215,6 +243,11 @@ const typeDefs = gql`
     priority: Int
     archived: Boolean
     tagIds: [String]
+
+    # This represents the ID of the project custom field id
+    customFieldId: String
+    # We will transform this value based on the custom field type
+    customFieldValue: String
   }
 
   input DeleteIssueInput {
@@ -318,6 +351,16 @@ const typeDefs = gql`
     projectId: String!
   }
 
+  input CreateProjectCustomFieldInput {
+    projectId: String!
+    fieldName: String!
+    fieldType: CUSTOM_FIELD_TYPE!
+  }
+
+  input DeleteProjectCustomFieldInput {
+    id: String!
+  }
+
   # Mutations
   type Mutation {
     createProject(input: CreateProjectInput): Project
@@ -327,6 +370,9 @@ const typeDefs = gql`
 
     createProjectTag(input: CreateProjectTagInput!): ProjectTag
     deleteProjectTag(input: DeleteProjectTagInput!): MessageAndStatus
+
+    createProjectCustomField(input: CreateProjectCustomFieldInput!): CustomField
+    deleteProjectCustomField(input: DeleteProjectCustomFieldInput!): MessageAndStatus
 
     createBoard(input: CreateBoardInput): Board
     updateBoard(input: UpdateBoardInput): Board

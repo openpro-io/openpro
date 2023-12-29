@@ -75,6 +75,10 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.TSVECTOR,
         field: 'vector_search',
       },
+      customFieldValues: {
+        type: DataTypes.JSONB,
+        field: 'custom_field_values',
+      },
       createdAt: {
         field: 'created_at',
         type: DataTypes.DATE,

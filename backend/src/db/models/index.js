@@ -1,20 +1,21 @@
 'use strict';
 
 import { DataTypes, Sequelize } from 'sequelize';
-import { ENABLE_SEQUELIZE_LOGGING, SQL_URI } from '../../services/config.js';
 
-import User from './user.js';
-import Project from './project.js';
-import Board from './board.js';
-import IssueStatuses from './issue-statuses.js';
-import Issue from './issue.js';
+import { ENABLE_SEQUELIZE_LOGGING, SQL_URI } from '../../services/config.js';
 import Asset from './asset.js';
-import IssueComment from './issue-comment.js';
-import ProjectTag from './project-tag.js';
-import IssueTag from './issue-tag.js';
+import Board from './board.js';
 import IssueBoard from './issue-board.js';
+import IssueComment from './issue-comment.js';
 import IssueLinks from './issue-links.js';
+import IssueStatuses from './issue-statuses.js';
+import IssueTag from './issue-tag.js';
+import Issue from './issue.js';
+import ProjectCustomFields from './project-custom-fields.js';
 import ProjectPermissions from './project-permissions.js';
+import ProjectTag from './project-tag.js';
+import Project from './project.js';
+import User from './user.js';
 
 export const db = {};
 
@@ -35,6 +36,7 @@ const init = async () => {
   db.IssueBoard = IssueBoard(db.sequelize, DataTypes);
   db.IssueLinks = IssueLinks(db.sequelize, DataTypes);
   db.ProjectPermissions = ProjectPermissions(db.sequelize, DataTypes);
+  db.ProjectCustomFields = ProjectCustomFields(db.sequelize, DataTypes);
 
   Object.values(db).forEach((model) => {
     if (model.associate) {
