@@ -1,25 +1,26 @@
 'use client';
 
-import { EditorContent, useEditor } from '@tiptap/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { CoreEditorExtensions } from '@/components/Editor/extensions';
-import { findTableAncestor } from '@/components/Editor/utils';
-import { startImageUpload } from '@/components/Editor/plugins/upload-image';
-import { ImageResizer } from '@/components/Editor/extensions/image/image-resize';
 import { useMutation } from '@apollo/client';
-import { UPLOAD_ASSET_MUTATION } from '@/gql/gql-queries-mutations';
-import { EditorToolbar } from '@/components/Editor/toolbar';
-import { NEXT_PUBLIC_API_URL, PUBLIC_NEXTAUTH_URL } from '@/services/config';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import Collaboration from '@tiptap/extension-collaboration';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
-import { useSearchParams } from 'next/navigation';
+import { EditorContent, useEditor } from '@tiptap/react';
+import axios from 'axios';
 import { useSession } from 'next-auth/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import * as Y from 'yjs';
+
+import { CoreEditorExtensions } from '@/components/Editor/extensions';
+import { ImageResizer } from '@/components/Editor/extensions/image/image-resize';
+import { startImageUpload } from '@/components/Editor/plugins/upload-image';
+import { EditorToolbar } from '@/components/Editor/toolbar';
+import { findTableAncestor } from '@/components/Editor/utils';
+import { UPLOAD_ASSET_MUTATION } from '@/gql/gql-queries-mutations';
+import { NEXT_PUBLIC_API_URL, PUBLIC_NEXTAUTH_URL } from '@/services/config';
 import { getUserColor } from '@/services/utils';
 import { classNames } from '@/services/utils';
-import axios from 'axios';
+
 export * as EditorRenderOnly from './EditorRenderOnly';
-import * as Y from 'yjs';
 
 const getToken = async () => {
   const { data } = await axios.get(`${PUBLIC_NEXTAUTH_URL}/api/get-jwt`);
@@ -29,11 +30,9 @@ const getToken = async () => {
 
 const Editor = ({
   onUpdateCallback,
-  defaultContent,
   documentName,
 }: {
   onUpdateCallback: (data: any) => void;
-  defaultContent?: string;
   documentName?: string;
 }) => {
   const [isSubmitting, setIsSubmitting] = useState<any>();
@@ -122,7 +121,11 @@ const Editor = ({
       }),
     ],
     onUpdate: ({ editor }) => {
-      if (onUpdateCallback) onUpdateCallback(editor.getJSON());
+      if (onUpdateCallback)
+        onUpdateCallback({
+          content: editor.getJSON(),
+          state: Y.encodeStateAsUpdate(provider.document),
+        });
     },
     editorProps: {
       handleDOMEvents: {
@@ -200,7 +203,6 @@ const Editor = ({
           'prose min-w-full dark:prose-invert !focus:ring-0 prose-sm p-3 !focus:outline-none border border-primary/20 rounded-b-lg',
       },
     },
-    // content: defaultContent ?? '',
   });
 
   const userCount = editor?.storage.collaborationCursor.users.filter(

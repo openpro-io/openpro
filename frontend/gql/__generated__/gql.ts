@@ -27,6 +27,8 @@ const documents = {
     "\n  query GetProjectInfo(\n    $input: QueryProjectInput\n    $issueInput: QueryIssueInput\n  ) {\n    project(input: $input) {\n      ...ProjectOnlyFields\n      users {\n        ...UserFields\n      }\n      boards {\n        id\n        viewState {\n          ...ViewStateFields\n        }\n        backlogEnabled\n        containerOrder\n      }\n      issueStatuses {\n        id\n        projectId\n        name\n        createdAt\n      }\n      issues(input: $issueInput) {\n        ...IssueFields\n      }\n    }\n  }\n": types.GetProjectInfoDocument,
     "\n  mutation CreateIssue($input: CreateIssueInput) {\n    createIssue(input: $input) {\n      ...IssueFields\n    }\n  }\n": types.CreateIssueDocument,
     "\n  mutation CreateIssueComment($input: CreateIssueCommentInput!) {\n    createIssueComment(input: $input) {\n      ...IssueCommentFields\n    }\n  }\n": types.CreateIssueCommentDocument,
+    "\n  mutation UpdateIssueComment($input: UpdateIssueCommentInput!) {\n    updateIssueComment(input: $input) {\n      ...IssueCommentFields\n    }\n  }\n": types.UpdateIssueCommentDocument,
+    "\n  mutation DeleteIssueCommentMutations($input: DeleteIssueCommentInput!) {\n    deleteIssueComment(input: $input) {\n      message\n      status\n    }\n  }\n": types.DeleteIssueCommentMutationsDocument,
     "\n  query GetIssueStatuses($input: QueryProjectInput) {\n    project(input: $input) {\n      id\n      name\n      description\n      issueStatuses {\n        id\n        projectId\n        name\n        createdAt\n      }\n    }\n  }\n": types.GetIssueStatusesDocument,
     "\n  mutation UpdateIssue($input: UpdateIssueInput) {\n    updateIssue(input: $input) {\n      ...IssueFields\n    }\n  }\n": types.UpdateIssueDocument,
     "\n  mutation DeleteIssue($input: DeleteIssueInput!) {\n    deleteIssue(input: $input) {\n      message\n      status\n    }\n  }\n": types.DeleteIssueDocument,
@@ -121,6 +123,14 @@ export function gql(source: "\n  mutation CreateIssue($input: CreateIssueInput) 
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  mutation CreateIssueComment($input: CreateIssueCommentInput!) {\n    createIssueComment(input: $input) {\n      ...IssueCommentFields\n    }\n  }\n"): (typeof documents)["\n  mutation CreateIssueComment($input: CreateIssueCommentInput!) {\n    createIssueComment(input: $input) {\n      ...IssueCommentFields\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  mutation UpdateIssueComment($input: UpdateIssueCommentInput!) {\n    updateIssueComment(input: $input) {\n      ...IssueCommentFields\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateIssueComment($input: UpdateIssueCommentInput!) {\n    updateIssueComment(input: $input) {\n      ...IssueCommentFields\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  mutation DeleteIssueCommentMutations($input: DeleteIssueCommentInput!) {\n    deleteIssueComment(input: $input) {\n      message\n      status\n    }\n  }\n"): (typeof documents)["\n  mutation DeleteIssueCommentMutations($input: DeleteIssueCommentInput!) {\n    deleteIssueComment(input: $input) {\n      message\n      status\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

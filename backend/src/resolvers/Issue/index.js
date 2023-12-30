@@ -89,16 +89,6 @@ const resolvers = {
     },
   },
   Mutation: {
-    createIssueComment: async (parent, { input }, { db, user }) => {
-      const { issueId, comment } = input;
-      const reporterId = user.id;
-
-      return await db.sequelize.models.IssueComment.create({
-        issueId,
-        reporterId,
-        comment,
-      });
-    },
     deleteIssueLink: async (parent, { input: { issueId, linkType, linkedIssueId } }, { db }) => {
       await db.sequelize.models.IssueLinks.destroy({
         where: {
