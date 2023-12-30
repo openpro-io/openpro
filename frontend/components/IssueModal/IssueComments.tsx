@@ -11,6 +11,7 @@ import {
   CREATE_ISSUE_COMMENT_MUTATION,
   DELETE_ISSUE_COMMENT_MUTATION,
   GET_ISSUE_QUERY,
+  ISSUE_COMMENT_FIELDS,
   ISSUE_FIELDS,
   UPDATE_ISSUE_COMMENT_MUTATION,
 } from '@/gql/gql-queries-mutations';
@@ -29,7 +30,26 @@ type UpdateComment = {
 const IssueComments = ({ issueId }: { issueId?: string }) => {
   const [deleteIssueComment] = useMutation(DELETE_ISSUE_COMMENT_MUTATION);
   const [updateIssueComment] = useMutation(UPDATE_ISSUE_COMMENT_MUTATION);
-  const [createIssueComment] = useMutation(CREATE_ISSUE_COMMENT_MUTATION);
+  const [createIssueComment] = useMutation(CREATE_ISSUE_COMMENT_MUTATION, {
+    update(cache, { data: { createIssueComment } }) {
+      cache.modify({
+        id: cache.identify({
+          __typename: 'Issue',
+          id: createIssueComment.issueId,
+        }),
+        fields: {
+          comments(existingComments = []) {
+            const newCommentRef = cache.writeFragment({
+              data: createIssueComment,
+              fragment: ISSUE_COMMENT_FIELDS,
+            });
+
+            return [...existingComments, newCommentRef];
+          },
+        },
+      });
+    },
+  });
   const [newDocumentName] = React.useState<string | undefined>(
     `issueComment.${nanoid()}.comment`
   );
@@ -53,12 +73,6 @@ const IssueComments = ({ issueId }: { issueId?: string }) => {
 
   const handleCreateIssueComment = () => {
     return createIssueComment({
-      refetchQueries: [
-        {
-          query: GET_ISSUE_QUERY,
-          variables: { input: { id: selectedIssueId } },
-        },
-      ],
       variables: {
         input: {
           issueId: selectedIssueId,
