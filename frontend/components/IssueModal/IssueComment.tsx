@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
-import { formatUser } from '@/services/utils';
 import { DateTime } from 'luxon';
-import EditorRenderOnly from '@/components/Editor/EditorRenderOnly';
+import React from 'react';
+
 import Avatar from '@/components/Avatar';
-import Editor from '@/components/Editor';
 import { Button } from '@/components/Button';
+import Editor from '@/components/Editor';
+import EditorRenderOnly from '@/components/Editor/EditorRenderOnly';
+import { formatUser } from '@/services/utils';
 
 const IssueComment = ({
   comment,
@@ -54,7 +55,6 @@ const IssueComment = ({
           <>
             <Editor
               onUpdateCallback={onUpdateCallback}
-              defaultContent={content}
               documentName={`issueComment.${selectedCommentId}.comment`}
             />
             <div className='gap-x-1 pb-10'>
@@ -72,7 +72,7 @@ const IssueComment = ({
                 text='Save'
                 onClick={() =>
                   handleUpdateIssueComment({
-                    comment: editorContent ?? content,
+                    comment: editorContent ? editorContent.content : content,
                     commentId: selectedCommentId,
                   }).then(() => {
                     setShowEditor(false);
@@ -86,20 +86,22 @@ const IssueComment = ({
         <div className='flex space-x-1 pt-2 text-sm'>
           <div>
             {' '}
-            <button
-              onClick={() => {
-                if (!selectedCommentId) {
-                  return;
-                }
+            {!showEditor && (
+              <button
+                onClick={() => {
+                  if (!selectedCommentId) {
+                    return;
+                  }
 
-                handleDeleteIssueComment({
-                  commentId: selectedCommentId,
-                });
-              }}
-              className='hover:text-red-700'
-            >
-              delete
-            </button>
+                  handleDeleteIssueComment({
+                    commentId: selectedCommentId,
+                  });
+                }}
+                className='hover:text-red-700'
+              >
+                delete
+              </button>
+            )}
           </div>
         </div>
       </div>

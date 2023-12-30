@@ -1,15 +1,20 @@
 'use client';
 
-import React from 'react';
 import { useFragment, useMutation } from '@apollo/client';
+import { nanoid } from 'ai';
+import { useSearchParams } from 'next/navigation';
+import React from 'react';
+
+import { Button } from '@/components/Button';
+import Editor from '@/components/Editor';
 import {
+  CREATE_ISSUE_COMMENT_MUTATION,
   DELETE_ISSUE_COMMENT_MUTATION,
   GET_ISSUE_QUERY,
   ISSUE_FIELDS,
   UPDATE_ISSUE_COMMENT_MUTATION,
 } from '@/gql/gql-queries-mutations';
-import { useSearchParams } from 'next/navigation';
-import IssueCommentEditorTipTap from '@/components/IssueModal/IssueCommentEditorTipTap';
+
 import IssueComment from './IssueComment';
 
 type DeleteComment = {
@@ -24,6 +29,12 @@ type UpdateComment = {
 const IssueComments = ({ issueId }: { issueId?: string }) => {
   const [deleteIssueComment] = useMutation(DELETE_ISSUE_COMMENT_MUTATION);
   const [updateIssueComment] = useMutation(UPDATE_ISSUE_COMMENT_MUTATION);
+  const [createIssueComment] = useMutation(CREATE_ISSUE_COMMENT_MUTATION);
+  const [newDocumentName] = React.useState<string | undefined>(
+    `issueComment.${nanoid()}.comment`
+  );
+  const [editorContent, setEditorContent] = React.useState(undefined);
+  const [showEditor, setShowEditor] = React.useState(false);
   const searchParams = useSearchParams()!;
   const params = new URLSearchParams(searchParams);
   const selectedIssueId = issueId ?? params.get('selectedIssueId');
@@ -35,6 +46,28 @@ const IssueComments = ({ issueId }: { issueId?: string }) => {
       id: `${selectedIssueId}`,
     },
   });
+
+  const onUpdateCallback = (data: any) => {
+    setEditorContent(data);
+  };
+
+  const handleCreateIssueComment = () => {
+    return createIssueComment({
+      refetchQueries: [
+        {
+          query: GET_ISSUE_QUERY,
+          variables: { input: { id: selectedIssueId } },
+        },
+      ],
+      variables: {
+        input: {
+          issueId: selectedIssueId,
+          comment: JSON.stringify(editorContent.content),
+          commentRaw: Buffer.from(editorContent.state).toString('base64'),
+        },
+      },
+    });
+  };
 
   const handleDeleteIssueComment = ({ commentId }: DeleteComment) => {
     if (!commentId) {
@@ -80,7 +113,47 @@ const IssueComments = ({ issueId }: { issueId?: string }) => {
   return (
     <>
       <div className='pb-5 text-2xl'>Comments</div>
-      <IssueCommentEditorTipTap issueId={selectedIssueId} />
+      {!showEditor && (
+        <article
+          onClick={() => setShowEditor(true)}
+          className='prose prose-sm h-10 max-w-full overflow-y-scroll rounded-lg'
+        >
+          <div className='m-1 text-primary opacity-70'>
+            Click to add comment...
+          </div>
+        </article>
+      )}
+      {showEditor && (
+        <>
+          <Editor
+            onUpdateCallback={onUpdateCallback}
+            documentName={newDocumentName}
+          />
+          <div className='gap-x-1 pb-10'>
+            <Button
+              text='Cancel'
+              variant='transparent'
+              onClick={() => {
+                if (!selectedIssueId) return;
+                setShowEditor(false);
+              }}
+              classes='float-right mt-2 shadow-none hover:bg-gray-400 hover:bg-opacity-10'
+            />
+
+            <Button
+              text='Save'
+              onClick={() => {
+                if (!selectedIssueId) return;
+
+                handleCreateIssueComment().then(() => {
+                  setShowEditor(false);
+                });
+              }}
+              classes='float-right mt-2'
+            />
+          </div>
+        </>
+      )}
       {getIssueFragment?.data?.comments
         ?.slice()
         ?.reverse()

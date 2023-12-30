@@ -242,6 +242,7 @@ const typeDefs = gql`
   input CreateIssueCommentInput {
     issueId: String!
     comment: String!
+    commentRaw: String
   }
 
   input UpdateIssueCommentInput {

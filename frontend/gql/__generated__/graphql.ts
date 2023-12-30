@@ -75,6 +75,7 @@ export type CreateBoardInput = {
 
 export type CreateIssueCommentInput = {
   comment: Scalars['String']['input'];
+  commentRaw?: InputMaybe<Scalars['String']['input']>;
   issueId: Scalars['String']['input'];
 };
 

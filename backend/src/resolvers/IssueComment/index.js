@@ -2,13 +2,14 @@ const resolvers = {
   Query: {},
   Mutation: {
     createIssueComment: async (parent, { input }, { db, user }) => {
-      const { issueId, comment } = input;
+      const { issueId, comment, commentRaw } = input;
       const reporterId = user.id;
 
       return await db.sequelize.models.IssueComment.create({
         issueId,
         reporterId,
         comment,
+        commentRaw: Buffer.from(commentRaw, 'base64')
       });
     },
     deleteIssueComment: async (parent, { input }, { db }) => {
