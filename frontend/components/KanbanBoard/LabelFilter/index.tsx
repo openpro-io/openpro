@@ -31,6 +31,7 @@ const LabelFilter = () => {
 
   const projectId = urlParams.projectId;
 
+  // TODO: This doesnt update when you create a new tag on an issue
   const getProjectTags = useQuery(GET_PROJECT_TAGS, {
     skip: !projectId,
     variables: { input: { projectId } },
