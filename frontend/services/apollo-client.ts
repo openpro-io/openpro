@@ -8,9 +8,11 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 import axios from 'axios';
 import { createClient } from 'graphql-ws';
+import { unionBy } from 'lodash';
 import { DateTime } from 'luxon';
 
 import {
+  BOARD_FIELDS,
   ISSUE_COMMENT_FIELDS,
   ISSUE_FIELDS,
   PROJECT_ONLY_FIELDS,
@@ -105,8 +107,18 @@ export const apolloClient = new ApolloClient({
       ${VIEW_STATE_ISSUE_STATUS_FIELDS}
       ${VIEW_STATE_FIELDS}
       ${PROJECT_ONLY_FIELDS}
+      ${BOARD_FIELDS}
     `),
     typePolicies: {
+      ViewState: {
+        fields: {
+          items: {
+            merge(existing = [], incoming) {
+              return unionBy(existing, incoming, '__ref');
+            },
+          },
+        },
+      },
       Board: {
         fields: {
           settings: {

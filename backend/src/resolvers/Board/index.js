@@ -1,4 +1,11 @@
+import pubsub from '../../services/apollo-pg-pubsub.js';
+
 const resolvers = {
+  Subscription: {
+    boardUpdated: {
+      subscribe: () => pubsub.asyncIterator(['BOARD_UPDATED']),
+    },
+  },
   Query: {
     boards: (parent, args, { db }) => {
       // TODO: should we require a project id to show boards?
@@ -26,6 +33,10 @@ const resolvers = {
       }
 
       await board.save();
+
+      pubsub.publish('BOARD_UPDATED', {
+        boardUpdated: board,
+      });
 
       // TODO: fix
       // emitBoardUpdatedEvent(io, board.toJSON());

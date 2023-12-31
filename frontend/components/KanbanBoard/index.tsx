@@ -33,8 +33,10 @@ import IssueModal from '@/components/IssueModal';
 import IssueModalContents from '@/components/IssueModal/IssueModalContents';
 import Toolbar from '@/components/KanbanBoard/Toolbar';
 import {
+  BOARD_UPDATED_SUBSCRIPTION,
   CREATE_ISSUE_MUTATION,
   CREATE_ISSUE_STATUS_MUTATION,
+  GET_ISSUE_QUERY,
   GET_PROJECT_INFO,
   ISSUE_CREATED_SUBSCRIPTION,
   ISSUE_FIELDS,
@@ -71,10 +73,21 @@ interface PageState {
 }
 
 const getIssueFragment = (issueId: string) => {
-  return apolloClient.readFragment({
-    id: `Issue:${issueId}`,
-    fragment: ISSUE_FIELDS,
-  });
+  // const fragment = apolloClient.readFragment({
+  //   id: `Issue:${issueId}`,
+  //   fragment: ISSUE_FIELDS,
+  // });
+  return apolloClient
+    .query({
+      query: GET_ISSUE_QUERY,
+      fetchPolicy: 'cache-first',
+      variables: {
+        input: { id: issueId },
+      },
+    })
+    .then(({ data }) => {
+      return data.issue;
+    });
 };
 
 export default function KanbanBoard({
@@ -113,7 +126,7 @@ export default function KanbanBoard({
   const [updateIssue] = useMutation(UPDATE_ISSUE_MUTATION);
   const [updateBoard] = useMutation(UPDATE_BOARD_MUTATION);
   const [addIssueStatus] = useMutation(CREATE_ISSUE_STATUS_MUTATION);
-  const issueCreatedSubscription = useSubscription(ISSUE_CREATED_SUBSCRIPTION);
+  const boardUpdatedSubscription = useSubscription(BOARD_UPDATED_SUBSCRIPTION);
 
   const getProjectInfo = useQuery(GET_PROJECT_INFO, {
     skip: !projectId,
@@ -131,12 +144,12 @@ export default function KanbanBoard({
   // });
 
   useEffect(() => {
-    if (!issueCreatedSubscription.loading && issueCreatedSubscription.data) {
+    if (!boardUpdatedSubscription.loading && boardUpdatedSubscription.data) {
       // TODO: Update the board state locally and server side
 
-      console.log({ issueCreatedSubscription });
+      console.log({ boardUpdatedSubscription });
     }
-  }, [issueCreatedSubscription]);
+  }, [boardUpdatedSubscription]);
 
   // On page load we open the modal if there is a query param for the issue
   useEffect(() => {
@@ -300,6 +313,7 @@ export default function KanbanBoard({
     }
   }, [saveToBackend, containers]);
 
+  // TODO: !! This is a hack to get the board to update when we add a new issue... we need to figure out a better way to do this
   // This is called once we fetch data from server
   useEffect(() => {
     if (getProjectInfo.loading || !getProjectInfo?.data) return;
@@ -321,49 +335,54 @@ export default function KanbanBoard({
     // this can happen when using the modal issue status dropdown to change the issue status versus dragging the issue to a new container
     incomingData.forEach((container: any) => {
       container.items.forEach((item: any) => {
-        const issueData = getIssueFragment(`${item.id}`.replace('item-', ''));
-        if (issueData.status.id !== container.id.replace('container-', '')) {
-          hasMismatchedIssueStatuses = true;
+        getIssueFragment(`${item.id}`.replace('item-', '')).then(
+          (issueData) => {
+            if (
+              issueData.status.id !== container.id.replace('container-', '')
+            ) {
+              hasMismatchedIssueStatuses = true;
 
-          // move to correct container
-          const destinationContainer = findContainerById(
-            `container-${issueData.status.id}`
-          );
+              // move to correct container
+              const destinationContainer = findContainerById(
+                `container-${issueData.status.id}`
+              );
 
-          const previousContainer = findContainerByItemId(
-            `item-${issueData.id}`
-          );
+              const previousContainer = findContainerByItemId(
+                `item-${issueData.id}`
+              );
 
-          if (!destinationContainer || !previousContainer) return;
+              if (!destinationContainer || !previousContainer) return;
 
-          const destinationContainerIndex = containers.findIndex(
-            (container) => container.id === destinationContainer.id
-          );
-          const previousContainerIndex = containers.findIndex(
-            (container) => container.id === previousContainer.id
-          );
-          const issueStatusId = `${issueData.status.id}`;
-          const issueId = `${issueData.id}`;
-          const previousItemIndex = previousContainer.items.findIndex(
-            (item) => item.id === `item-${issueData.id}`
-          );
-          const destinationItemIndex =
-            destinationContainer.items.length > 0
-              ? destinationContainer.items.length + 1
-              : destinationContainer.items.length;
+              const destinationContainerIndex = containers.findIndex(
+                (container) => container.id === destinationContainer.id
+              );
+              const previousContainerIndex = containers.findIndex(
+                (container) => container.id === previousContainer.id
+              );
+              const issueStatusId = `${issueData.status.id}`;
+              const issueId = `${issueData.id}`;
+              const previousItemIndex = previousContainer.items.findIndex(
+                (item) => item.id === `item-${issueData.id}`
+              );
+              const destinationItemIndex =
+                destinationContainer.items.length > 0
+                  ? destinationContainer.items.length + 1
+                  : destinationContainer.items.length;
 
-          // remove item from old container
-          const [removedItem] = correctedBoardState[
-            previousContainerIndex
-          ].items.splice(previousItemIndex, 1);
+              // remove item from old container
+              const [removedItem] = correctedBoardState[
+                previousContainerIndex
+              ].items.splice(previousItemIndex, 1);
 
-          // push removed item to new container
-          correctedBoardState[destinationContainerIndex].items.splice(
-            destinationItemIndex,
-            0,
-            removedItem
-          );
-        }
+              // push removed item to new container
+              correctedBoardState[destinationContainerIndex].items.splice(
+                destinationItemIndex,
+                0,
+                removedItem
+              );
+            }
+          }
+        );
       });
     });
 

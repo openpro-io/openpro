@@ -381,6 +381,7 @@ const typeDefs = gql`
   # SUBSCRIPTIONS
   type Subscription {
     issueCreated: Issue
+    boardUpdated: Board
   }
 `;
 

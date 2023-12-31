@@ -1,5 +1,19 @@
 import { gql } from '@apollo/client';
 
+export const BOARD_FIELDS = gql(/* GraphQL */ `
+  fragment BoardFields on Board {
+    id
+    name
+    viewState {
+      ...ViewStateFields
+    }
+    backlogEnabled
+    settings
+    createdAt
+    updatedAt
+  }
+`);
+
 export const PROJECT_FIELDS = gql(/* GraphQL */ `
   fragment ProjectFields on Project {
     id
@@ -10,15 +24,7 @@ export const PROJECT_FIELDS = gql(/* GraphQL */ `
     createdAt
     updatedAt
     boards {
-      id
-      name
-      viewState {
-        ...ViewStateFields
-      }
-      backlogEnabled
-      settings
-      createdAt
-      updatedAt
+      ...BoardFields
     }
     issueStatuses {
       id
@@ -472,6 +478,14 @@ export const ISSUE_CREATED_SUBSCRIPTION = gql(/* GraphQL */ `
   subscription IssueCreated {
     issueCreated {
       ...IssueFields
+    }
+  }
+`);
+
+export const BOARD_UPDATED_SUBSCRIPTION = gql(/* GraphQL */ `
+  subscription BoardUpdated {
+    boardUpdated {
+      ...BoardFields
     }
   }
 `);
