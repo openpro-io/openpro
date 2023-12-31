@@ -1,5 +1,6 @@
 'use client';
 
+import { FetchResult } from '@apollo/client';
 import { DateTime } from 'luxon';
 import React from 'react';
 
@@ -7,6 +8,7 @@ import Avatar from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import Editor from '@/components/Editor';
 import EditorRenderOnly from '@/components/Editor/EditorRenderOnly';
+import { EditorContent } from '@/constants/types';
 import { formatUser } from '@/services/utils';
 
 const IssueComment = ({
@@ -15,16 +17,22 @@ const IssueComment = ({
   handleUpdateIssueComment,
 }: {
   comment: any;
-  handleDeleteIssueComment: ({ commentId }: { commentId: string }) => void;
+  handleDeleteIssueComment: ({
+    commentId,
+  }: {
+    commentId: string;
+  }) => Promise<FetchResult<any>>;
   handleUpdateIssueComment: ({
     commentId,
     comment,
   }: {
     comment: string;
     commentId: string;
-  }) => Promise<any>;
+  }) => Promise<FetchResult<any>>;
 }) => {
-  const [editorContent, setEditorContent] = React.useState(undefined);
+  const [editorContent, setEditorContent] = React.useState<
+    EditorContent | undefined
+  >(undefined);
   const [showEditor, setShowEditor] = React.useState(false);
 
   const onUpdateCallback = (data: any) => {
@@ -70,14 +78,20 @@ const IssueComment = ({
 
               <Button
                 text='Save'
-                onClick={() =>
+                onClick={() => {
+                  const comment = editorContent
+                    ? editorContent.content
+                    : content;
+
+                  if (!selectedCommentId || !comment) return;
+
                   handleUpdateIssueComment({
-                    comment: editorContent ? editorContent.content : content,
+                    comment,
                     commentId: selectedCommentId,
                   }).then(() => {
                     setShowEditor(false);
-                  })
-                }
+                  });
+                }}
                 classes='float-right mt-2'
               />
             </div>
