@@ -22,6 +22,7 @@ import {
 } from './services/config.js';
 import hocuspocusServer from './services/hocuspocus-server.js';
 import { minioClient } from './services/minio-client.js';
+import * as wsServer from './services/ws-server.js';
 import { socketInit } from './socket/index.js';
 import typeDefs from './type-defs.js';
 
@@ -74,6 +75,78 @@ fastify.register(fastifyIO, {
 
 fastify.register(fastifyWebsocket, {
   options: { maxPayload: 1048576 },
+});
+
+fastify.addHook('preValidation', async (request, reply) => {
+  // check if the request is authenticated
+  // TODO: Refactor to make this cleaner
+  if (request.headers['connection'] === 'Upgrade' && request.url === '/ws') {
+    const token = request.headers['sec-websocket-protocol'].split(',').map((x) => x.trim())[1];
+    let user = null;
+
+    try {
+      // TODO: maybe we just call the url of the caller origin
+      const { data } = await axios.get(`${FRONTEND_HOSTNAME}/api/verify-jwt`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // TODO: We can inject from DB here the whitelist domains and emails in addition to ENV vars
+
+      if (ALLOW_LOGIN_EMAILS_LIST.length > 0 && !ALLOW_LOGIN_EMAILS_LIST.includes(data.email)) {
+        throw new GraphQLError('Email is not allowed to login', {
+          extensions: {
+            code: 'UNAUTHENTICATED',
+            http: { status: 401 },
+          },
+        });
+      }
+
+      if (
+        ALLOW_LOGIN_DOMAINS_LIST.length > 0 &&
+        !ALLOW_LOGIN_DOMAINS_LIST.includes(data.email.split('@')[1].toLowerCase())
+      ) {
+        throw new GraphQLError('Email is not allowed to login', {
+          extensions: {
+            code: 'UNAUTHENTICATED',
+            http: { status: 401 },
+          },
+        });
+      }
+
+      const externalId = `${data.provider}__${data.sub}`;
+
+      user = await db.sequelize.models.User.findOne({ where: { externalId } });
+
+      if (!user && ALLOW_SIGNUP) {
+        try {
+          const [firstName, lastName] = data.name.split(' ');
+
+          user = await db.sequelize.models.User.create({
+            email: data.email,
+            externalId,
+            firstName,
+            lastName,
+          });
+        } catch (e) {}
+      }
+    } catch (e) {
+      if (e?.response?.status === 401) {
+        await reply.code(401).send('not authenticated');
+      } else {
+        // TODO: We should probably throw a 500 here and log the error
+        console.error({ e });
+      }
+    }
+  }
+});
+
+fastify.register(async function (fastify) {
+  fastify.get('/ws', { websocket: true }, (connection /* SocketStream */, req /* FastifyRequest */) => {
+    const context = {};
+    console.log('HITTTING');
+
+    wsServer.handleConnection(connection.socket, req, context);
+  });
 });
 
 fastify.register(async function (fastify) {

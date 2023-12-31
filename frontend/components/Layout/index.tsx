@@ -1,20 +1,23 @@
 'use client';
-import { CommandPalette } from '@/components/CommandPalette';
-import Notifications from '@/components/Notifications';
-import { Panel, PanelGroup } from 'react-resizable-panels';
-import Sidebar from '@/components/Sidebar';
-import ResizeHandle from '@/components/Panels/ResizeHandle';
-import Header from '@/components/Header';
+
+import { signIn, signOut, useSession } from 'next-auth/react';
 import { useEffect, useRef, useState } from 'react';
+import { Panel, PanelGroup } from 'react-resizable-panels';
+import { ReadyState } from 'react-use-websocket';
+
+import { CommandPalette } from '@/components/CommandPalette';
+import Header from '@/components/Header';
+import Notifications from '@/components/Notifications';
+import ResizeHandle from '@/components/Panels/ResizeHandle';
+import Sidebar from '@/components/Sidebar';
+import Loader from '@/components/common/Loader';
+import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
+import useWsAuthenticatedSocket from '@/hooks/useWsAuthenticatedSocket';
+import { PUBLIC_DEFAULT_LOGIN_PROVIDER } from '@/services/config';
+import socketMsgHandler from '@/services/socket-handlers';
 
 import '../../globals.css';
 import '../../satoshi.css';
-import Loader from '@/components/common/Loader';
-
-import { signIn, signOut, useSession } from 'next-auth/react';
-import { PUBLIC_DEFAULT_LOGIN_PROVIDER } from '@/services/config';
-import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
-import socketMsgHandler from '@/services/socket-handlers';
 
 export const ProtectedLayout = ({
   children,
@@ -64,6 +67,15 @@ export default function MainLayout({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const leftPanel = useRef(null);
   const { socket, connected, error } = useAuthenticatedSocket();
+  const { sendMessage, lastMessage, readyState } = useWsAuthenticatedSocket();
+
+  const connectionStatus = {
+    [ReadyState.CONNECTING]: 'Connecting',
+    [ReadyState.OPEN]: 'Open',
+    [ReadyState.CLOSING]: 'Closing',
+    [ReadyState.CLOSED]: 'Closed',
+    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
+  }[readyState];
 
   // This is our global handler for websocket messages
   useEffect(() => {
@@ -71,6 +83,14 @@ export default function MainLayout({
       socket.on('message', socketMsgHandler);
     }
   }, [connected]);
+
+  useEffect(() => {
+    console.log('readyState', connectionStatus);
+    // if (readyState === ReadyState.OPEN) {
+    //   console.log('pinging');
+    //   sendMessage('ping');
+    // }
+  }, [connectionStatus]);
 
   useEffect(() => {
     if (sidebarOpen) {
