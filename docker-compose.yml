@@ -79,13 +79,17 @@ services:
 
   frontend:
     container_name: frontend
-    image: ghcr.io/openpro-io/openpro-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+      args:
+        DOCKER_BUILDKIT: 1
     environment:
       NEXT_PUBLIC_API_URL: http://backend:8080
+      NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER: keycloak
       NEXTAUTH_URL: http://localhost:3000
-      NEXTAUTH_SECRET: # openssl rand -base64 32
+      NEXTAUTH_SECRET: 68a8450a7e7945f6a0c83cef2d46eae177564ac7c6c3872f55bdb04f36f568be
       NEXT_PUBLIC_NEXTAUTH_URL: http://localhost:3000
-      NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER: # github|keycloak
 
       # Uncomment the following lines to enable keycloak OAuth
       #AUTH_KEYCLOAK_ID:
@@ -95,6 +99,13 @@ services:
       # Uncomment the following lines to enable GitHub OAuth
       #GITHUB_CLIENT_ID: <client-id>
       #GITHUB_CLIENT_SECRET: <client-secret>
+      AUTH_KEYCLOAK_ID: scrumboard
+      AUTH_KEYCLOAK_SECRET: H4yFPBaVBgsYmcwsghEVuEgOXcEkX0YU
+      AUTH_KEYCLOAK_ISSUER: https://auth.oauthd.me/realms/claysjira
+      KEYCLOAK_BASE_URL: https://auth.oauthd.me
+      NFTY_WS_HOST: localhost:8093
+      NFTY_WS_SSL: false
+      PUBLIC_NFTY_HTTP_SSL: false
     networks:
       - internal
     ports:

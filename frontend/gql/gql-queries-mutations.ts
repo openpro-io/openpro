@@ -467,3 +467,11 @@ export const REMOVE_USER_FROM_PROJECT_MUTATION = gql(/* GraphQL */ `
     }
   }
 `);
+
+export const ISSUE_CREATED_SUBSCRIPTION = gql(/* GraphQL */ `
+  subscription IssueCreated {
+    issueCreated {
+      ...IssueFields
+    }
+  }
+`);

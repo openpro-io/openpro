@@ -1,6 +1,13 @@
 import { Op } from 'sequelize';
 
+import pubsub from '../../services/apollo-pg-pubsub.js';
+
 const resolvers = {
+  Subscription: {
+    issueCreated: {
+      subscribe: () => pubsub.asyncIterator(['ISSUE_CREATED']),
+    },
+  },
   Query: {
     issues: (parent, { input: { projectId, id, search, searchOperator } }, { db }) => {
       let whereOr = [];
@@ -175,7 +182,13 @@ const resolvers = {
 
       const issueStatus = await db.sequelize.models.IssueStatuses.findByPk(issueStatusId);
 
-      return { ...issue.toJSON(), status: issueStatus.toJSON() };
+      const returnData = { ...issue.toJSON(), status: issueStatus.toJSON() };
+
+      pubsub.publish('ISSUE_CREATED', {
+        issueCreated: returnData,
+      });
+
+      return returnData;
     },
     deleteIssue: async (parent, { input }, { db }) => {
       const { id } = input;

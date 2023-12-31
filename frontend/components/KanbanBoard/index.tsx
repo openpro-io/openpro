@@ -1,9 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
 
+import { useMutation, useQuery, useSubscription } from '@apollo/client';
+import { omitDeep } from '@apollo/client/utilities';
 // https://github.com/chetanverma16/dndkit-guide/tree/main/components
 // This guy did a pretty good job!!!
-
 import {
   DndContext,
   DragEndEvent,
@@ -11,44 +11,45 @@ import {
   DragOverlay,
   DragStartEvent,
   KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
   UniqueIdentifier,
   closestCorners,
   useSensor,
   useSensors,
-  TouchSensor,
-  MouseSensor,
 } from '@dnd-kit/core';
 import {
   SortableContext,
   arrayMove,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
+import { cloneDeep, isEmpty, isEqual, pick } from 'lodash';
+import { getSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-// Components
-import Container from './Container';
-import Items from './Item';
-import Modal from './Modal';
-import Input from './Input';
 import { Button } from '@/components/Button';
-import { useMutation, useQuery } from '@apollo/client';
+import IssueModal from '@/components/IssueModal';
+import IssueModalContents from '@/components/IssueModal/IssueModalContents';
+import Toolbar from '@/components/KanbanBoard/Toolbar';
 import {
   CREATE_ISSUE_MUTATION,
   CREATE_ISSUE_STATUS_MUTATION,
   GET_PROJECT_INFO,
+  ISSUE_CREATED_SUBSCRIPTION,
   ISSUE_FIELDS,
   UPDATE_BOARD_MUTATION,
   UPDATE_ISSUE_MUTATION,
 } from '@/gql/gql-queries-mutations';
-import { cloneDeep, isEmpty, isEqual, pick } from 'lodash';
-import { getSession } from 'next-auth/react';
-import { getDomainName } from '@/services/utils';
-import { useSearchParams } from 'next/navigation';
-import IssueModal from '@/components/IssueModal';
-import IssueModalContents from '@/components/IssueModal/IssueModalContents';
-import Toolbar from '@/components/KanbanBoard/Toolbar';
 import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
-import { omitDeep } from '@apollo/client/utilities';
 import { apolloClient } from '@/services/apollo-client';
+import { getDomainName } from '@/services/utils';
+
+// Components
+import Container from './Container';
+import Input from './Input';
+import Items from './Item';
+import Modal from './Modal';
 
 type DNDType = {
   id: UniqueIdentifier;
@@ -112,6 +113,7 @@ export default function KanbanBoard({
   const [updateIssue] = useMutation(UPDATE_ISSUE_MUTATION);
   const [updateBoard] = useMutation(UPDATE_BOARD_MUTATION);
   const [addIssueStatus] = useMutation(CREATE_ISSUE_STATUS_MUTATION);
+  const issueCreatedSubscription = useSubscription(ISSUE_CREATED_SUBSCRIPTION);
 
   const getProjectInfo = useQuery(GET_PROJECT_INFO, {
     skip: !projectId,
@@ -127,6 +129,14 @@ export default function KanbanBoard({
   //     input: { id: `${boardId}` },
   //   },
   // });
+
+  useEffect(() => {
+    if (!issueCreatedSubscription.loading && issueCreatedSubscription.data) {
+      // TODO: Update the board state locally and server side
+
+      console.log({ issueCreatedSubscription });
+    }
+  }, [issueCreatedSubscription]);
 
   // On page load we open the modal if there is a query param for the issue
   useEffect(() => {

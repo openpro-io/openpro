@@ -377,6 +377,11 @@ const typeDefs = gql`
     issues(input: QueryIssueInput): [Issue]
     issue(input: QueryIssueInput): Issue
   }
+
+  # SUBSCRIPTIONS
+  type Subscription {
+    issueCreated: Issue
+  }
 `;
 
 export default typeDefs;

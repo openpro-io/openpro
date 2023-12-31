@@ -2,10 +2,12 @@ import { ApolloServer } from '@apollo/server';
 import { fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
 import * as cors from '@fastify/cors';
 import { fastifyWebsocket } from '@fastify/websocket';
+import { makeExecutableSchema } from '@graphql-tools/schema';
 import axios from 'axios';
 import Fastify from 'fastify';
 import fastifyIO from 'fastify-socket.io';
 import processRequest from 'graphql-upload/processRequest.mjs';
+import { makeHandler } from 'graphql-ws/lib/use/@fastify/websocket';
 import { GraphQLError } from 'graphql/error/index.js';
 
 import { db } from './db/index.js';
@@ -24,6 +26,8 @@ import hocuspocusServer from './services/hocuspocus-server.js';
 import { minioClient } from './services/minio-client.js';
 import { socketInit } from './socket/index.js';
 import typeDefs from './type-defs.js';
+
+const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 const fastify = Fastify({
   logger: ENABLE_FASTIFY_LOGGING,
@@ -114,8 +118,13 @@ const apollo = new ApolloServer({
 await apollo.start();
 
 const myContextFunction = async (request) => {
+  let token = request?.headers?.authorization;
+
+  if (request?.connectionParams?.headers?.Authorization) {
+    token = request?.connectionParams?.headers?.Authorization;
+  }
+
   // get the user token from the headers
-  const token = request.headers.authorization;
   let user = null;
 
   // Allow if introspection query only
@@ -131,7 +140,7 @@ const myContextFunction = async (request) => {
     try {
       // TODO: maybe we just call the url of the caller origin
       const { data } = await axios.get(`${FRONTEND_HOSTNAME}/api/verify-jwt`, {
-        headers: { Authorization: request.headers.authorization },
+        headers: { Authorization: token },
       });
 
       // TODO: We can inject from DB here the whitelist domains and emails in addition to ENV vars
@@ -207,6 +216,10 @@ const myContextFunction = async (request) => {
     user,
   };
 };
+
+fastify.register(async (fastify) => {
+  fastify.get('/graphql', { websocket: true }, makeHandler({ schema, context: myContextFunction }));
+});
 
 fastify.post(
   '/graphql',
