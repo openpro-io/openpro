@@ -1,12 +1,13 @@
 'use client';
 
-import { useFragment, useMutation } from '@apollo/client';
+import { FetchResult, useFragment, useMutation } from '@apollo/client';
 import { nanoid } from 'ai';
 import { useSearchParams } from 'next/navigation';
 import React from 'react';
 
 import { Button } from '@/components/Button';
 import Editor from '@/components/Editor';
+import { EditorContent } from '@/constants/types';
 import {
   CREATE_ISSUE_COMMENT_MUTATION,
   DELETE_ISSUE_COMMENT_MUTATION,
@@ -53,7 +54,9 @@ const IssueComments = ({ issueId }: { issueId?: string }) => {
   const [newDocumentName] = React.useState<string | undefined>(
     `issueComment.${nanoid()}.comment`
   );
-  const [editorContent, setEditorContent] = React.useState(undefined);
+  const [editorContent, setEditorContent] = React.useState<
+    EditorContent | undefined
+  >(undefined);
   const [showEditor, setShowEditor] = React.useState(false);
   const searchParams = useSearchParams()!;
   const params = new URLSearchParams(searchParams);
@@ -71,7 +74,9 @@ const IssueComments = ({ issueId }: { issueId?: string }) => {
     setEditorContent(data);
   };
 
-  const handleCreateIssueComment = () => {
+  const handleCreateIssueComment = async () => {
+    if (!selectedIssueId || !editorContent) return;
+
     return createIssueComment({
       variables: {
         input: {
@@ -83,11 +88,9 @@ const IssueComments = ({ issueId }: { issueId?: string }) => {
     });
   };
 
-  const handleDeleteIssueComment = ({ commentId }: DeleteComment) => {
-    if (!commentId) {
-      return;
-    }
-
+  const handleDeleteIssueComment = async ({
+    commentId,
+  }: DeleteComment): Promise<FetchResult> => {
     return deleteIssueComment({
       refetchQueries: [
         {
@@ -103,11 +106,10 @@ const IssueComments = ({ issueId }: { issueId?: string }) => {
     });
   };
 
-  const handleUpdateIssueComment = ({ commentId, comment }: UpdateComment) => {
-    if (!commentId) {
-      return;
-    }
-
+  const handleUpdateIssueComment = async ({
+    commentId,
+    comment,
+  }: UpdateComment): Promise<FetchResult> => {
     return updateIssueComment({
       refetchQueries: [
         {
@@ -176,7 +178,6 @@ const IssueComments = ({ issueId }: { issueId?: string }) => {
             handleDeleteIssueComment={handleDeleteIssueComment}
             handleUpdateIssueComment={handleUpdateIssueComment}
             key={comment.id}
-            issueId={selectedIssueId!}
             comment={comment}
           />
         ))}

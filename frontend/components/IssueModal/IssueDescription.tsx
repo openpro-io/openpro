@@ -2,12 +2,13 @@
 
 import { useMutation, useQuery } from '@apollo/client';
 import { useSearchParams } from 'next/navigation';
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
 // @ts-ignore
 import { Button } from '@/components/Button';
 import Editor from '@/components/Editor';
 import EditorRenderOnly from '@/components/Editor/EditorRenderOnly';
+import { EditorContent } from '@/constants/types';
 import {
   GET_ISSUE_QUERY,
   UPDATE_ISSUE_MUTATION,
@@ -17,7 +18,9 @@ export const IssueDescription = ({ issueId }: { issueId?: string }) => {
   const searchParams = useSearchParams()!;
   const selectedIssueId = issueId ?? searchParams.get('selectedIssueId');
 
-  const [editorContent, setEditorContent] = React.useState(undefined);
+  const [editorContent, setEditorContent] = React.useState<
+    EditorContent | undefined
+  >(undefined);
   const [showEditor, setShowEditor] = React.useState(false);
 
   const { data: issueData } = useQuery(GET_ISSUE_QUERY, {
@@ -92,9 +95,8 @@ export const IssueDescription = ({ issueId }: { issueId?: string }) => {
             <Button
               text='Save'
               onClick={() => {
-                if (!selectedIssueId) return;
+                if (!selectedIssueId || !editorContent) return;
 
-                console.log({ editorContent, selectedIssueId });
                 updateDescription({
                   variables: {
                     input: {
