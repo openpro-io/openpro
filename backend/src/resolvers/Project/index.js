@@ -63,6 +63,27 @@ const resolvers = {
     },
   },
   Mutation: {
+    createProjectCustomField: async (parent, { input: { projectId, fieldName, fieldType } }, { db }) =>
+      await db.sequelize.models.ProjectCustomField.create(
+        {
+          projectId: Number(projectId),
+          fieldName,
+          fieldType,
+        },
+        { returning: true }
+      ),
+    deleteProjectCustomField: async (parent, { input: { id } }, { db }) => {
+      const findCustomField = await db.sequelize.models.ProjectCustomField.findByPk(id);
+
+      if (!findCustomField) throw new Error('Custom field not found');
+
+      await findCustomField.destroy();
+
+      return {
+        message: 'deleted custom field',
+        status: 'success',
+      };
+    },
     createProjectTag: async (parent, { input }, { db }) => {
       const { projectId, name } = input;
 
@@ -71,9 +92,7 @@ const resolvers = {
         name,
       });
     },
-    deleteProjectTag: async (parent, { input }, { db }) => {
-      const { id } = input;
-
+    deleteProjectTag: async (parent, { input: { id } }, { db }) => {
       const findProjectTag = await db.sequelize.models.ProjectTag.findByPk(id);
 
       if (!findProjectTag) {
@@ -162,6 +181,9 @@ const resolvers = {
     },
   },
   Project: {
+    customFields: (parent, args, { db }) => {
+      return db.sequelize.models.ProjectCustomField.findAll({ where: { projectId: parent.id } });
+    },
     tags: (parent, args, { db }) => {
       return db.sequelize.models.ProjectTag.findAll({ where: { projectId: parent.id } });
     },

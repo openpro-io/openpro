@@ -1,4 +1,6 @@
+import { keyBy, merge, values } from 'lodash-es';
 import { Op } from 'sequelize';
+import yn from 'yn';
 
 import { websocketBroadcast } from '../../services/ws-server.js';
 
@@ -119,7 +121,19 @@ const resolvers = {
       return { message: 'success', status: 'success' };
     },
     updateIssue: async (parent, { input }, { db, websocketServer }) => {
-      const { id, issueStatusId, assigneeId, reporterId, title, description, tagIds, priority, archived } = input;
+      const {
+        id,
+        issueStatusId,
+        assigneeId,
+        reporterId,
+        title,
+        description,
+        tagIds,
+        priority,
+        archived,
+        customFieldId,
+        customFieldValue,
+      } = input;
 
       const issue = await db.sequelize.models.Issue.findByPk(id);
 
@@ -143,6 +157,28 @@ const resolvers = {
       // TODO: look for better way to handle nullifying user
       if (issue.assigneeId === 0) issue.assigneeId = null;
       if (issue.reporterId === 0) issue.reporterId = null;
+
+      if (customFieldId && customFieldValue) {
+        const customField = await db.sequelize.models.ProjectCustomField.findByPk(Number(customFieldId));
+        if (!customField) throw new Error('Custom field not found');
+
+        let valueCasted = customFieldValue;
+
+        if (customField.fieldType.toLowerCase() === 'number') valueCasted = Number(customFieldValue);
+        else if (customField.fieldType.toLowerCase() === 'boolean') valueCasted = yn(customFieldValue);
+
+        const customFieldObject = {
+          id: `${issue.id}-${customField.id}`,
+          customFieldId,
+          value: valueCasted,
+          createdAt: new Date(), // TODO: improve date format decision
+        };
+
+        // TODO: investigate how to deep set the value instead of this to leverage DB level updating
+        issue.customFields = issue.customFields
+          ? values(merge(keyBy(issue.customFields, 'id'), keyBy([customFieldObject], 'id')))
+          : [customFieldObject];
+      }
 
       await issue.save();
 
@@ -200,6 +236,11 @@ const resolvers = {
       });
 
       return { message: 'issue deleted', status: 'success' };
+    },
+  },
+  CustomFieldValue: {
+    customField: async (parent, args, { db }) => {
+      return db.sequelize.models.ProjectCustomField.findByPk(parent.customFieldId);
     },
   },
   Issue: {
