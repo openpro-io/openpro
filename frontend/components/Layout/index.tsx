@@ -11,7 +11,6 @@ import Notifications from '@/components/Notifications';
 import ResizeHandle from '@/components/Panels/ResizeHandle';
 import Sidebar from '@/components/Sidebar';
 import Loader from '@/components/common/Loader';
-import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
 import useWsAuthenticatedSocket from '@/hooks/useWsAuthenticatedSocket';
 import { PUBLIC_DEFAULT_LOGIN_PROVIDER } from '@/services/config';
 import socketMsgHandler from '@/services/socket-handlers';
@@ -66,23 +65,7 @@ export default function MainLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const leftPanel = useRef(null);
-  const { socket, connected, error } = useAuthenticatedSocket();
-  const { sendMessage, lastMessage, readyState } = useWsAuthenticatedSocket();
-
-  const connectionStatus = {
-    [ReadyState.CONNECTING]: 'Connecting',
-    [ReadyState.OPEN]: 'Open',
-    [ReadyState.CLOSING]: 'Closing',
-    [ReadyState.CLOSED]: 'Closed',
-    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
-  }[readyState];
-
-  // This is our global handler for websocket messages
-  useEffect(() => {
-    if (connected) {
-      socket.on('message', socketMsgHandler);
-    }
-  }, [connected]);
+  const { lastMessage, readyState } = useWsAuthenticatedSocket();
 
   useEffect(() => {
     if (readyState === ReadyState.OPEN && lastMessage) {

@@ -1,9 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
 
+import { useMutation, useQuery } from '@apollo/client';
+import { omitDeep } from '@apollo/client/utilities';
 // https://github.com/chetanverma16/dndkit-guide/tree/main/components
 // This guy did a pretty good job!!!
-
 import {
   DndContext,
   DragEndEvent,
@@ -11,26 +11,27 @@ import {
   DragOverlay,
   DragStartEvent,
   KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
   UniqueIdentifier,
   closestCorners,
   useSensor,
   useSensors,
-  TouchSensor,
-  MouseSensor,
 } from '@dnd-kit/core';
 import {
   SortableContext,
   arrayMove,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
+import { cloneDeep, isEmpty, isEqual, pick } from 'lodash';
+import { getSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-// Components
-import Container from './Container';
-import Items from './Item';
-import Modal from './Modal';
-import Input from './Input';
 import { Button } from '@/components/Button';
-import { useMutation, useQuery } from '@apollo/client';
+import IssueModal from '@/components/IssueModal';
+import IssueModalContents from '@/components/IssueModal/IssueModalContents';
+import Toolbar from '@/components/KanbanBoard/Toolbar';
 import {
   CREATE_ISSUE_MUTATION,
   CREATE_ISSUE_STATUS_MUTATION,
@@ -39,16 +40,15 @@ import {
   UPDATE_BOARD_MUTATION,
   UPDATE_ISSUE_MUTATION,
 } from '@/gql/gql-queries-mutations';
-import { cloneDeep, isEmpty, isEqual, pick } from 'lodash';
-import { getSession } from 'next-auth/react';
-import { getDomainName } from '@/services/utils';
-import { useSearchParams } from 'next/navigation';
-import IssueModal from '@/components/IssueModal';
-import IssueModalContents from '@/components/IssueModal/IssueModalContents';
-import Toolbar from '@/components/KanbanBoard/Toolbar';
-import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
-import { omitDeep } from '@apollo/client/utilities';
+import useWsAuthenticatedSocket from '@/hooks/useWsAuthenticatedSocket';
 import { apolloClient } from '@/services/apollo-client';
+import { getDomainName } from '@/services/utils';
+
+// Components
+import Container from './Container';
+import Input from './Input';
+import Items from './Item';
+import Modal from './Modal';
 
 type DNDType = {
   id: UniqueIdentifier;
@@ -86,7 +86,7 @@ export default function KanbanBoard({
   const searchParams = useSearchParams()!;
   const selectedIssueId = searchParams.get('selectedIssueId');
 
-  const { socket, connected, error } = useAuthenticatedSocket();
+  const { sendJsonMessage } = useWsAuthenticatedSocket();
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
   const [showAddContainerModal, setShowAddContainerModal] = useState(false);
   const [showAddItemModal, setShowAddItemModal] = useState(false);
@@ -204,11 +204,7 @@ export default function KanbanBoard({
       }`,
     };
 
-    if (connected) {
-      socket.emit('message', notification);
-      console.log('emitting');
-    }
-
+    sendJsonMessage(notification);
     // await notify(notification);
 
     const id = `item-${newIssue.id}`;

@@ -4,7 +4,6 @@ import * as cors from '@fastify/cors';
 import { fastifyWebsocket } from '@fastify/websocket';
 import axios from 'axios';
 import Fastify from 'fastify';
-import fastifyIO from 'fastify-socket.io';
 import processRequest from 'graphql-upload/processRequest.mjs';
 import { GraphQLError } from 'graphql/error/index.js';
 import { nanoid } from 'nanoid';
@@ -24,7 +23,6 @@ import {
 import hocuspocusServer from './services/hocuspocus-server.js';
 import { minioClient } from './services/minio-client.js';
 import * as wsServer from './services/ws-server.js';
-import { socketInit } from './socket/index.js';
 import typeDefs from './type-defs.js';
 
 const fastify = Fastify({
@@ -65,13 +63,6 @@ fastify.register(cors, {
   ],
   exposedHeaders: [],
   credentials: true,
-});
-
-fastify.register(fastifyIO, {
-  path: '/socket.io',
-  cors: {
-    origin: ['localhost', CORS_ORIGIN, 'http://localhost:3000'],
-  },
 });
 
 fastify.register(fastifyWebsocket, {
@@ -319,7 +310,6 @@ const myContextFunction = async (request) => {
   }
 
   return {
-    io: fastify?.io,
     websocketServer: fastify?.websocketServer,
     db,
     user,
@@ -365,10 +355,6 @@ fastify.get('/uploads/:file', async (request, reply) => {
 //   const buffer = await fs.readFile(filePath);
 //   reply.send(buffer);
 // });
-
-fastify.ready().then(() => {
-  socketInit(fastify.io);
-});
 
 await fastify.listen({ port: HTTP_PORT, host: '0.0.0.0' });
 
