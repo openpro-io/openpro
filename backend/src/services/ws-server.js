@@ -1,9 +1,37 @@
-export const handleConnection = (socket, req, context) => {
-  //       // verify token
-  //       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  //       // add user to the context
-  //       user = await db.User.findByPk(decoded.id);
-  //     } catch (err) {
-  // console.log(socket);
-  socket.send('hi from server');
+export const handleConnection = ({ socket, req, context, clients }) => {
+  let isAlive = true;
+
+  const interval = setInterval(() => {
+    if (isAlive === false) {
+      socket.terminate();
+    } else {
+      isAlive = false;
+      socket.ping(() => {});
+    }
+  }, 30000); // 30 seconds
+
+  socket.on('pong', () => {
+    isAlive = true;
+  });
+
+  socket.send(JSON.stringify({ type: 'HELLO', payload: { message: 'hi from server' } }));
+
+  socket.on('message', (message) => {
+    console.log('message', message.toString());
+    if (message.toString() === 'ping') {
+      socket.send('pong');
+    }
+  });
+
+  socket.on('close', () => {
+    clearInterval(interval);
+  });
+};
+
+export const websocketBroadcast = ({ clients, message, namespace }) => {
+  clients.forEach((client) => {
+    if (namespace && client.namespace === namespace) {
+      client.send(message);
+    }
+  });
 };

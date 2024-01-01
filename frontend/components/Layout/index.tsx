@@ -85,12 +85,10 @@ export default function MainLayout({
   }, [connected]);
 
   useEffect(() => {
-    console.log('readyState', connectionStatus);
-    // if (readyState === ReadyState.OPEN) {
-    //   console.log('pinging');
-    //   sendMessage('ping');
-    // }
-  }, [connectionStatus]);
+    if (readyState === ReadyState.OPEN && lastMessage) {
+      socketMsgHandler(lastMessage?.data);
+    }
+  }, [lastMessage, readyState]);
 
   useEffect(() => {
     if (sidebarOpen) {

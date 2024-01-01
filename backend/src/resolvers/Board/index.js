@@ -1,3 +1,5 @@
+import { websocketBroadcast } from '../../services/ws-server.js';
+
 const resolvers = {
   Query: {
     boards: (parent, args, { db }) => {
@@ -12,7 +14,7 @@ const resolvers = {
     },
   },
   Mutation: {
-    updateBoard: async (parent, { input }, { db, io }) => {
+    updateBoard: async (parent, { input }, { db, io, websocketServer }) => {
       const { id, name, viewState, backlogEnabled, settings, containerOrder } = input;
 
       const board = await db.sequelize.models.Board.findByPk(id);
@@ -29,6 +31,11 @@ const resolvers = {
 
       // TODO: fix
       // emitBoardUpdatedEvent(io, board.toJSON());
+      websocketBroadcast({
+        clients: websocketServer.clients,
+        namespace: 'ws',
+        message: JSON.stringify({ type: 'BOARD_UPDATED', payload: board.toJSON() }),
+      });
 
       return board;
     },

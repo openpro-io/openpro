@@ -7,6 +7,7 @@ import Fastify from 'fastify';
 import fastifyIO from 'fastify-socket.io';
 import processRequest from 'graphql-upload/processRequest.mjs';
 import { GraphQLError } from 'graphql/error/index.js';
+import { nanoid } from 'nanoid';
 
 import { db } from './db/index.js';
 import resolvers from './resolvers/index.js';
@@ -74,7 +75,7 @@ fastify.register(fastifyIO, {
 });
 
 fastify.register(fastifyWebsocket, {
-  options: { maxPayload: 1048576 },
+  options: { maxPayload: 1048576, clientTracking: true },
 });
 
 fastify.addHook('preValidation', async (request, reply) => {
@@ -129,6 +130,8 @@ fastify.addHook('preValidation', async (request, reply) => {
           });
         } catch (e) {}
       }
+
+      request.user = user;
     } catch (e) {
       if (e?.response?.status === 401) {
         await reply.code(401).send('not authenticated');
@@ -143,9 +146,18 @@ fastify.addHook('preValidation', async (request, reply) => {
 fastify.register(async function (fastify) {
   fastify.get('/ws', { websocket: true }, (connection /* SocketStream */, req /* FastifyRequest */) => {
     const context = {};
-    console.log('HITTTING');
 
-    wsServer.handleConnection(connection.socket, req, context);
+    connection.socket.id = nanoid();
+    connection.socket.user = req?.user;
+    connection.socket.namespace = 'ws';
+    const clients = fastify.websocketServer.clients;
+
+    wsServer.handleConnection({
+      socket: connection.socket,
+      req,
+      context,
+      clients,
+    });
   });
 });
 
@@ -276,6 +288,7 @@ const myContextFunction = async (request) => {
 
   return {
     io: fastify?.io,
+    websocketServer: fastify?.websocketServer,
     db,
     user,
   };
