@@ -1,13 +1,14 @@
 'use client';
 
-import { Inter } from 'next/font/google';
-import '../globals.css';
-import NextAuthProvider from '@/app/context/NextAuthProvider';
 import { ApolloProvider } from '@apollo/client';
-import { apolloClient } from '@/services/apollo-client';
-import MainLayout, { ProtectedLayout } from '@/components/Layout';
 import { PublicEnvScript } from 'next-runtime-env';
-import { IoProvider } from 'socket.io-react-hook';
+import { Inter } from 'next/font/google';
+
+import NextAuthProvider from '@/app/context/NextAuthProvider';
+import MainLayout, { ProtectedLayout } from '@/components/Layout';
+import { apolloClient } from '@/services/apollo-client';
+
+import '../globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -26,9 +27,7 @@ export default function RootLayout({
         <ApolloProvider client={apolloClient}>
           <NextAuthProvider>
             <ProtectedLayout>
-              <IoProvider>
-                <MainLayout>{children}</MainLayout>
-              </IoProvider>
+              <MainLayout>{children}</MainLayout>
             </ProtectedLayout>
           </NextAuthProvider>
         </ApolloProvider>

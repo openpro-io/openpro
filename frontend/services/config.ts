@@ -6,7 +6,7 @@ export const OPENAI_API_BASE = process.env.OPENAI_API_BASE;
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 export const GPT_ENGINE = process.env.GPT_ENGINE;
 export const PUBLIC_NEXTAUTH_URL = env('NEXT_PUBLIC_NEXTAUTH_URL');
-export const NEXT_PUBLIC_API_URL = env('NEXT_PUBLIC_API_URL');
+export const NEXT_PUBLIC_API_URL = env('NEXT_PUBLIC_API_URL') as string;
 export const API_URL = process.env.API_URL;
 export const PUBLIC_DEFAULT_LOGIN_PROVIDER = env(
   'NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER'

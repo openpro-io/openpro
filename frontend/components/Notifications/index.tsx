@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import { Alert } from '@/components/Alert';
 import { toast } from 'react-hot-toast';
+
+import { Alert } from '@/components/Alert';
 import { priorityToIcon } from '@/components/Icons';
-import { PUBLIC_NEXTAUTH_URL } from '@/services/config';
 import { notificationsTable } from '@/database/database.config';
-import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
-import { useSocketEvent } from 'socket.io-react-hook';
+import useWsAuthenticatedSocket from '@/hooks/useWsAuthenticatedSocket';
+import { PUBLIC_NEXTAUTH_URL } from '@/services/config';
 
 type ProcessTagsReturn = {
   otherTags: string[];
@@ -29,8 +29,8 @@ const processTags = (tags: any | undefined): ProcessTagsReturn => {
 };
 
 const Notifications = () => {
-  const { socket, connected, error } = useAuthenticatedSocket();
-  const { lastMessage: msg } = useSocketEvent(socket, 'message');
+  const { lastJsonMessage: msg }: { lastJsonMessage: any } =
+    useWsAuthenticatedSocket();
 
   useEffect(() => {
     if (msg && msg?.type === 'notification') {
