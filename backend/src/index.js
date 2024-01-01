@@ -144,6 +144,31 @@ fastify.addHook('preValidation', async (request, reply) => {
 });
 
 fastify.register(async function (fastify) {
+  fastify.websocketServer.on('connection', function connection(ws) {
+    ws.isAlive = true;
+
+    // Heartbeat
+    ws.on('message', function (message) {
+      const msg = message.toString();
+      if (['ping', 'pong'].includes(msg)) {
+        this.isAlive = true;
+        ws.send(msg === 'ping' ? 'pong' : 'ping');
+      }
+    });
+  });
+
+  const interval = setInterval(function ping() {
+    fastify.websocketServer.clients.forEach(function each(ws) {
+      if (ws.isAlive === false) return ws.terminate();
+
+      ws.isAlive = false;
+    });
+  }, 30000);
+
+  fastify.websocketServer.on('close', function close() {
+    clearInterval(interval);
+  });
+
   fastify.get('/ws', { websocket: true }, (connection /* SocketStream */, req /* FastifyRequest */) => {
     const context = {};
 
@@ -198,6 +223,13 @@ const apollo = new ApolloServer({
 
 await apollo.start();
 
+/**
+ * Retrieves context information based on the given request object.
+ *
+ * @param {import('fastify').RouteGenericInterface} request - The request object.
+ * @returns {Promise<Object>} - The context object.
+ * @throws {GraphQLError} - If the user is not authenticated.
+ */
 const myContextFunction = async (request) => {
   // get the user token from the headers
   const token = request.headers.authorization;

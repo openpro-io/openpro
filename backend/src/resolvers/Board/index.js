@@ -14,7 +14,7 @@ const resolvers = {
     },
   },
   Mutation: {
-    updateBoard: async (parent, { input }, { db, io, websocketServer }) => {
+    updateBoard: async (parent, { input }, { db, websocketServer }) => {
       const { id, name, viewState, backlogEnabled, settings, containerOrder } = input;
 
       const board = await db.sequelize.models.Board.findByPk(id);
@@ -29,8 +29,6 @@ const resolvers = {
 
       await board.save();
 
-      // TODO: fix
-      // emitBoardUpdatedEvent(io, board.toJSON());
       websocketBroadcast({
         clients: websocketServer.clients,
         namespace: 'ws',

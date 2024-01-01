@@ -23,11 +23,12 @@ const useWsAuthenticatedSocket = (options?: any) => {
     NEXT_PUBLIC_API_URL.replace('https', 'wss').replace('http', 'ws') + '/ws',
     {
       ...(options ?? {}),
+      shouldReconnect: (closeEvent) => true,
       heartbeat: {
-        message: 'ping',
-        returnMessage: 'pong',
-        timeout: 30000, // 30 seconds, no response is received, the connection will be closed
-        interval: 25000, // every 25 seconds, a ping message will be sent
+        message: 'pong',
+        returnMessage: 'ping',
+        timeout: 35000, // 35 seconds, no response is received, the connection will be closed
+        interval: 30000, // every 30 seconds, a ping message will be sent
       },
       protocols: ['Authorization', `${accessToken}`],
     },
