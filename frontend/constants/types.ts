@@ -74,8 +74,6 @@ export type Issue = {
   assignee?: User;
 };
 
-export type IssueItems = { [key: string]: Issue[] };
-
 export type IssueStatus = {
   id: string;
   projectId: string;
@@ -97,12 +95,7 @@ export type CreateProjectType = {
 
 export type CreateProject = CreateProjectType & CreateProjectDetails;
 
-export type Comment = {
-  id: string;
-  issueId?: string;
-  comment: string;
-  reporter: User;
-  createdAt: string;
-  createdAtTimeAgo: string;
-  updatedAt?: string;
+export type EditorContent = {
+  content: any;
+  state: any;
 };

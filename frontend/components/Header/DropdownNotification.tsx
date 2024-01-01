@@ -1,12 +1,13 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
-import { notificationsTable } from '@/database/database.config';
-import { useLiveQuery } from 'dexie-react-hooks';
+
 import { CheckIcon } from '@heroicons/react/20/solid';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { DateTime } from 'luxon';
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
 import { IoCheckmarkDone } from 'react-icons/io5';
-import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
+
+import { notificationsTable } from '@/database/database.config';
 
 type Event = {
   event: string;
@@ -25,22 +26,6 @@ const DropdownNotification = () => {
   const dropdown = useRef<any>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifying, setNotifying] = useState(false);
-  const { socket, connected, error } = useAuthenticatedSocket();
-
-  useEffect(() => {
-    if (connected) {
-      const eventHandler = (msg: any) => {
-        console.log({ msg });
-      };
-
-      socket.on('message', eventHandler);
-
-      // unsubscribe from event for preventing memory leaks
-      return () => {
-        socket.off('message', eventHandler);
-      };
-    }
-  }, [connected]);
 
   useEffect(() => {
     const clickHandler = ({ target }: MouseEvent) => {

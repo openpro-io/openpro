@@ -4,9 +4,9 @@ import * as cors from '@fastify/cors';
 import { fastifyWebsocket } from '@fastify/websocket';
 import axios from 'axios';
 import Fastify from 'fastify';
-import fastifyIO from 'fastify-socket.io';
 import processRequest from 'graphql-upload/processRequest.mjs';
 import { GraphQLError } from 'graphql/error/index.js';
+import { nanoid } from 'nanoid';
 
 import { db } from './db/index.js';
 import resolvers from './resolvers/index.js';
@@ -22,7 +22,7 @@ import {
 } from './services/config.js';
 import hocuspocusServer from './services/hocuspocus-server.js';
 import { minioClient } from './services/minio-client.js';
-import { socketInit } from './socket/index.js';
+import * as wsServer from './services/ws-server.js';
 import typeDefs from './type-defs.js';
 
 const fastify = Fastify({
@@ -65,15 +65,116 @@ fastify.register(cors, {
   credentials: true,
 });
 
-fastify.register(fastifyIO, {
-  path: '/socket.io',
-  cors: {
-    origin: ['localhost', CORS_ORIGIN, 'http://localhost:3000'],
-  },
+fastify.register(fastifyWebsocket, {
+  options: { maxPayload: 1048576, clientTracking: true },
 });
 
-fastify.register(fastifyWebsocket, {
-  options: { maxPayload: 1048576 },
+fastify.addHook('preValidation', async (request, reply) => {
+  // check if the request is authenticated
+  // TODO: Refactor to make this cleaner
+  if (request.headers['connection'] === 'Upgrade' && request.url === '/ws') {
+    const token = request.headers['sec-websocket-protocol'].split(',').map((x) => x.trim())[1];
+    let user = null;
+
+    try {
+      // TODO: maybe we just call the url of the caller origin
+      const { data } = await axios.get(`${FRONTEND_HOSTNAME}/api/verify-jwt`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // TODO: We can inject from DB here the whitelist domains and emails in addition to ENV vars
+
+      if (ALLOW_LOGIN_EMAILS_LIST.length > 0 && !ALLOW_LOGIN_EMAILS_LIST.includes(data.email)) {
+        throw new GraphQLError('Email is not allowed to login', {
+          extensions: {
+            code: 'UNAUTHENTICATED',
+            http: { status: 401 },
+          },
+        });
+      }
+
+      if (
+        ALLOW_LOGIN_DOMAINS_LIST.length > 0 &&
+        !ALLOW_LOGIN_DOMAINS_LIST.includes(data.email.split('@')[1].toLowerCase())
+      ) {
+        throw new GraphQLError('Email is not allowed to login', {
+          extensions: {
+            code: 'UNAUTHENTICATED',
+            http: { status: 401 },
+          },
+        });
+      }
+
+      const externalId = `${data.provider}__${data.sub}`;
+
+      user = await db.sequelize.models.User.findOne({ where: { externalId } });
+
+      if (!user && ALLOW_SIGNUP) {
+        try {
+          const [firstName, lastName] = data.name.split(' ');
+
+          user = await db.sequelize.models.User.create({
+            email: data.email,
+            externalId,
+            firstName,
+            lastName,
+          });
+        } catch (e) {}
+      }
+
+      request.user = user;
+    } catch (e) {
+      if (e?.response?.status === 401) {
+        await reply.code(401).send('not authenticated');
+      } else {
+        // TODO: We should probably throw a 500 here and log the error
+        console.error({ e });
+      }
+    }
+  }
+});
+
+fastify.register(async function (fastify) {
+  fastify.websocketServer.on('connection', function connection(ws) {
+    ws.isAlive = true;
+
+    // Heartbeat
+    ws.on('message', function (message) {
+      const msg = message.toString();
+      if (['ping', 'pong'].includes(msg)) {
+        this.isAlive = true;
+        ws.send(msg === 'ping' ? 'pong' : 'ping');
+      }
+    });
+  });
+
+  const interval = setInterval(function ping() {
+    fastify.websocketServer.clients.forEach(function each(ws) {
+      if (ws.isAlive === false) return ws.terminate();
+
+      ws.isAlive = false;
+    });
+  }, 30000);
+
+  fastify.websocketServer.on('close', function close() {
+    clearInterval(interval);
+  });
+
+  fastify.get('/ws', { websocket: true }, (connection /* SocketStream */, req /* FastifyRequest */) => {
+    const context = {};
+
+    connection.socket.id = nanoid();
+    connection.socket.user = req?.user;
+    connection.socket.namespace = 'ws';
+    const clients = fastify.websocketServer.clients;
+
+    wsServer.handleConnection({
+      socket: connection.socket,
+      req,
+      context,
+      clients,
+    });
+  });
 });
 
 fastify.register(async function (fastify) {
@@ -113,6 +214,13 @@ const apollo = new ApolloServer({
 
 await apollo.start();
 
+/**
+ * Retrieves context information based on the given request object.
+ *
+ * @param {import('fastify').RouteGenericInterface} request - The request object.
+ * @returns {Promise<Object>} - The context object.
+ * @throws {GraphQLError} - If the user is not authenticated.
+ */
 const myContextFunction = async (request) => {
   // get the user token from the headers
   const token = request.headers.authorization;
@@ -204,7 +312,7 @@ const myContextFunction = async (request) => {
   }
 
   return {
-    io: fastify?.io,
+    websocketServer: fastify?.websocketServer,
     db,
     user,
   };
@@ -249,10 +357,6 @@ fastify.get('/uploads/:file', async (request, reply) => {
 //   const buffer = await fs.readFile(filePath);
 //   reply.send(buffer);
 // });
-
-fastify.ready().then(() => {
-  socketInit(fastify.io);
-});
 
 await fastify.listen({ port: HTTP_PORT, host: '0.0.0.0' });
 

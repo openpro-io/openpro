@@ -1,21 +1,26 @@
 'use client';
-import React, { useEffect, useRef } from 'react';
+
 import { useMutation, useQuery } from '@apollo/client';
+import { useSearchParams } from 'next/navigation';
+import React from 'react';
+
+// @ts-ignore
+import { Button } from '@/components/Button';
+import Editor from '@/components/Editor';
+import EditorRenderOnly from '@/components/Editor/EditorRenderOnly';
+import { EditorContent } from '@/constants/types';
 import {
   GET_ISSUE_QUERY,
   UPDATE_ISSUE_MUTATION,
 } from '@/gql/gql-queries-mutations';
-// @ts-ignore
-import { Button } from '@/components/Button';
-import { useSearchParams } from 'next/navigation';
-import Editor from '@/components/Editor';
-import EditorRenderOnly from '@/components/Editor/EditorRenderOnly';
 
 export const IssueDescription = ({ issueId }: { issueId?: string }) => {
   const searchParams = useSearchParams()!;
   const selectedIssueId = issueId ?? searchParams.get('selectedIssueId');
 
-  const [editorContent, setEditorContent] = React.useState(undefined);
+  const [editorContent, setEditorContent] = React.useState<
+    EditorContent | undefined
+  >(undefined);
   const [showEditor, setShowEditor] = React.useState(false);
 
   const { data: issueData } = useQuery(GET_ISSUE_QUERY, {
@@ -74,7 +79,6 @@ export const IssueDescription = ({ issueId }: { issueId?: string }) => {
         <>
           <Editor
             onUpdateCallback={onUpdateCallback}
-            defaultContent={defaultContent}
             documentName={`issue.${selectedIssueId}.description`}
           />
           <div className='gap-x-1 pb-10'>
@@ -91,14 +95,13 @@ export const IssueDescription = ({ issueId }: { issueId?: string }) => {
             <Button
               text='Save'
               onClick={() => {
-                if (!selectedIssueId) return;
+                if (!selectedIssueId || !editorContent) return;
 
-                console.log({ editorContent, selectedIssueId });
                 updateDescription({
                   variables: {
                     input: {
                       id: selectedIssueId,
-                      description: JSON.stringify(editorContent),
+                      description: JSON.stringify(editorContent.content),
                     },
                   },
                 }).then(() => {

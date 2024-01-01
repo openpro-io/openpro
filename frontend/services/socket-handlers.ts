@@ -1,6 +1,8 @@
 import { apolloClient } from '@/services/apollo-client';
 
-const socketMsgHandler = async (msg: any) => {
+const socketMsgHandler = async (message: any) => {
+  const msg = typeof message === 'string' ? JSON.parse(message) : message;
+
   switch (msg?.type) {
     case 'BOARD_UPDATED':
       await apolloClient.refetchQueries({

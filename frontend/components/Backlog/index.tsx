@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react';
-
+import { useMutation, useQuery } from '@apollo/client';
 // https://github.com/chetanverma16/dndkit-guide/tree/main/components
 // This guy did a pretty good job!!!
-
 import {
   DndContext,
   DragEndEvent,
@@ -10,27 +8,25 @@ import {
   DragOverlay,
   DragStartEvent,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   UniqueIdentifier,
   closestCorners,
   useSensor,
   useSensors,
-  TouchSensor,
-  MouseSensor,
 } from '@dnd-kit/core';
 import {
   SortableContext,
   arrayMove,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
+import { cloneDeep, flatMap, pullAt } from 'lodash';
+import { getSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-// Components
-import Container from './Container';
-import Items from './Item';
-import Modal from './Modal';
-import Input from './Input';
-import { Button } from './Button';
-import { useMutation, useQuery } from '@apollo/client';
+import IssueModal from '@/components/IssueModal';
+import IssueModalContents from '@/components/IssueModal/IssueModalContents';
 import {
   CREATE_ISSUE_MUTATION,
   CREATE_ISSUE_STATUS_MUTATION,
@@ -38,12 +34,14 @@ import {
   UPDATE_BOARD_MUTATION,
   UPDATE_ISSUE_MUTATION,
 } from '@/gql/gql-queries-mutations';
-import { cloneDeep, pullAt, flatMap } from 'lodash';
-import { getSession } from 'next-auth/react';
-import { useSearchParams } from 'next/navigation';
-import IssueModal from '@/components/IssueModal';
-import IssueModalContents from '@/components/IssueModal/IssueModalContents';
-import useAuthenticatedSocket from '@/hooks/useAuthenticatedSocket';
+import useWsAuthenticatedSocket from '@/hooks/useWsAuthenticatedSocket';
+
+import { Button } from './Button';
+// Components
+import Container from './Container';
+import Input from './Input';
+import Items from './Item';
+import Modal from './Modal';
 
 // TODO: When we drag from backlog into a board we need to push into the viewState
 
@@ -74,7 +72,7 @@ export default function Backlog({ projectId }: { projectId: string }) {
   const params = new URLSearchParams(searchParams);
   const selectedIssueId = params.get('selectedIssueId');
 
-  const { socket, connected, error } = useAuthenticatedSocket();
+  const { sendJsonMessage } = useWsAuthenticatedSocket();
 
   const [backlogState, setBacklogState] = useState<BacklogState>({
     isIssueModalOpen: false,
@@ -89,7 +87,6 @@ export default function Backlog({ projectId }: { projectId: string }) {
   });
 
   const [createIssue, createIssueProps] = useMutation(CREATE_ISSUE_MUTATION);
-  const [updateIssue] = useMutation(UPDATE_ISSUE_MUTATION);
   const [updateBoard] = useMutation(UPDATE_BOARD_MUTATION);
   const [addIssueStatus] = useMutation(CREATE_ISSUE_STATUS_MUTATION);
   const getProjectInfo = useQuery(GET_PROJECT_INFO, {
@@ -181,9 +178,7 @@ export default function Backlog({ projectId }: { projectId: string }) {
       tags: ['white_check_mark', 'openpro.notificationDuration=3000'],
     };
 
-    if (connected) {
-      socket.emit('message', notification);
-    }
+    sendJsonMessage(notification);
 
     // await notify(notification);
 

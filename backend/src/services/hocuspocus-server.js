@@ -33,13 +33,15 @@ const hocuspocusServer = Server.configure({
           }
 
           if (entityType === 'issueComment' && entityField === 'comment') {
+            if (!isFinite(entityId)) return resolve(null);
+
             const comment = await db.sequelize.models.IssueComment.findOne({
               where: {
                 id: entityId,
               },
             });
 
-            if (!comment || !comment?.commentRaw) resolve(null);
+            if (!comment || !comment?.commentRaw) return resolve(null);
 
             const commentAsUnit8Array = new Uint8Array(comment.commentRaw);
             resolve(commentAsUnit8Array.length === 0 ? null : commentAsUnit8Array);
@@ -65,6 +67,8 @@ const hocuspocusServer = Server.configure({
         }
 
         if (entityType === 'issueComment' && entityField === 'comment') {
+          if (!isFinite(entityId)) return;
+
           await db.sequelize.models.IssueComment.update(
             {
               commentRaw: state,

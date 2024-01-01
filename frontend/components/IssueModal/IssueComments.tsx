@@ -1,16 +1,63 @@
 'use client';
 
-import React from 'react';
-import { formatUser } from '@/services/utils';
-import { useFragment } from '@apollo/client';
-import { ISSUE_FIELDS } from '@/gql/gql-queries-mutations';
+import { FetchResult, useFragment, useMutation } from '@apollo/client';
+import { nanoid } from 'ai';
 import { useSearchParams } from 'next/navigation';
-import { DateTime } from 'luxon';
-import IssueCommentEditorTipTap from '@/components/IssueModal/IssueCommentEditorTipTap';
-import EditorRenderOnly from '@/components/Editor/EditorRenderOnly';
-import Avatar from '@/components/Avatar';
+import React from 'react';
+
+import { Button } from '@/components/Button';
+import Editor from '@/components/Editor';
+import { EditorContent } from '@/constants/types';
+import {
+  CREATE_ISSUE_COMMENT_MUTATION,
+  DELETE_ISSUE_COMMENT_MUTATION,
+  GET_ISSUE_QUERY,
+  ISSUE_COMMENT_FIELDS,
+  ISSUE_FIELDS,
+  UPDATE_ISSUE_COMMENT_MUTATION,
+} from '@/gql/gql-queries-mutations';
+
+import IssueComment from './IssueComment';
+
+type DeleteComment = {
+  commentId: string;
+};
+
+type UpdateComment = {
+  commentId: string;
+  comment: string;
+};
 
 const IssueComments = ({ issueId }: { issueId?: string }) => {
+  const [deleteIssueComment] = useMutation(DELETE_ISSUE_COMMENT_MUTATION);
+  const [updateIssueComment] = useMutation(UPDATE_ISSUE_COMMENT_MUTATION);
+  const [createIssueComment] = useMutation(CREATE_ISSUE_COMMENT_MUTATION, {
+    update(cache, { data: { createIssueComment } }) {
+      cache.modify({
+        id: cache.identify({
+          __typename: 'Issue',
+          id: createIssueComment.issueId,
+        }),
+        fields: {
+          comments(existingComments = []) {
+            const newCommentRef = cache.writeFragment({
+              data: createIssueComment,
+              fragment: ISSUE_COMMENT_FIELDS,
+            });
+
+            return [...existingComments, newCommentRef];
+          },
+        },
+      });
+    },
+  });
+  const [newDocumentName] = React.useState<string | undefined>(
+    `issueComment.${nanoid()}.comment`
+  );
+  const [editorContent, setEditorContent] = React.useState<
+    EditorContent | undefined
+  >(undefined);
+  const [showEditor, setShowEditor] = React.useState(false);
   const searchParams = useSearchParams()!;
   const params = new URLSearchParams(searchParams);
   const selectedIssueId = issueId ?? params.get('selectedIssueId');
@@ -23,44 +70,117 @@ const IssueComments = ({ issueId }: { issueId?: string }) => {
     },
   });
 
+  const onUpdateCallback = (data: any) => {
+    setEditorContent(data);
+  };
+
+  const handleCreateIssueComment = async () => {
+    if (!selectedIssueId || !editorContent) return;
+
+    return createIssueComment({
+      variables: {
+        input: {
+          issueId: selectedIssueId,
+          comment: JSON.stringify(editorContent.content),
+          commentRaw: Buffer.from(editorContent.state).toString('base64'),
+        },
+      },
+    });
+  };
+
+  const handleDeleteIssueComment = async ({
+    commentId,
+  }: DeleteComment): Promise<FetchResult> => {
+    return deleteIssueComment({
+      refetchQueries: [
+        {
+          query: GET_ISSUE_QUERY,
+          variables: { input: { id: selectedIssueId } },
+        },
+      ],
+      variables: {
+        input: {
+          commentId,
+        },
+      },
+    });
+  };
+
+  const handleUpdateIssueComment = async ({
+    commentId,
+    comment,
+  }: UpdateComment): Promise<FetchResult> => {
+    return updateIssueComment({
+      refetchQueries: [
+        {
+          query: GET_ISSUE_QUERY,
+          variables: { input: { id: selectedIssueId } },
+        },
+      ],
+      variables: {
+        input: {
+          commentId,
+          comment: JSON.stringify(comment),
+        },
+      },
+    });
+  };
+
   return (
     <>
       <div className='pb-5 text-2xl'>Comments</div>
-      <IssueCommentEditorTipTap issueId={selectedIssueId} />
+      {!showEditor && (
+        <article
+          onClick={() => setShowEditor(true)}
+          className='prose prose-sm h-10 max-w-full overflow-y-scroll rounded-lg'
+        >
+          <div className='m-1 text-primary opacity-70'>
+            Click to add comment...
+          </div>
+        </article>
+      )}
+      {showEditor && (
+        <>
+          <Editor
+            onUpdateCallback={onUpdateCallback}
+            documentName={newDocumentName}
+          />
+          <div className='gap-x-1 pb-10'>
+            <Button
+              text='Cancel'
+              variant='transparent'
+              onClick={() => {
+                if (!selectedIssueId) return;
+                setShowEditor(false);
+              }}
+              classes='float-right mt-2 shadow-none hover:bg-gray-400 hover:bg-opacity-10'
+            />
+
+            <Button
+              text='Save'
+              onClick={() => {
+                if (!selectedIssueId) return;
+
+                handleCreateIssueComment().then(() => {
+                  setShowEditor(false);
+                });
+              }}
+              classes='float-right mt-2'
+            />
+          </div>
+        </>
+      )}
       {getIssueFragment?.data?.comments
         ?.slice()
         ?.reverse()
-        .map((comment: any) => {
-          const reporter = formatUser(comment.reporter);
-
-          return (
-            <div className='pb-10' key={comment.id}>
-              <div className='flex space-x-2 pb-2 pt-1'>
-                <Avatar person={reporter} className='h-6 w-6' />
-                <div className=''>{reporter.name}</div>
-                <div className='pt-0.5 text-sm'>
-                  {DateTime.fromMillis(Number(comment.createdAt)).toRelative()}
-                </div>
-              </div>
-              <div className='max-h-60 overflow-y-auto'>
-                <EditorRenderOnly content={JSON.parse(comment.comment)} />
-              </div>
-              <div className='flex space-x-1 pt-2 text-sm'>
-                <div>
-                  <a href='#' className='hover:text-blue-700'>
-                    edit
-                  </a>
-                </div>
-                <div>
-                  {' '}
-                  <a href='#' className='hover:text-red-700'>
-                    delete
-                  </a>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        .map((comment: any) => (
+          <IssueComment
+            handleDeleteIssueComment={handleDeleteIssueComment}
+            handleUpdateIssueComment={handleUpdateIssueComment}
+            key={comment.id}
+            comment={comment}
+          />
+        ))}
     </>
   );
 };

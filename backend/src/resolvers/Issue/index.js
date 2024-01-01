@@ -2,6 +2,8 @@ import { keyBy, merge, values } from 'lodash-es';
 import { Op } from 'sequelize';
 import yn from 'yn';
 
+import { websocketBroadcast } from '../../services/ws-server.js';
+
 const resolvers = {
   Query: {
     issues: (parent, { input: { projectId, id, search, searchOperator } }, { db }) => {
@@ -91,16 +93,6 @@ const resolvers = {
     },
   },
   Mutation: {
-    createIssueComment: async (parent, { input }, { db, user }) => {
-      const { issueId, comment } = input;
-      const reporterId = user.id;
-
-      return await db.sequelize.models.IssueComment.create({
-        issueId,
-        reporterId,
-        comment,
-      });
-    },
     deleteIssueLink: async (parent, { input: { issueId, linkType, linkedIssueId } }, { db }) => {
       await db.sequelize.models.IssueLinks.destroy({
         where: {
@@ -128,7 +120,7 @@ const resolvers = {
 
       return { message: 'success', status: 'success' };
     },
-    updateIssue: async (parent, { input }, { db, io }) => {
+    updateIssue: async (parent, { input }, { db, websocketServer }) => {
       const {
         id,
         issueStatusId,
@@ -190,12 +182,17 @@ const resolvers = {
 
       await issue.save();
 
-      // TODO: fix
-      // emitIssueUpdatedEvent(io, issue.toJSON());
-
       const issueStatus = await db.sequelize.models.IssueStatuses.findByPk(issueStatusId ?? issue.issueStatusId);
 
-      return { ...issue.toJSON(), status: issueStatus.toJSON() };
+      const returnData = { ...issue.toJSON(), status: issueStatus.toJSON() };
+
+      websocketBroadcast({
+        clients: websocketServer.clients,
+        namespace: 'ws',
+        message: JSON.stringify({ type: 'ISSUE_UPDATED', payload: returnData }),
+      });
+
+      return returnData;
     },
     createIssue: async (parent, { input }, { db, user }) => {
       const { projectId, boardId, issueStatusId, assigneeId, title, description, priority } = input;
