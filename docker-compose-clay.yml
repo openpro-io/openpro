@@ -1,0 +1,117 @@
+version: "3.8"
+
+networks:
+  dev_env:
+
+volumes:
+  uploads:
+  pgdata:
+  backend_node_modules:
+  backend_ts_build_files:
+  frontend_node_modules:
+
+x-minio-env-variables: &minio-env-variables
+  MINIO_PORT: 9000
+  MINIO_HOST: openpro-minio
+  MINIO_ROOT_USER: access-key
+  MINIO_ROOT_PASSWORD: secret-key
+
+services:
+  postgresql-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - dev_env
+    ports:
+      - "5432:5432"
+
+  openpro-minio:
+    image: minio/minio
+    container_name: openpro-minio
+    environment:
+      <<: *minio-env-variables
+    pull_policy: always
+    restart: unless-stopped
+    networks:
+      - dev_env
+    command: server /export --console-address ":9090"
+    volumes:
+      - uploads:/export
+    ports:
+      - "9000:9000"
+      - "9090:9090"
+
+  createbuckets:
+    image: minio/mc
+    environment:
+      <<: *minio-env-variables
+      BUCKET_NAME: uploads
+    pull_policy: always
+    networks:
+      - dev_env
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add openpro-minio http://openpro-minio:9000 access-key secret-key;
+      /usr/bin/mc mb openpro-minio/uploads;
+      /usr/bin/mc anonymous set download openpro-minio/uploads;
+      "
+    depends_on:
+      - openpro-minio
+
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile.local
+      args:
+        DOCKER_BUILDKIT: 1
+    environment:
+      HTTP_PORT: 8080
+      SQL_URI: postgres://postgres:postgres@postgresql-db:5432/postgres
+      FRONTEND_HOSTNAME: http://frontend:3000
+      FILE_SIZE_LIMIT: 5242880
+      BUCKET_NAME: uploads
+      # Minio
+      USE_MINIO: 1
+      <<: *minio-env-variables
+    networks:
+      - dev_env
+    volumes:
+      - ./backend:/app
+      - backend_node_modules:/app/node_modules
+      - backend_ts_build_files:/app/dist
+    depends_on:
+      - postgresql-db
+      - createbuckets
+    ports:
+      - "8080:8080"
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile.local
+      args:
+        DOCKER_BUILDKIT: 1
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+      NEXT_PUBLIC_DEFAULT_LOGIN_PROVIDER: keycloak
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: 68a8450a7e7945f6a0c83cef2d46eae177564ac7c6c3872f55bdb04f36f568be
+      NEXT_PUBLIC_NEXTAUTH_URL: http://localhost:3000
+      AUTH_KEYCLOAK_ID: scrumboard
+      AUTH_KEYCLOAK_SECRET: H4yFPBaVBgsYmcwsghEVuEgOXcEkX0YU
+      AUTH_KEYCLOAK_ISSUER: https://auth.oauthd.me/realms/claysjira
+      KEYCLOAK_BASE_URL: https://auth.oauthd.me
+    networks:
+      - dev_env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    depends_on:
+      - backend
