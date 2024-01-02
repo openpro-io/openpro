@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 echo "Running migrations..."
-pnpm migrate:up
+node dist/umzug-runner.js up
 
 # Check the exit code of the last command
 if [ $? -ne 0 ]; then

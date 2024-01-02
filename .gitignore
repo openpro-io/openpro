@@ -134,3 +134,4 @@ assets/
 /backend/dist/
 
 docker-compose-dev.yml
+/backend/.env.local

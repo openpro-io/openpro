@@ -4,18 +4,19 @@
     "esm": true
   },
   "compilerOptions": {
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "incremental": true,
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
     "outDir": "./dist",
     "allowJs": true,
-    "target": "ES2022",
+    "target": "ESNext",
     "module": "ESNext",
+    "lib": ["esnext"],
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "sourceMap": true
   },
   "include": ["./src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"],

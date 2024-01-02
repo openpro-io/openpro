@@ -1,11 +1,11 @@
 import { Server } from '@hocuspocus/server';
 import { FRONTEND_HOSTNAME, HTTP_PORT } from './config.js';
 import { Database } from '@hocuspocus/extension-database';
-import { db } from '../db/index.js';
+import db from '../db/index.js';
 import axios from 'axios';
 
 const hocuspocusServer = Server.configure({
-  port: HTTP_PORT,
+  port: Number(HTTP_PORT),
   address: '0.0.0.0',
   extensions: [
     new Database({
@@ -28,11 +28,18 @@ const hocuspocusServer = Server.configure({
 
             if (!issue || !issue?.descriptionRaw) resolve(null);
 
-            const descriptionAsUnit8Array = new Uint8Array(issue.descriptionRaw);
-            resolve(descriptionAsUnit8Array.length === 0 ? null : descriptionAsUnit8Array);
+            const descriptionAsUnit8Array = new Uint8Array(
+              issue.descriptionRaw
+            );
+            resolve(
+              descriptionAsUnit8Array.length === 0
+                ? null
+                : descriptionAsUnit8Array
+            );
           }
 
           if (entityType === 'issueComment' && entityField === 'comment') {
+            // @ts-ignore
             if (!isFinite(entityId)) return resolve(null);
 
             const comment = await db.sequelize.models.IssueComment.findOne({
@@ -41,10 +48,14 @@ const hocuspocusServer = Server.configure({
               },
             });
 
+            // @ts-ignore
             if (!comment || !comment?.commentRaw) return resolve(null);
 
+            // @ts-ignore
             const commentAsUnit8Array = new Uint8Array(comment.commentRaw);
-            resolve(commentAsUnit8Array.length === 0 ? null : commentAsUnit8Array);
+            resolve(
+              commentAsUnit8Array.length === 0 ? null : commentAsUnit8Array
+            );
           }
 
           resolve(null);
@@ -67,6 +78,7 @@ const hocuspocusServer = Server.configure({
         }
 
         if (entityType === 'issueComment' && entityField === 'comment') {
+          // @ts-ignore
           if (!isFinite(entityId)) return;
 
           await db.sequelize.models.IssueComment.update(
@@ -104,12 +116,15 @@ const hocuspocusServer = Server.configure({
     }
 
     const {
+      // @ts-ignore
       data: { provider, sub },
     } = verifyJwt;
 
     const externalId = `${provider}__${sub}`;
 
-    const user = await db.sequelize.models.User.findOne({ where: { externalId } });
+    const user = await db.sequelize.models.User.findOne({
+      where: { externalId },
+    });
 
     return {
       user: user ? user.toJSON() : null,

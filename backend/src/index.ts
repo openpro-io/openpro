@@ -6,15 +6,15 @@ import {
 import cors from '@fastify/cors';
 import { fastifyWebsocket } from '@fastify/websocket';
 import axios from 'axios';
-import Fastify, { RequestGenericInterface } from 'fastify';
+import Fastify, { FastifyRequest, RequestGenericInterface } from 'fastify';
 import processRequest from 'graphql-upload/processRequest.mjs';
 import { GraphQLError } from 'graphql/error/index.js';
 import { nanoid } from 'nanoid';
 import { Readable } from 'stream';
 import * as http from 'http';
 
-import { db } from '@/db';
-import resolvers from './resolvers';
+import db from './db/index.js';
+import resolvers from './resolvers/index.js';
 import {
   ALLOW_LOGIN_DOMAINS_LIST,
   ALLOW_LOGIN_EMAILS_LIST,
@@ -24,11 +24,11 @@ import {
   ENABLE_FASTIFY_LOGGING,
   FRONTEND_HOSTNAME,
   HTTP_PORT,
-} from './services/config';
-import hocuspocusServer from './services/hocuspocus-server';
-import { minioClient } from './services/minio-client';
-import * as wsServer from './services/ws-server';
-import typeDefs from './type-defs';
+} from './services/config.js';
+import hocuspocusServer from './services/hocuspocus-server.js';
+import { minioClient } from './services/minio-client.js';
+import * as wsServer from './services/ws-server.js';
+import typeDefs from './type-defs.js';
 
 interface IQuerystring {}
 
@@ -64,6 +64,16 @@ interface AuthenticatedUser {
   user: any;
 }
 
+type CustomFastifyRequest = FastifyRequest<{
+  Body: {
+    query?: string;
+    variables?: any;
+  };
+  Headers: {
+    authorization?: string;
+  };
+}>;
+
 declare module 'fastify' {
   export interface FastifyRequest {
     user?: AuthenticatedUser;
@@ -78,7 +88,7 @@ const fastify = Fastify<http.Server, customRequest>({
 
 fastify.server.headersTimeout = 65 * 1000;
 
-fastify.register(cors, {
+await fastify.register(cors, {
   origin: (origin, cb) => {
     // TODO: ENV VAR this... maybe a.com,b.com and split and test
     if (
@@ -111,7 +121,7 @@ fastify.register(cors, {
   credentials: true,
 });
 
-fastify.register(fastifyWebsocket, {
+await fastify.register(fastifyWebsocket, {
   options: { maxPayload: 1048576, clientTracking: true },
 });
 
@@ -189,7 +199,7 @@ fastify.addHook<requestGeneric>('preValidation', async (request, reply) => {
   }
 });
 
-fastify.register(async function (fastify) {
+await fastify.register(async function (fastify) {
   fastify.websocketServer.on('connection', function connection(ws) {
     ws.isAlive = true;
 
@@ -236,7 +246,7 @@ fastify.register(async function (fastify) {
   );
 });
 
-fastify.register(async function (fastify) {
+await fastify.register(async function (fastify) {
   fastify.get(
     '/collaboration',
     { websocket: true },
@@ -278,14 +288,9 @@ const apollo = new ApolloServer({
 
 await apollo.start();
 
-/**
- * Retrieves context information based on the given request object.
- *
- * @param {import('fastify').RouteGenericInterface} request - The request object.
- * @returns {Promise<Object>} - The context object.
- * @throws {GraphQLError} - If the user is not authenticated.
- */
-const myContextFunction = async (request) => {
+const myContextFunction = async (
+  request: CustomFastifyRequest
+): Promise<object> => {
   // get the user token from the headers
   const token = request.headers.authorization;
   let user = null;

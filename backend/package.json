@@ -9,12 +9,14 @@
   },
   "scripts": {
     "dev": "node --env-file .env --watch src/index.ts",
-    "start": "node src/index.ts",
+    "start": "node dist",
     "format": "prettier --check --ignore-path ../.gitignore .",
     "format:fix": "prettier --write --ignore-path ../.gitignore .",
     "migrate:up": "tsx src/umzug-runner.ts up",
-    "build": "tsc -p tsconfig.json",
-    "dev:ts": "tsx watch -r tsconfig-paths/register src/index.ts"
+    "build": "esbuild `find src \\( -name '*.ts' \\)` --platform=node --outdir=dist --resolve-extensions=.js",
+    "dev:ts": "tsx watch src/index.ts",
+    "check:types": "tsc --noEmit",
+    "pretest": "pnpm run build"
   },
   "dependencies": {
     "@apollo/server": "^4.9.5",
@@ -32,6 +34,7 @@
     "graphql-upload": "^16.0.2",
     "lodash-es": "^4.17.21",
     "minio": "^7.1.3",
+    "module-alias": "^2.2.3",
     "nanoid": "^5.0.4",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
@@ -49,8 +52,10 @@
     "@swc/core": "^1.3.102",
     "@swc/helpers": "^0.5.3",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/module-alias": "^2.0.4",
     "@types/node": "^20.10.6",
     "chai": "^4.3.10",
+    "esbuild": "^0.19.11",
     "mocha": "^10.2.0",
     "prettier": "^3.1.1",
     "proxyquire": "^2.1.3",

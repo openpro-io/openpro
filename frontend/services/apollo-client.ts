@@ -1,8 +1,13 @@
-import { from, ApolloClient, InMemoryCache, gql, split } from '@apollo/client';
+import { ApolloClient, InMemoryCache, from, gql, split } from '@apollo/client';
+import { createFragmentRegistry } from '@apollo/client/cache';
+import { BatchHttpLink } from '@apollo/client/link/batch-http';
 import { setContext } from '@apollo/client/link/context';
+import { getMainDefinition } from '@apollo/client/utilities';
 // TODO: Why isn't typescript picking up the ./types definition for this...
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
+import axios from 'axios';
 import { DateTime } from 'luxon';
+
 import {
   ISSUE_COMMENT_FIELDS,
   ISSUE_FIELDS,
@@ -12,15 +17,11 @@ import {
   VIEW_STATE_ISSUE_STATUS_FIELDS,
   VIEW_STATE_ITEM_FIELDS,
 } from '@/gql/gql-queries-mutations';
-import { createFragmentRegistry } from '@apollo/client/cache';
 import {
+  API_URL,
   NEXT_PUBLIC_API_URL,
   PUBLIC_NEXTAUTH_URL,
-  API_URL,
 } from '@/services/config';
-import { BatchHttpLink } from '@apollo/client/link/batch-http';
-import { getMainDefinition } from '@apollo/client/utilities';
-import axios from 'axios';
 
 const authLink = setContext(async (_, { headers }) => {
   const { data } = await axios.get(`${PUBLIC_NEXTAUTH_URL}/api/get-jwt`);
@@ -76,6 +77,18 @@ export const apolloClient = new ApolloClient({
       ${PROJECT_ONLY_FIELDS}
     `),
     typePolicies: {
+      ViewState: {
+        fields: {
+          items: {
+            merge(existing = [], incoming) {
+              // TODO: we should revisit this. I seem to get an error when creating a
+              //  new project/board and i create an issue then drag to another column for first time
+              //  return [...existing, ...incoming]; ??
+              return incoming;
+            },
+          },
+        },
+      },
       Board: {
         fields: {
           settings: {

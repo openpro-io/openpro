@@ -50,7 +50,7 @@ const resolvers = {
       });
     },
     projectTags: (parent, { input: { projectId, id, name } }, { db }) => {
-      const where = { projectId };
+      const where: any = { projectId };
 
       if (id) where.id = id;
       if (name) {
@@ -63,7 +63,11 @@ const resolvers = {
     },
   },
   Mutation: {
-    createProjectCustomField: async (parent, { input: { projectId, fieldName, fieldType } }, { db }) =>
+    createProjectCustomField: async (
+      parent,
+      { input: { projectId, fieldName, fieldType } },
+      { db }
+    ) =>
       await db.sequelize.models.ProjectCustomField.create(
         {
           projectId: Number(projectId),
@@ -73,7 +77,8 @@ const resolvers = {
         { returning: true }
       ),
     deleteProjectCustomField: async (parent, { input: { id } }, { db }) => {
-      const findCustomField = await db.sequelize.models.ProjectCustomField.findByPk(id);
+      const findCustomField =
+        await db.sequelize.models.ProjectCustomField.findByPk(id);
 
       if (!findCustomField) throw new Error('Custom field not found');
 
@@ -106,10 +111,15 @@ const resolvers = {
         status: 'success',
       };
     },
-    addUserToProject: async (parent, { input: { userId, projectId } }, { db }) => {
-      const existingPermission = await db.sequelize.models.ProjectPermission.findOne({
-        where: { userId, projectId },
-      });
+    addUserToProject: async (
+      parent,
+      { input: { userId, projectId } },
+      { db }
+    ) => {
+      const existingPermission =
+        await db.sequelize.models.ProjectPermission.findOne({
+          where: { userId, projectId },
+        });
 
       if (existingPermission) {
         return { message: 'User added to project', status: 'success' };
@@ -123,14 +133,19 @@ const resolvers = {
 
       return { message: 'User added to project', status: 'success' };
     },
-    removeUserFromProject: async (parent, { input: { userId, projectId } }, { db, user }) => {
+    removeUserFromProject: async (
+      parent,
+      { input: { userId, projectId } },
+      { db, user }
+    ) => {
       if (user.id === userId) {
         throw new Error('You cannot remove yourself from the project');
       }
 
-      const existingPermission = await db.sequelize.models.ProjectPermission.findOne({
-        where: { userId, projectId },
-      });
+      const existingPermission =
+        await db.sequelize.models.ProjectPermission.findOne({
+          where: { userId, projectId },
+        });
 
       if (!existingPermission) {
         throw new Error('User is not added to the project');
@@ -182,29 +197,41 @@ const resolvers = {
   },
   Project: {
     customFields: (parent, args, { db }) => {
-      return db.sequelize.models.ProjectCustomField.findAll({ where: { projectId: parent.id } });
+      return db.sequelize.models.ProjectCustomField.findAll({
+        where: { projectId: parent.id },
+      });
     },
     tags: (parent, args, { db }) => {
-      return db.sequelize.models.ProjectTag.findAll({ where: { projectId: parent.id } });
+      return db.sequelize.models.ProjectTag.findAll({
+        where: { projectId: parent.id },
+      });
     },
     issues: (parent, args, { db }) => {
       const { input } = args;
-      const findAllInput = { where: { projectId: parent.id } };
+      const findAllInput: any = { where: { projectId: parent.id } };
 
       if (input && input?.sortBy) {
-        findAllInput.order = [input?.sortBy.map(({ field, order }) => [field, order])];
+        findAllInput.order = [
+          input?.sortBy.map(({ field, order }) => [field, order]),
+        ];
       }
 
       return db.sequelize.models.Issue.findAll(findAllInput);
     },
     boards: (parent, args, { db }) => {
-      return db.sequelize.models.Board.findAll({ where: { projectId: parent.id } });
+      return db.sequelize.models.Board.findAll({
+        where: { projectId: parent.id },
+      });
     },
     issueStatuses: (parent, args, { db }) => {
-      return db.sequelize.models.IssueStatuses.findAll({ where: { projectId: parent.id } });
+      return db.sequelize.models.IssueStatuses.findAll({
+        where: { projectId: parent.id },
+      });
     },
     issueCount: async (parent, args, { db }) => {
-      return db.sequelize.models.Issue.count({ where: { projectId: parent.id } });
+      return db.sequelize.models.Issue.count({
+        where: { projectId: parent.id },
+      });
     },
   },
 };
