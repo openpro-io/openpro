@@ -5,12 +5,13 @@ import type {
 } from 'next';
 import type { NextAuthOptions as NextAuthConfig } from 'next-auth';
 import { getServerSession } from 'next-auth';
+import { AdapterUser } from 'next-auth/adapters';
+import { type JWT, getToken } from 'next-auth/jwt';
 // @ts-ignore
 import { type OAuthConfig } from 'next-auth/providers';
-import { getToken, type JWT } from 'next-auth/jwt';
-import Keycloak, { type KeycloakProfile } from 'next-auth/providers/keycloak';
 import GithubProvider from 'next-auth/providers/github';
-import { AdapterUser } from 'next-auth/adapters';
+import Keycloak, { type KeycloakProfile } from 'next-auth/providers/keycloak';
+
 import {
   AUTH_KEYCLOAK_ID,
   AUTH_KEYCLOAK_ISSUER,
@@ -150,7 +151,7 @@ export const config = {
       // console.log('Token: ');
       // console.log(token);
       //
-      // console.log('User: ');
+      // console.log('user: ');
       // console.log(user);
       //
       // console.log('Account: ');

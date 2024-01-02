@@ -1,12 +1,16 @@
 import { ApolloServer } from '@apollo/server';
-import { fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
-import * as cors from '@fastify/cors';
+import {
+  fastifyApolloDrainPlugin,
+  fastifyApolloHandler,
+} from '@as-integrations/fastify';
+import cors from '@fastify/cors';
 import { fastifyWebsocket } from '@fastify/websocket';
 import axios from 'axios';
-import Fastify from 'fastify';
+import Fastify, { RequestGenericInterface } from 'fastify';
 import processRequest from 'graphql-upload/processRequest.mjs';
 import { GraphQLError } from 'graphql/error/index.js';
 import { nanoid } from 'nanoid';
+import { Readable } from 'stream';
 
 import { db } from './db/index.js';
 import resolvers from './resolvers/index.js';
@@ -24,8 +28,50 @@ import hocuspocusServer from './services/hocuspocus-server.js';
 import { minioClient } from './services/minio-client.js';
 import * as wsServer from './services/ws-server.js';
 import typeDefs from './type-defs.js';
+import * as http from 'http';
 
-const fastify = Fastify({
+interface IQuerystring {}
+
+interface IHeaders {
+  connection?: string;
+}
+
+interface IParams {
+  file?: any;
+}
+
+interface IReply {
+  200?: { success: boolean };
+  302?: { url: string };
+  401?: { error: string };
+  error?: string;
+  Readable?: Readable;
+  ReadableBase?: Readable;
+}
+
+interface requestGeneric extends RequestGenericInterface {
+  Querystring: IQuerystring;
+  Headers: IHeaders;
+  Reply: IReply;
+  Params: IParams;
+}
+
+interface customRequest extends http.IncomingMessage {
+  isMultipart?: boolean;
+}
+
+interface AuthenticatedUser {
+  user: any;
+}
+
+declare module 'fastify' {
+  export interface FastifyRequest {
+    user?: AuthenticatedUser;
+    isMultipart?: boolean;
+  }
+}
+
+const fastify = Fastify<http.Server, customRequest>({
   logger: ENABLE_FASTIFY_LOGGING,
   keepAliveTimeout: 61 * 1000,
 });
@@ -48,7 +94,7 @@ fastify.register(cors, {
     }
     console.log('Blocked by CORS', { origin });
     // Generate an error on other origins, disabling access
-    cb(new Error('Not allowed'));
+    cb(new Error('Not allowed'), false);
   },
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: [
@@ -69,11 +115,13 @@ fastify.register(fastifyWebsocket, {
   options: { maxPayload: 1048576, clientTracking: true },
 });
 
-fastify.addHook('preValidation', async (request, reply) => {
+fastify.addHook<requestGeneric>('preValidation', async (request, reply) => {
   // check if the request is authenticated
   // TODO: Refactor to make this cleaner
-  if (request.headers['connection'] === 'Upgrade' && request.url === '/ws') {
-    const token = request.headers['sec-websocket-protocol'].split(',').map((x) => x.trim())[1];
+  if (request.headers.connection === 'Upgrade' && request.url === '/ws') {
+    const token = request.headers['sec-websocket-protocol']
+      .split(',')
+      .map((x) => x.trim())[1];
     let user = null;
 
     try {
@@ -84,7 +132,10 @@ fastify.addHook('preValidation', async (request, reply) => {
 
       // TODO: We can inject from DB here the whitelist domains and emails in addition to ENV vars
 
-      if (ALLOW_LOGIN_EMAILS_LIST.length > 0 && !ALLOW_LOGIN_EMAILS_LIST.includes(data.email)) {
+      if (
+        ALLOW_LOGIN_EMAILS_LIST.length > 0 &&
+        !ALLOW_LOGIN_EMAILS_LIST.includes(data.email)
+      ) {
         throw new GraphQLError('Email is not allowed to login', {
           extensions: {
             code: 'UNAUTHENTICATED',
@@ -95,7 +146,9 @@ fastify.addHook('preValidation', async (request, reply) => {
 
       if (
         ALLOW_LOGIN_DOMAINS_LIST.length > 0 &&
-        !ALLOW_LOGIN_DOMAINS_LIST.includes(data.email.split('@')[1].toLowerCase())
+        !ALLOW_LOGIN_DOMAINS_LIST.includes(
+          data.email.split('@')[1].toLowerCase()
+        )
       ) {
         throw new GraphQLError('Email is not allowed to login', {
           extensions: {
@@ -107,7 +160,9 @@ fastify.addHook('preValidation', async (request, reply) => {
 
       const externalId = `${data.provider}__${data.sub}`;
 
-      user = await db.sequelize.models.User.findOne({ where: { externalId } });
+      user = await db.sequelize.models.User.findOne({
+        where: { externalId },
+      });
 
       if (!user && ALLOW_SIGNUP) {
         try {
@@ -125,7 +180,7 @@ fastify.addHook('preValidation', async (request, reply) => {
       request.user = user;
     } catch (e) {
       if (e?.response?.status === 401) {
-        await reply.code(401).send('not authenticated');
+        reply.code(401).send({ error: 'not authenticated' });
       } else {
         // TODO: We should probably throw a 500 here and log the error
         console.error({ e });
@@ -160,40 +215,49 @@ fastify.register(async function (fastify) {
     clearInterval(interval);
   });
 
-  fastify.get('/ws', { websocket: true }, (connection /* SocketStream */, req /* FastifyRequest */) => {
-    const context = {};
+  fastify.get(
+    '/ws',
+    { websocket: true },
+    (connection /* SocketStream */, req /* FastifyRequest */) => {
+      const context = {};
 
-    connection.socket.id = nanoid();
-    connection.socket.user = req?.user;
-    connection.socket.namespace = 'ws';
-    const clients = fastify.websocketServer.clients;
+      connection.socket.id = nanoid();
+      connection.socket.user = req?.user;
+      connection.socket.namespace = 'ws';
+      const clients = fastify.websocketServer.clients;
 
-    wsServer.handleConnection({
-      socket: connection.socket,
-      req,
-      context,
-      clients,
-    });
-  });
+      wsServer.handleConnection({
+        socket: connection.socket,
+        req,
+        context,
+        clients,
+      });
+    }
+  );
 });
 
 fastify.register(async function (fastify) {
-  fastify.get('/collaboration', { websocket: true }, (connection /* SocketStream */, req /* FastifyRequest */) => {
-    const context = {};
+  fastify.get(
+    '/collaboration',
+    { websocket: true },
+    (connection /* SocketStream */, req /* FastifyRequest */) => {
+      const context = {};
 
-    hocuspocusServer.handleConnection(connection.socket, req, context);
-  });
+      // @ts-ignore
+      hocuspocusServer.handleConnection(connection.socket, req, context);
+    }
+  );
 });
 
 // Handle all requests that have the `Content-Type` header set as multipart
-fastify.addContentTypeParser('multipart', (request, payload, done) => {
+fastify.addContentTypeParser('multipart', function (request, done) {
   request.isMultipart = true;
   done();
 });
 
 // Format the request body to follow graphql-upload's
 fastify.addHook('preValidation', async function (request, reply) {
-  if (!request.isMultipart) {
+  if (!request?.isMultipart) {
     return;
   }
 
@@ -229,7 +293,10 @@ const myContextFunction = async (request) => {
   if (!token) return { db, user };
 
   // Allow if introspection query only
-  if (!Array.isArray(request.body) && request?.body?.query?.includes('IntrospectionQuery')) {
+  if (
+    !Array.isArray(request.body) &&
+    request?.body?.query?.includes('IntrospectionQuery')
+  ) {
     return {
       db,
       user,
@@ -246,7 +313,10 @@ const myContextFunction = async (request) => {
 
       // TODO: We can inject from DB here the whitelist domains and emails in addition to ENV vars
 
-      if (ALLOW_LOGIN_EMAILS_LIST.length > 0 && !ALLOW_LOGIN_EMAILS_LIST.includes(data.email)) {
+      if (
+        ALLOW_LOGIN_EMAILS_LIST.length > 0 &&
+        !ALLOW_LOGIN_EMAILS_LIST.includes(data.email)
+      ) {
         throw new GraphQLError('Email is not allowed to login', {
           extensions: {
             code: 'UNAUTHENTICATED',
@@ -257,7 +327,9 @@ const myContextFunction = async (request) => {
 
       if (
         ALLOW_LOGIN_DOMAINS_LIST.length > 0 &&
-        !ALLOW_LOGIN_DOMAINS_LIST.includes(data.email.split('@')[1].toLowerCase())
+        !ALLOW_LOGIN_DOMAINS_LIST.includes(
+          data.email.split('@')[1].toLowerCase()
+        )
       ) {
         throw new GraphQLError('Email is not allowed to login', {
           extensions: {
@@ -325,15 +397,18 @@ fastify.post(
   })
 );
 
-fastify.get('/uploads/:file', async (request, reply) => {
+fastify.get<requestGeneric>('/uploads/:file', async (request, reply) => {
   // TODO: make sure logged in
   const { file } = request.params;
 
   const result = await minioClient.getObject(BUCKET_NAME, file);
 
+  // @ts-ignore
   reply.header('Content-Type', result.headers['content-type']);
+  // @ts-ignore
   reply.header('Content-Length', result.headers['content-length']);
 
+  // @ts-ignore
   return reply.send(result);
 });
 
@@ -358,6 +433,6 @@ fastify.get('/uploads/:file', async (request, reply) => {
 //   reply.send(buffer);
 // });
 
-await fastify.listen({ port: HTTP_PORT, host: '0.0.0.0' });
+await fastify.listen({ port: Number(HTTP_PORT), host: '0.0.0.0' });
 
 console.log(`server listening on ${HTTP_PORT}`);

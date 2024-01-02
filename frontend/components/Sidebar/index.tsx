@@ -133,7 +133,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             {pathname.includes('projects') && pathname !== '/projects' && (
               <>
                 <ul className='mb-6 flex flex-col gap-0.5'>
-                  {/* <!-- Menu Item Project Board --> */}
+                  {/* <!-- Menu Item project board --> */}
                   <SidebarLinkGroup
                     activeCondition={REGEX_PROJECT_BOARD.test(pathname)}
                   >
@@ -172,7 +172,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       );
                     }}
                   </SidebarLinkGroup>
-                  {/* <!-- Menu Item Project Board --> */}
+                  {/* <!-- Menu Item project board --> */}
 
                   {/* <!-- Menu Item Backlog --> */}
                   <SidebarLinkGroup

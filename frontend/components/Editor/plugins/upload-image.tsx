@@ -1,6 +1,7 @@
-import { UploadImage } from '../types/upload-image';
 import { EditorState, Plugin, PluginKey } from '@tiptap/pm/state';
 import { Decoration, DecorationSet, EditorView } from '@tiptap/pm/view';
+
+import { UploadImage } from '../types/upload-image';
 
 const uploadKey = new PluginKey('upload-image');
 
@@ -155,7 +156,7 @@ export async function startImageUpload(
       .setMeta(uploadKey, { remove: { id } });
     view.dispatch(transaction);
   } catch (error) {
-    console.error('Upload error: ', error);
+    console.error('upload error: ', error);
     removePlaceholder(view, id);
   }
 }

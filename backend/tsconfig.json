@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "outDir": "./built",
+    "allowJs": true,
+    "target": "ES2022",
+    "module": "es2022",
+    "moduleResolution":"node"
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"],
+}

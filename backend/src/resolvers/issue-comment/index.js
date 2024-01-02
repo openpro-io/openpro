@@ -9,7 +9,7 @@ const resolvers = {
         issueId,
         reporterId,
         comment,
-        commentRaw: Buffer.from(commentRaw, 'base64')
+        commentRaw: Buffer.from(commentRaw, 'base64'),
       });
     },
     deleteIssueComment: async (parent, { input }, { db }) => {
@@ -18,7 +18,7 @@ const resolvers = {
       const findIssueComment = await db.sequelize.models.IssueComment.findByPk(commentId);
 
       if (!findIssueComment) {
-        throw new Error('Issue comment not found');
+        throw new Error('issue comment not found');
       }
 
       await findIssueComment.destroy();
