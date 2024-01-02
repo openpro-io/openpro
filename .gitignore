@@ -131,4 +131,4 @@ assets/
 /frontend/.pnpm-store/
 /backend/.pnpm-store/
 .history
-/backend/built/
+/backend/dist/
