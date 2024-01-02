@@ -11,9 +11,10 @@ import processRequest from 'graphql-upload/processRequest.mjs';
 import { GraphQLError } from 'graphql/error/index.js';
 import { nanoid } from 'nanoid';
 import { Readable } from 'stream';
+import * as http from 'http';
 
-import { db } from './db/index.js';
-import resolvers from './resolvers/index.js';
+import { db } from '@/db';
+import resolvers from './resolvers';
 import {
   ALLOW_LOGIN_DOMAINS_LIST,
   ALLOW_LOGIN_EMAILS_LIST,
@@ -23,12 +24,11 @@ import {
   ENABLE_FASTIFY_LOGGING,
   FRONTEND_HOSTNAME,
   HTTP_PORT,
-} from './services/config.js';
-import hocuspocusServer from './services/hocuspocus-server.js';
-import { minioClient } from './services/minio-client.js';
-import * as wsServer from './services/ws-server.js';
-import typeDefs from './type-defs.js';
-import * as http from 'http';
+} from './services/config';
+import hocuspocusServer from './services/hocuspocus-server';
+import { minioClient } from './services/minio-client';
+import * as wsServer from './services/ws-server';
+import typeDefs from './type-defs';
 
 interface IQuerystring {}
 

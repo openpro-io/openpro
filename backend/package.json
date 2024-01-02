@@ -12,9 +12,9 @@
     "start": "node src/index.ts",
     "format": "prettier --check --ignore-path ../.gitignore .",
     "format:fix": "prettier --write --ignore-path ../.gitignore .",
-    "migrate:up": "node src/umzug-runner.js up",
+    "migrate:up": "tsx src/umzug-runner.ts up",
     "build": "tsc -p tsconfig.json",
-    "dev:ts": "node --loader ts-node/esm --env-file .env --watch src/index.ts"
+    "dev:ts": "tsx watch -r tsconfig-paths/register src/index.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.9.5",
@@ -38,6 +38,7 @@
     "sequelize": "^6.34.0",
     "sharp": "^0.32.6",
     "sinon-chai": "^3.7.0",
+    "tsconfig-paths": "^4.2.0",
     "umzug": "^3.4.0",
     "uuid": "^9.0.1",
     "y-protocols": "^1.0.6",
@@ -58,6 +59,7 @@
     "sinon": "^17.0.1",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.2",
+    "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   },
   "optionalDependencies": {

@@ -3,21 +3,31 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-import { db } from './db/index.js';
+import { db } from './db';
 import { DataTypes } from 'sequelize';
 
 await db.init();
 
 export const migrator = new Umzug({
   migrations: {
-    glob: ['db/migrations/*.js', { cwd: __dirname }],
+    glob: ['db/migrations/*.ts', { cwd: __dirname }],
     resolve: (params) => {
       const getModule = () => import(params.path);
 
       return {
         name: params.name,
-        up: async (params) => (await getModule()).default.up(params.context.queryInterface, DataTypes),
-        down: async (params) => (await getModule()).default.down(params.context.queryInterface, DataTypes),
+        up: async (params) =>
+          (await getModule()).default.up(
+            // @ts-ignore
+            params.context.queryInterface,
+            DataTypes
+          ),
+        down: async (params) =>
+          (await getModule()).default.down(
+            // @ts-ignore
+            params.context.queryInterface,
+            DataTypes
+          ),
       };
     },
   },
