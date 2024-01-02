@@ -132,3 +132,5 @@ assets/
 /backend/.pnpm-store/
 .history
 /backend/dist/
+
+docker-compose-dev.yml
