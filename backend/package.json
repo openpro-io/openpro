@@ -8,13 +8,12 @@
     "pnpm": ">=8.7.0"
   },
   "scripts": {
-    "dev": "node --env-file .env --watch src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "lint": "tsc",
     "start": "node dist",
     "format": "prettier --check --ignore-path ../.gitignore .",
     "format:fix": "prettier --write --ignore-path ../.gitignore .",
-    "migrate:up": "tsx src/umzug-runner.ts up",
     "build": "esbuild `find src \\( -name '*.ts' \\)` --platform=node --outdir=dist --resolve-extensions=.js",
-    "dev:ts": "tsx watch src/index.ts",
     "check:types": "tsc --noEmit",
     "pretest": "pnpm run build"
   },

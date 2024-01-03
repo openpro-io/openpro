@@ -1,6 +1,30 @@
-import { FastifyRequest, RequestGenericInterface } from 'fastify';
-import http from 'http';
-import { Readable } from 'stream';
+import type { FastifyRequest, RequestGenericInterface } from 'fastify';
+import type http from 'http';
+import type Sequelize from 'sequelize/types/sequelize';
+import type { Readable } from 'stream';
+
+export type Model = {
+  associate?: (db: Db) => void;
+};
+
+export type Db = {
+  sequelize?: Sequelize;
+  Sequelize?: typeof Sequelize;
+  Users?: Model;
+  Project?: Model;
+  Board?: Model;
+  IssueStatuses?: Model;
+  Issue?: Model;
+  Asset?: Model;
+  IssueComment?: Model;
+  ProjectTag?: Model;
+  IssueTag?: Model;
+  IssueBoard?: Model;
+  IssueLinks?: Model;
+  ProjectPermissions?: Model;
+  ProjectCustomFields?: Model;
+  init?: () => Promise<void>;
+};
 
 export interface IQuerystring {}
 

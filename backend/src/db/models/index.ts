@@ -3,6 +3,7 @@
 import { DataTypes, Sequelize } from 'sequelize';
 
 import { ENABLE_SEQUELIZE_LOGGING, SQL_URI } from '../../services/config.js';
+import type { Db } from '../../typings.js';
 import Asset from './asset.js';
 import Board from './board.js';
 import IssueBoard from './issue-board.js';
@@ -16,7 +17,6 @@ import ProjectPermissions from './project-permissions.js';
 import ProjectTag from './project-tag.js';
 import Project from './project.js';
 import User from './user.js';
-import { Db } from '../../typings/model.js';
 
 export const db: Db = {};
 
