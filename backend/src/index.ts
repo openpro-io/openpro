@@ -6,11 +6,10 @@ import {
 import cors from '@fastify/cors';
 import { fastifyWebsocket } from '@fastify/websocket';
 import axios from 'axios';
-import Fastify, { FastifyRequest, RequestGenericInterface } from 'fastify';
+import Fastify from 'fastify';
 import processRequest from 'graphql-upload/processRequest.mjs';
 import { GraphQLError } from 'graphql/error/index.js';
 import { nanoid } from 'nanoid';
-import { Readable } from 'stream';
 import * as http from 'http';
 
 import db from './db/index.js';
@@ -29,50 +28,12 @@ import hocuspocusServer from './services/hocuspocus-server.js';
 import { minioClient } from './services/minio-client.js';
 import * as wsServer from './services/ws-server.js';
 import typeDefs from './type-defs.js';
-
-interface IQuerystring {}
-
-interface IHeaders {
-  connection?: string;
-}
-
-interface IParams {
-  file?: any;
-}
-
-interface IReply {
-  200?: { success: boolean };
-  302?: { url: string };
-  401?: { error: string };
-  error?: string;
-  Readable?: Readable;
-  ReadableBase?: Readable;
-}
-
-interface requestGeneric extends RequestGenericInterface {
-  Querystring: IQuerystring;
-  Headers: IHeaders;
-  Reply: IReply;
-  Params: IParams;
-}
-
-interface customRequest extends http.IncomingMessage {
-  isMultipart?: boolean;
-}
-
-interface AuthenticatedUser {
-  user: any;
-}
-
-type CustomFastifyRequest = FastifyRequest<{
-  Body: {
-    query?: string;
-    variables?: any;
-  };
-  Headers: {
-    authorization?: string;
-  };
-}>;
+import {
+  AuthenticatedUser,
+  CustomFastifyRequest,
+  customRequest,
+  requestGeneric,
+} from './typings/index.js';
 
 declare module 'fastify' {
   export interface FastifyRequest {
@@ -196,6 +157,8 @@ fastify.addHook<requestGeneric>('preValidation', async (request, reply) => {
         console.error({ e });
       }
     }
+  } else if (request?.isMultipart) {
+    request.body = await processRequest(request.raw, reply.raw);
   }
 });
 
@@ -263,15 +226,6 @@ await fastify.register(async function (fastify) {
 fastify.addContentTypeParser('multipart', function (request, done) {
   request.isMultipart = true;
   done();
-});
-
-// Format the request body to follow graphql-upload's
-fastify.addHook('preValidation', async function (request, reply) {
-  if (!request?.isMultipart) {
-    return;
-  }
-
-  request.body = await processRequest(request.raw, reply.raw);
 });
 
 await db.init();
