@@ -1,3 +1,10 @@
+/**
+ * This file serves as the entry point for the backend of the OpenPro application.
+ * It imports necessary dependencies, sets up the Fastify server, handles authentication,
+ * and defines routes for GraphQL queries and file uploads.
+ *
+ * @module index.js
+ */
 import { ApolloServer } from '@apollo/server';
 import { fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
 import * as cors from '@fastify/cors';
@@ -24,7 +31,22 @@ import hocuspocusServer from './services/hocuspocus-server.js';
 import { minioClient } from './services/minio-client.js';
 import * as wsServer from './services/ws-server.js';
 import typeDefs from './type-defs.js';
+// @ts-ignore
+import typings from './typings/index.js';
 
+/**
+ * The fastify variable is an instance of the Fastify class,
+ * which is a fast and low overhead web framework for Node.js.
+ *
+ * @class Fastify
+ * @constructor
+ * @param {Object} options - Fastify configuration options
+ * @param {boolean} [options.logger=false] - Enable Fastify logging
+ * @param {number} [options.keepAliveTimeout=61000] - The maximum time (in milliseconds)
+ *                                                     that a TCP/IP connection will remain open
+ *                                                     without sending any data
+ * @returns {Fastify} - Fastify instance
+ */
 const fastify = Fastify({
   logger: ENABLE_FASTIFY_LOGGING,
   keepAliveTimeout: 61 * 1000,
@@ -48,7 +70,7 @@ fastify.register(cors, {
     }
     console.log('Blocked by CORS', { origin });
     // Generate an error on other origins, disabling access
-    cb(new Error('Not allowed'));
+    cb(new Error('Not allowed'), false);
   },
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: [
@@ -69,7 +91,15 @@ fastify.register(fastifyWebsocket, {
   options: { maxPayload: 1048576, clientTracking: true },
 });
 
-fastify.addHook('preValidation', async (request, reply) => {
+/**
+ * Performs pre-validation checks on the request to determine if it is authenticated.
+ *
+ * @param {import('./typings/types.js').fastifyGenericRequest} request - The incoming request object.
+ * @param {object} reply - The reply object used to send the response.
+ *
+ * @return {Promise<void>} - A promise that resolves once the pre-validation checks are completed.
+ */
+const preValidationHook = async (request, reply) => {
   // check if the request is authenticated
   // TODO: Refactor to make this cleaner
   if (request.headers['connection'] === 'Upgrade' && request.url === '/ws') {
@@ -132,50 +162,59 @@ fastify.addHook('preValidation', async (request, reply) => {
       }
     }
   }
-});
+};
 
-fastify.register(async function (fastify) {
-  fastify.websocketServer.on('connection', function connection(ws) {
-    ws.isAlive = true;
+fastify.addHook('preValidation', preValidationHook);
 
-    // Heartbeat
-    ws.on('message', function (message) {
-      const msg = message.toString();
-      if (['ping', 'pong'].includes(msg)) {
-        this.isAlive = true;
-        ws.send(msg === 'ping' ? 'pong' : 'ping');
-      }
+fastify.register(
+  /**
+   * Sets up a WebSocket server and handles incoming connections and messages.
+   *
+   * @param {import('./typings/types.js').FastifyInstance} fastify - The Fastify instance.
+   */
+  async function (fastify) {
+    fastify.websocketServer.on('connection', function connection(ws) {
+      ws.isAlive = true;
+
+      // Heartbeat
+      ws.on('message', function (message) {
+        const msg = message.toString();
+        if (['ping', 'pong'].includes(msg)) {
+          this.isAlive = true;
+          ws.send(msg === 'ping' ? 'pong' : 'ping');
+        }
+      });
     });
-  });
 
-  const interval = setInterval(function ping() {
-    fastify.websocketServer.clients.forEach(function each(ws) {
-      if (ws.isAlive === false) return ws.terminate();
+    const interval = setInterval(function ping() {
+      fastify.websocketServer.clients.forEach(function each(ws) {
+        if (ws.isAlive === false) return ws.terminate();
 
-      ws.isAlive = false;
+        ws.isAlive = false;
+      });
+    }, 30000);
+
+    fastify.websocketServer.on('close', function close() {
+      clearInterval(interval);
     });
-  }, 30000);
 
-  fastify.websocketServer.on('close', function close() {
-    clearInterval(interval);
-  });
+    fastify.get('/ws', { websocket: true }, (connection, req) => {
+      const context = {};
 
-  fastify.get('/ws', { websocket: true }, (connection /* SocketStream */, req /* FastifyRequest */) => {
-    const context = {};
+      connection.socket.id = nanoid();
+      connection.socket.user = req?.user;
+      connection.socket.namespace = 'ws';
+      const clients = fastify.websocketServer.clients;
 
-    connection.socket.id = nanoid();
-    connection.socket.user = req?.user;
-    connection.socket.namespace = 'ws';
-    const clients = fastify.websocketServer.clients;
-
-    wsServer.handleConnection({
-      socket: connection.socket,
-      req,
-      context,
-      clients,
+      wsServer.handleConnection({
+        socket: connection.socket,
+        req,
+        context,
+        clients,
+      });
     });
-  });
-});
+  }
+);
 
 fastify.register(async function (fastify) {
   fastify.get('/collaboration', { websocket: true }, (connection /* SocketStream */, req /* FastifyRequest */) => {
