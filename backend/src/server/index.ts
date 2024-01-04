@@ -1,5 +1,4 @@
-import cors from '@fastify/cors';
-import { IncomingMessage } from '@hocuspocus/server';
+import cors, { OriginFunction } from '@fastify/cors';
 import Fastify from 'fastify';
 import * as http from 'http';
 
@@ -25,24 +24,18 @@ const fastify = Fastify<http.Server, customRequest>({
 
 fastify.server.headersTimeout = 65 * 1000;
 
+const corsHandler: OriginFunction = (origin, cb) => {
+  // undefined is for SSR to backend server requests
+  if (CORS_ORIGIN.split(',').includes(origin) || origin === undefined) {
+    cb(null, true);
+    return;
+  }
+  console.log('Blocked by CORS', { origin });
+  cb(new Error('Not allowed'), false);
+};
+
 await fastify.register(cors, {
-  origin: (origin, cb) => {
-    // TODO: ENV VAR this... maybe a.com,b.com and split and test
-    if (
-      /localhost/.test(origin) ||
-      /qa\.openpro\.io/.test(origin) ||
-      /openpro\.io/.test(origin) ||
-      CORS_ORIGIN === origin ||
-      origin === null ||
-      origin === undefined
-    ) {
-      cb(null, true);
-      return;
-    }
-    console.log('Blocked by CORS', { origin });
-    // Generate an error on other origins, disabling access
-    cb(new Error('Not allowed'), false);
-  },
+  origin: corsHandler,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: [
     'Content-Type',
