@@ -1,4 +1,5 @@
 import cors from '@fastify/cors';
+import { IncomingMessage } from '@hocuspocus/server';
 import Fastify from 'fastify';
 import * as http from 'http';
 
@@ -70,15 +71,29 @@ await hocuspocusHandler(fastify);
 
 await apolloHandler(fastify);
 
+type MinioGetObjectResponse = {
+  stream: NodeJS.ReadableStream;
+  headers: {
+    'content-type': string;
+    'content-length': string;
+    'last-modified': string;
+    etag: string;
+    server: string;
+    'accept-ranges': string;
+    date: string;
+    vary: string;
+    'x-amz-meta-uploaded-by-user-id': string;
+  };
+};
+
 fastify.get<requestGeneric>('/uploads/:file', async (request, reply) => {
   // TODO: make sure logged in
   const { file } = request.params;
 
-  const result = await minioClient.getObject(BUCKET_NAME, file);
+  // TODO: need better TS fix here
+  const result = (await minioClient.getObject(BUCKET_NAME, file)) as unknown as MinioGetObjectResponse;
 
-  // @ts-ignore
   reply.header('Content-Type', result.headers['content-type']);
-  // @ts-ignore
   reply.header('Content-Length', result.headers['content-length']);
 
   // @ts-ignore
