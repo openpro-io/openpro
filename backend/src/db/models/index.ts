@@ -25,19 +25,19 @@ const init = async () => {
     logging: ENABLE_SEQUELIZE_LOGGING,
   });
 
-  db.Users = User(db.sequelize, DataTypes);
-  db.Project = Project(db.sequelize, DataTypes);
-  db.Board = Board(db.sequelize, DataTypes);
-  db.IssueStatuses = IssueStatuses(db.sequelize, DataTypes);
-  db.Issue = Issue(db.sequelize, DataTypes);
-  db.Asset = Asset(db.sequelize, DataTypes);
-  db.IssueComment = IssueComment(db.sequelize, DataTypes);
-  db.ProjectTag = ProjectTag(db.sequelize, DataTypes);
-  db.IssueTag = IssueTag(db.sequelize, DataTypes);
-  db.IssueBoard = IssueBoard(db.sequelize, DataTypes);
-  db.IssueLinks = IssueLinks(db.sequelize, DataTypes);
-  db.ProjectPermissions = ProjectPermissions(db.sequelize, DataTypes);
-  db.ProjectCustomFields = ProjectCustomFields(db.sequelize, DataTypes);
+  db.User = User(db.sequelize);
+  db.Project = Project(db.sequelize);
+  db.Board = Board(db.sequelize);
+  db.IssueStatuses = IssueStatuses(db.sequelize);
+  db.Issue = Issue(db.sequelize);
+  db.Asset = Asset(db.sequelize);
+  db.IssueComment = IssueComment(db.sequelize);
+  db.ProjectTag = ProjectTag(db.sequelize);
+  db.IssueTag = IssueTag(db.sequelize);
+  db.IssueBoard = IssueBoard(db.sequelize);
+  db.IssueLinks = IssueLinks(db.sequelize);
+  db.ProjectPermissions = ProjectPermissions(db.sequelize);
+  db.ProjectCustomFields = ProjectCustomFields(db.sequelize);
 
   Object.values(db).forEach((model: any) => {
     if (model.associate) {

@@ -3,6 +3,8 @@ import type http from 'http';
 import type Sequelize from 'sequelize/types/sequelize';
 import type { Readable } from 'stream';
 
+import { Project, ProjectPermission, ProjectTag, User } from './db/models/types.js';
+
 export type Model = {
   associate?: (db: Db) => void;
 };
@@ -10,18 +12,18 @@ export type Model = {
 export type Db = {
   sequelize?: Sequelize;
   Sequelize?: typeof Sequelize;
-  Users?: Model;
-  Project?: Model;
+  User?: typeof User;
+  Project?: typeof Project;
   Board?: Model;
   IssueStatuses?: Model;
   Issue?: Model;
   Asset?: Model;
   IssueComment?: Model;
-  ProjectTag?: Model;
+  ProjectTag?: typeof ProjectTag;
   IssueTag?: Model;
   IssueBoard?: Model;
   IssueLinks?: Model;
-  ProjectPermissions?: Model;
+  ProjectPermissions?: typeof ProjectPermission;
   ProjectCustomFields?: Model;
   init?: () => Promise<void>;
 };

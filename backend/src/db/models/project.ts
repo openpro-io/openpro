@@ -1,9 +1,9 @@
-'use strict';
-import ProjectPermissions from './project-permissions.js';
+import { DataTypes } from 'sequelize';
 
-export default (sequelize, DataTypes) => {
-  const Project = sequelize.define(
-    'Project',
+import { Project } from './types';
+
+export default (sequelize) => {
+  Project.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -12,9 +12,11 @@ export default (sequelize, DataTypes) => {
       },
       name: {
         type: DataTypes.STRING,
+        allowNull: false,
       },
       key: {
         type: DataTypes.STRING,
+        allowNull: false,
       },
       description: {
         type: DataTypes.TEXT,
@@ -54,15 +56,13 @@ export default (sequelize, DataTypes) => {
     }
   );
 
-  Project.associate = ({ ProjectTag, Users, ProjectPermissions }) => {
-    Project.hasMany(ProjectTag, { foreignKey: 'project_id' });
-    Project.belongsToMany(Users, {
+  Project.associate = ({ ProjectTag, User, ProjectPermissions }) => {
+    Project.hasMany(ProjectTag, { foreignKey: 'project_id', as: 'projectTags' });
+    Project.belongsToMany(User, {
       through: ProjectPermissions,
       foreignKey: 'project_id',
       otherKey: 'user_id',
       as: 'users',
     });
   };
-
-  return Project;
 };

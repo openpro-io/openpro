@@ -1,6 +1,7 @@
-'use strict';
 // TODO: Migration
-export default (sequelize, DataTypes) => {
+import { DataTypes } from 'sequelize';
+
+export default (sequelize) => {
   const IssueBoards = sequelize.define(
     'IssueBoards',
     {

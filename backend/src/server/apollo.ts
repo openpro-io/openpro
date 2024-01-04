@@ -3,8 +3,10 @@ import { fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations
 import axios from 'axios';
 import type { FastifyInstance } from 'fastify';
 import { GraphQLError } from 'graphql/error';
+import { Model } from 'sequelize';
 
 import db from '../db/index.js';
+import type { User } from '../db/models/user';
 import resolvers from '../resolvers/index.js';
 import {
   ALLOW_LOGIN_DOMAINS_LIST,
@@ -32,7 +34,7 @@ export const apolloHandler = async (fastify: FastifyInstance) => {
   const myContextFunction = async (request: CustomFastifyRequest): Promise<object> => {
     // get the user token from the headers
     const token = request.headers.authorization;
-    let user = null;
+    let user: User = null;
 
     if (!token) return { db, user };
 
@@ -77,15 +79,17 @@ export const apolloHandler = async (fastify: FastifyInstance) => {
 
         const externalId = `${data.provider}__${data.sub}`;
 
-        user = await db.sequelize.models.User.findOne({
+        user = await db.User.findOne({
           where: { externalId },
         });
+
+        user.firstName = '';
 
         if (!user && ALLOW_SIGNUP) {
           try {
             const [firstName, lastName] = data.name.split(' ');
 
-            user = await db.sequelize.models.User.create({
+            user = await db.User.create({
               email: data.email,
               externalId,
               firstName,

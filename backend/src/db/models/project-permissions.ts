@@ -1,8 +1,9 @@
-'use strict';
+import { DataTypes } from 'sequelize';
 
-export default (sequelize, DataTypes) => {
-  const ProjectPermission = sequelize.define(
-    'ProjectPermission',
+import { ProjectPermission } from './types';
+
+export default (sequelize) =>
+  ProjectPermission.init(
     {
       id: {
         allowNull: false,
@@ -34,6 +35,3 @@ export default (sequelize, DataTypes) => {
       indexes: [{ unique: true, fields: ['project_id', 'user_id'] }],
     }
   );
-
-  return ProjectPermission;
-};

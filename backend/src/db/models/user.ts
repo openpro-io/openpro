@@ -1,8 +1,9 @@
-'use strict';
+import { DataTypes, Sequelize } from 'sequelize';
 
-export default (sequelize, DataTypes) => {
-  const User = sequelize.define(
-    'User',
+import { User } from './types.js';
+
+export default (sequelize: Sequelize) => {
+  return User.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -50,6 +51,4 @@ export default (sequelize, DataTypes) => {
       indexes: [{ unique: true, fields: ['external_id'] }],
     }
   );
-
-  return User;
 };

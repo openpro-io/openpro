@@ -1,6 +1,6 @@
-'use strict';
+import { DataTypes } from 'sequelize';
 
-export default (sequelize, DataTypes) => {
+export default (sequelize) => {
   const ProjectTag = sequelize.define(
     'ProjectTag',
     {
@@ -42,7 +42,7 @@ export default (sequelize, DataTypes) => {
   );
 
   ProjectTag.associate = ({ Project }) => {
-    ProjectTag.belongsTo(Project, { foreignKey: 'project_id' });
+    ProjectTag.belongsTo(Project, { foreignKey: 'project_id', as: 'project' });
   };
 
   return ProjectTag;

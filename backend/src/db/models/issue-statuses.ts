@@ -1,8 +1,6 @@
-'use strict';
+import { DataTypes } from 'sequelize';
 
-import IssueComment from './issue-comment.js';
-
-export default (sequelize, DataTypes) => {
+export default (sequelize) => {
   const IssueStatuses = sequelize.define(
     'IssueStatuses',
     {

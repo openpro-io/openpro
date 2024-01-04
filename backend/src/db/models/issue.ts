@@ -1,6 +1,6 @@
-'use strict';
+import { DataTypes } from 'sequelize';
 
-export default (sequelize, DataTypes) => {
+export default (sequelize) => {
   const Issue = sequelize.define(
     'Issue',
     {
