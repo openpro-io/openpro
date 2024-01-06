@@ -1,5 +1,5 @@
 import cors, { OriginFunction } from '@fastify/cors';
-import Fastify from 'fastify';
+import Fastify, { FastifyRequest } from 'fastify';
 import * as http from 'http';
 
 import db from '../db/index.js';
@@ -52,7 +52,8 @@ await fastify.register(cors, {
 });
 
 // Handle all requests that have the `Content-Type` header set as multipart
-fastify.addContentTypeParser('multipart', async (request) => {
+fastify.addContentTypeParser('multipart', {}, async (request: FastifyRequest) => {
+  // https://github.com/jaydenseric/graphql-upload
   request.isMultipart = true;
 });
 

@@ -20,8 +20,15 @@ export const fastifyWsHandler = async (fastify: FastifyInstance) => {
     options: { maxPayload: 1048576, clientTracking: true },
   });
 
+  // TODO: Avoid multiple side effects in single prevalidation hook
   // TODO: This is mostly duplicated from apollo.ts. Lets refactor this to be DRY
-  await fastify.addHook<requestGeneric>('preValidation', async (request, reply) => {
+  fastify.addHook<requestGeneric>('preValidation', async (request, reply) => {
+    // This is for apollo file uploading
+    // https://github.com/jaydenseric/graphql-upload
+    if (request?.isMultipart) {
+      request.body = await processRequest(request.raw, reply.raw);
+    }
+
     // check if the request is authenticated
     // TODO: Refactor to make this cleaner
     if (request.headers.connection === 'Upgrade' && request.url === '/ws') {
@@ -85,8 +92,6 @@ export const fastifyWsHandler = async (fastify: FastifyInstance) => {
           console.error({ e });
         }
       }
-    } else if (request?.isMultipart) {
-      request.body = await processRequest(request.raw, reply.raw);
     }
   });
 

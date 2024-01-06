@@ -6,7 +6,7 @@ import { GraphQLError } from 'graphql/error';
 import { Model } from 'sequelize';
 
 import db from '../db/index.js';
-import type { User } from '../db/models/user';
+import type { User } from '../db/models/types.js';
 import resolvers from '../resolvers/index.js';
 import {
   ALLOW_LOGIN_DOMAINS_LIST,
