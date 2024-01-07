@@ -1,4 +1,4 @@
 {
-  "backend/**/*.ts": "backend/node_modules/.bin/eslint --config backend/.eslintrc",
+  "backend/**/*.ts": "backend/node_modules/.bin/eslint --config backend/.eslintrc.json",
   "frontend/**/*.{ts,tsx}": "frontend/node_modules/.bin/eslint --config frontend/.eslintrc.json",
 }
