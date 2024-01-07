@@ -3,16 +3,19 @@ import Fastify, { FastifyRequest } from 'fastify';
 import * as http from 'http';
 
 import db from '../db/index.js';
+import { User } from '../db/models/types.js';
+import { cache } from '../services/cache.js';
 import { BUCKET_NAME, CORS_ORIGIN, ENABLE_FASTIFY_LOGGING } from '../services/config.js';
 import { minioClient } from '../services/minio-client.js';
-import type { AuthenticatedUser, customRequest, requestGeneric } from '../typings.js';
+import type { customRequest, requestGeneric } from '../typings.js';
 import { apolloHandler } from './apollo.js';
+import { fastifyHooksHandler } from './fastify-hooks.js';
 import { fastifyWsHandler } from './fastify-ws.js';
 import { hocuspocusHandler } from './hocuspocus.js';
 
 declare module 'fastify' {
   export interface FastifyRequest {
-    user?: AuthenticatedUser;
+    user?: User;
     isMultipart?: boolean;
   }
 }
@@ -59,6 +62,8 @@ fastify.addContentTypeParser('multipart', {}, async (request: FastifyRequest) =>
 
 await db.init();
 
+await fastifyHooksHandler(fastify);
+
 await fastifyWsHandler(fastify);
 
 await hocuspocusHandler(fastify);
@@ -79,6 +84,15 @@ type MinioGetObjectResponse = {
     'x-amz-meta-uploaded-by-user-id': string;
   };
 };
+
+fastify.get('/cache-stats', async (request, reply) => {
+  if (!request?.user) {
+    reply.code(401).send({ error: 'not authenticated' });
+    return;
+  }
+
+  reply.send(cache.getStats());
+});
 
 fastify.get<requestGeneric>('/uploads/:file', async (request, reply) => {
   // TODO: make sure logged in
