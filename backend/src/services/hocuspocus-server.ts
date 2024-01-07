@@ -3,9 +3,10 @@ import { Server, fetchPayload, storePayload } from '@hocuspocus/server';
 import axios from 'axios';
 
 import db from '../db/index.js';
-import { cache } from './cache';
+import { cache } from './cache.js';
 import { FRONTEND_HOSTNAME, HTTP_PORT } from './config.js';
-import { hash } from './utils';
+import { hash } from './utils.js';
+import { User } from '../db/models/types.js';
 
 const fetch = async ({ documentName }: fetchPayload): Promise<Uint8Array | null> => {
   return new Promise(async (resolve, reject) => {
@@ -82,42 +83,50 @@ const store = async ({ documentName, state }: storePayload) => {
   }
 };
 
-const onAuthenticate = async (data: any) => {
-  let token = data?.token;
+type OnAuthenticatePayload = {
+  token?: string;
+};
 
-  if (!token) {
+type VerifyJwtResponse = {
+  data?: {
+    provider?: string;
+    sub?: string;
+  };
+};
+
+type OnAuthenticateResponse = {
+  user?: User;
+}
+
+const onAuthenticate = async (data: OnAuthenticatePayload): Promise<OnAuthenticateResponse> => {
+  if (!data?.token) {
     console.warn('Throwing exception to tiptap user');
     throw new Error('Not authorized!');
   }
 
-  token = `Bearer ${token}`;
+  const token = `Bearer ${data?.token}`;
+  let sub = null;
+  let provider = null;
 
   const cacheKey = hash(token);
-
   const cachedUser = cache.get(cacheKey);
-
   if (cachedUser) return { user: db.User.build(cachedUser).toJSON() };
 
-  let verifyJwt = {};
-
   try {
-    verifyJwt = await axios.get(`${FRONTEND_HOSTNAME}/api/verify-jwt`, {
+    ({
+      data: { provider, sub },
+    } = <VerifyJwtResponse>await axios.get(`${FRONTEND_HOSTNAME}/api/verify-jwt`, {
       headers: {
         authorization: token,
       },
-    });
+    }));
   } catch (e) {
     throw new Error('Unable to verify tiptap user!');
   }
 
-  const {
-    // @ts-ignore
-    data: { provider, sub },
-  } = verifyJwt;
-
   const externalId = `${provider}__${sub}`;
 
-  const user = await db.sequelize.models.User.findOne({
+  const user = <User>await db.sequelize.models.User.findOne({
     where: { externalId },
   });
 
