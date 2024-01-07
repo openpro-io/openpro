@@ -1,8 +1,9 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes, Sequelize } from 'sequelize';
 
-export default (sequelize) => {
-  const Issue = sequelize.define(
-    'Issue',
+import { Issue } from './types.js';
+
+export default (sequelize: Sequelize) => {
+  Issue.init(
     {
       id: {
         allowNull: false,
@@ -21,7 +22,6 @@ export default (sequelize) => {
       issueStatusId: {
         type: DataTypes.INTEGER,
         field: 'issue_status_id',
-        underscored: true,
         references: {
           model: 'issue_statuses',
           key: 'id',
@@ -104,18 +104,18 @@ export default (sequelize) => {
     }
   );
 
-  Issue.associate = ({ IssueComment, IssueBoard, IssueLinks, Issue, Project }) => {
-    Issue.belongsTo(Project, { foreignKey: 'project_id' });
-    Issue.hasMany(IssueComment, { foreignKey: 'issue_id', onDelete: 'CASCADE' });
-    Issue.hasMany(IssueBoard, { foreignKey: 'issue_id', onDelete: 'CASCADE' });
+  Issue.associate = ({ IssueComment, IssueBoard, IssueLink, Issue, Project }) => {
+    Issue.belongsTo(Project, { foreignKey: 'project_id', as: 'project' });
+    Issue.hasMany(IssueComment, { foreignKey: 'issue_id', onDelete: 'CASCADE', as: 'issueComments' });
+    Issue.hasMany(IssueBoard, { foreignKey: 'issue_id', onDelete: 'CASCADE', as: 'issueBoards' });
     Issue.belongsToMany(Issue, {
-      through: IssueLinks,
+      through: IssueLink,
       foreignKey: 'issue_id',
       otherKey: 'linked_issue_id',
       as: 'linkedToIssues',
     });
     Issue.belongsToMany(Issue, {
-      through: IssueLinks,
+      through: IssueLink,
       foreignKey: 'linked_issue_id',
       otherKey: 'issue_id',
       as: 'linkedByIssues',

@@ -2,8 +2,8 @@ import { DataTypes, Sequelize } from 'sequelize';
 
 import { User } from './types.js';
 
-export default (sequelize: Sequelize) => {
-  return User.init(
+export default (sequelize: Sequelize) =>
+  User.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -51,4 +51,3 @@ export default (sequelize: Sequelize) => {
       indexes: [{ unique: true, fields: ['external_id'] }],
     }
   );
-};

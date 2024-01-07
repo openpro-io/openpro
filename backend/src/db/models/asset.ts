@@ -1,8 +1,10 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes, Sequelize } from 'sequelize';
 
-export default (sequelize) => {
-  const Asset = sequelize.define(
-    'Asset',
+import { Asset } from './types.js';
+
+// TODO: Use associations instead of references
+export default (sequelize: Sequelize) => {
+  Asset.init(
     {
       id: {
         type: DataTypes.INTEGER,

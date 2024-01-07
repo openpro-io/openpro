@@ -1,8 +1,9 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes, Sequelize } from 'sequelize';
 
-export default (sequelize) => {
-  const ProjectTag = sequelize.define(
-    'ProjectTag',
+import { ProjectTag } from './types.js';
+
+export default (sequelize: Sequelize) => {
+  ProjectTag.init(
     {
       id: {
         allowNull: false,
@@ -21,7 +22,7 @@ export default (sequelize) => {
       createdAt: {
         field: 'created_at',
         type: DataTypes.DATE,
-        default: new Date(),
+        defaultValue: new Date(),
       },
       updatedAt: {
         field: 'updated_at',

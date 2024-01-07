@@ -1,8 +1,9 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes, Sequelize } from 'sequelize';
 
-export default (sequelize) => {
-  const Board = sequelize.define(
-    'Board',
+import { Board } from './types.js';
+
+export default (sequelize: Sequelize) => {
+  Board.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -62,6 +63,7 @@ export default (sequelize) => {
       through: IssueBoard,
       foreignKey: 'board_id',
       otherKey: 'issue_id',
+      as: 'issues',
     });
   };
 

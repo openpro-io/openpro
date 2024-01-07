@@ -8,7 +8,7 @@ import Asset from './asset.js';
 import Board from './board.js';
 import IssueBoard from './issue-board.js';
 import IssueComment from './issue-comment.js';
-import IssueLinks from './issue-links.js';
+import IssueLink from './issue-link.js';
 import IssueStatuses from './issue-statuses.js';
 import IssueTag from './issue-tag.js';
 import Issue from './issue.js';
@@ -35,7 +35,7 @@ const init = async () => {
   db.ProjectTag = ProjectTag(db.sequelize);
   db.IssueTag = IssueTag(db.sequelize);
   db.IssueBoard = IssueBoard(db.sequelize);
-  db.IssueLinks = IssueLinks(db.sequelize);
+  db.IssueLink = IssueLink(db.sequelize);
   db.ProjectPermissions = ProjectPermissions(db.sequelize);
   db.ProjectCustomFields = ProjectCustomFields(db.sequelize);
 

@@ -1,8 +1,8 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes, Sequelize } from 'sequelize';
 
-import { ProjectPermission } from './types';
+import { ProjectPermission } from './types.js';
 
-export default (sequelize) =>
+export default (sequelize: Sequelize) =>
   ProjectPermission.init(
     {
       id: {

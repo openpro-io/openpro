@@ -1,8 +1,8 @@
-'use strict';
+import { DataTypes, Sequelize } from 'sequelize';
 
-import { DataTypes } from 'sequelize';
+import { IssueLink } from './types.js';
 
-export default (sequelize) => {
+export default (sequelize: Sequelize) => {
   const inverseLinkType = {
     blocks: 'blocked_by',
     blocked_by: 'blocks',
@@ -13,8 +13,7 @@ export default (sequelize) => {
     is_cloned_by: 'clones',
   };
 
-  const IssueLink = sequelize.define(
-    'IssueLinks',
+  IssueLink.init(
     {
       id: {
         allowNull: false,
@@ -39,6 +38,9 @@ export default (sequelize) => {
       },
       linkTypeInverted: {
         type: DataTypes.VIRTUAL,
+        set(value) {
+          throw new Error('Do not try to set the `linkTypeInverted` value!');
+        },
         get() {
           return inverseLinkType?.[this.getDataValue('linkType')];
         },
@@ -54,7 +56,7 @@ export default (sequelize) => {
       createdAt: {
         field: 'created_at',
         type: DataTypes.DATE,
-        default: new Date(),
+        defaultValue: new Date(),
       },
       updatedAt: {
         field: 'updated_at',

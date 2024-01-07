@@ -94,7 +94,7 @@ const resolvers = {
   },
   Mutation: {
     deleteIssueLink: async (parent, { input: { issueId, linkType, linkedIssueId } }, { db }) => {
-      await db.sequelize.models.IssueLinks.destroy({
+      await db.sequelize.models.IssueLink.destroy({
         where: {
           issueId,
           linkType,
@@ -112,7 +112,7 @@ const resolvers = {
         throw new Error('Issue not found');
       }
 
-      await db.sequelize.models.IssueLinks.create({
+      await db.sequelize.models.IssueLink.create({
         issueId,
         linkType,
         linkedIssueId,
@@ -248,12 +248,12 @@ const resolvers = {
       return [
         ...parent.linkedToIssues?.map((issue) => ({
           ...issue.toJSON(),
-          linkType: issue.IssueLinks.linkType,
+          linkType: issue.IssueLink.linkType,
           linkedIssueId: parent.id,
         })),
         ...parent.linkedByIssues?.map((issue) => ({
           ...issue.toJSON(),
-          linkType: issue.IssueLinks.linkTypeInverted,
+          linkType: issue.IssueLink.linkTypeInverted,
           linkedIssueId: parent.id,
         })),
       ];

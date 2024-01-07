@@ -1,8 +1,8 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes, Sequelize } from 'sequelize';
 
-import { Project } from './types';
+import { Project } from './types.js';
 
-export default (sequelize) => {
+export default (sequelize: Sequelize) => {
   Project.init(
     {
       id: {

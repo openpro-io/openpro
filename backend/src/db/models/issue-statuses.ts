@@ -1,8 +1,9 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes, Sequelize } from 'sequelize';
 
-export default (sequelize) => {
-  const IssueStatuses = sequelize.define(
-    'IssueStatuses',
+import { IssueStatus } from './types.js';
+
+export default (sequelize: Sequelize) =>
+  IssueStatus.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -41,6 +42,3 @@ export default (sequelize) => {
       ],
     }
   );
-
-  return IssueStatuses;
-};

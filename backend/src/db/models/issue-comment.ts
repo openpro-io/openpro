@@ -1,10 +1,9 @@
-'use strict';
+import { DataTypes, Sequelize } from 'sequelize';
 
-import { DataTypes } from 'sequelize';
+import { IssueComment } from './types.js';
 
-export default (sequelize) => {
-  const IssueComment = sequelize.define(
-    'IssueComment',
+export default (sequelize: Sequelize) => {
+  IssueComment.init(
     {
       id: {
         allowNull: false,
@@ -39,7 +38,7 @@ export default (sequelize) => {
       createdAt: {
         field: 'created_at',
         type: DataTypes.DATE,
-        default: new Date(),
+        defaultValue: new Date(),
       },
       updatedAt: {
         field: 'updated_at',
@@ -59,7 +58,7 @@ export default (sequelize) => {
   );
 
   IssueComment.associate = ({ Issue }) => {
-    IssueComment.belongsTo(Issue, { foreignKey: 'issue_id' });
+    IssueComment.belongsTo(Issue, { foreignKey: 'issue_id', as: 'issue' });
   };
 
   return IssueComment;

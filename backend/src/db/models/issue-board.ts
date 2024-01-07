@@ -1,9 +1,10 @@
 // TODO: Migration
-import { DataTypes } from 'sequelize';
+import { DataTypes, Sequelize } from 'sequelize';
 
-export default (sequelize) => {
-  const IssueBoards = sequelize.define(
-    'IssueBoards',
+import { IssueBoard } from './types.js';
+
+export default (sequelize: Sequelize) => {
+  IssueBoard.init(
     {
       boardId: {
         type: DataTypes.INTEGER,
@@ -29,10 +30,10 @@ export default (sequelize) => {
     }
   );
 
-  IssueBoards.associate = ({ Board, Issue }) => {
-    IssueBoards.belongsTo(Board, { foreignKey: 'board_id' });
-    IssueBoards.belongsTo(Issue, { foreignKey: 'issue_id' });
+  IssueBoard.associate = ({ Board, Issue }) => {
+    IssueBoard.belongsTo(Board, { foreignKey: 'board_id', as: 'board' });
+    IssueBoard.belongsTo(Issue, { foreignKey: 'issue_id', as: 'issue' });
   };
 
-  return IssueBoards;
+  return IssueBoard;
 };

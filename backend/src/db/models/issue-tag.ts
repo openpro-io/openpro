@@ -1,10 +1,11 @@
 'use strict';
 
-import { DataTypes } from 'sequelize';
+import { DataTypes, Sequelize } from 'sequelize';
 
-export default (sequelize) => {
-  const IssueTag = sequelize.define(
-    'IssueTag',
+import { IssueTag } from './types.js';
+
+export default (sequelize: Sequelize) => {
+  IssueTag.init(
     {
       id: {
         allowNull: false,
@@ -31,7 +32,7 @@ export default (sequelize) => {
       createdAt: {
         field: 'created_at',
         type: DataTypes.DATE,
-        default: new Date(),
+        defaultValue: new Date(),
       },
       updatedAt: {
         field: 'updated_at',
@@ -52,7 +53,7 @@ export default (sequelize) => {
   );
 
   IssueTag.associate = ({ Issue }) => {
-    IssueTag.belongsTo(Issue, { foreignKey: 'issue_id' });
+    IssueTag.belongsTo(Issue, { foreignKey: 'issue_id', as: 'issue' });
   };
 
   return IssueTag;
