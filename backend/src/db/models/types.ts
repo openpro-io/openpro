@@ -50,7 +50,7 @@ export class ProjectTag extends Model<
   // id can be undefined during creation when using `autoIncrement`
   declare id: CreationOptional<number>;
   declare projectId: ForeignKey<Project['id']>;
-  declare name?: string;
+  declare name: CreationOptional<string>;
 
   declare getProject: BelongsToGetAssociationMixin<Project>;
 
@@ -160,7 +160,7 @@ export class IssueComment extends Model<
   declare reporterId: ForeignKey<User['id']>;
   declare issueId: ForeignKey<Issue['id']>;
   declare comment: string;
-  declare commentRaw: string;
+  declare commentRaw: CreationOptional<string>;
 
   declare getIssue: BelongsToGetAssociationMixin<Issue>;
 
@@ -206,13 +206,13 @@ export class Board extends Model<
   // id can be undefined during creation when using `autoIncrement`
   declare id: CreationOptional<number>;
   declare projectId: ForeignKey<Project['id']>;
-  declare name: string;
-  declare style: string;
-  declare viewState: object;
-  declare status: string;
-  declare backlogEnabled: boolean;
-  declare settings: object;
-  declare containerOrder: object;
+  declare name: CreationOptional<string>;
+  declare style: CreationOptional<string>;
+  declare viewState: CreationOptional<object>;
+  declare status: CreationOptional<string>;
+  declare backlogEnabled: CreationOptional<boolean>;
+  declare settings: CreationOptional<object>;
+  declare containerOrder: CreationOptional<object>;
 
   declare getIssues: BelongsToManyGetAssociationsMixin<Issue[]>;
 
@@ -259,7 +259,7 @@ export class IssueBoard extends Model<
   // id can be undefined during creation when using `autoIncrement`
   declare boardId: ForeignKey<Board['id']>;
   declare issueId: ForeignKey<Issue['id']>;
-  declare position: number;
+  declare position: CreationOptional<number>;
 
   declare getIssue: BelongsToGetAssociationMixin<Issue>;
   declare getBoard: BelongsToGetAssociationMixin<Board>;

@@ -13,7 +13,7 @@
     "start": "node dist",
     "format": "prettier --check --ignore-path ../.gitignore .",
     "format:fix": "prettier --write --ignore-path ../.gitignore .",
-    "build": "esbuild `find src \\( -name '*.ts' \\)` --platform=node --outdir=dist --resolve-extensions=.js",
+    "build": "esbuild `find src \\( -name '*.ts' \\)` --platform=node --outdir=dist",
     "check:types": "tsc --noEmit",
     "pretest": "pnpm run build"
   },
