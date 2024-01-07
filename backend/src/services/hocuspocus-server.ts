@@ -1,5 +1,5 @@
 import { Database } from '@hocuspocus/extension-database';
-import { Server } from '@hocuspocus/server';
+import { Server, fetchPayload, storePayload } from '@hocuspocus/server';
 import axios from 'axios';
 
 import db from '../db/index.js';
@@ -7,7 +7,7 @@ import { cache } from './cache';
 import { FRONTEND_HOSTNAME, HTTP_PORT } from './config.js';
 import { hash } from './utils';
 
-const fetch = async ({ documentName }): Promise<Uint8Array | null> => {
+const fetch = async ({ documentName }: fetchPayload): Promise<Uint8Array | null> => {
   return new Promise(async (resolve, reject) => {
     const [entityType, entityId, entityField] = documentName.split('.');
 
@@ -52,7 +52,7 @@ const fetch = async ({ documentName }): Promise<Uint8Array | null> => {
   });
 };
 
-const store = async ({ documentName, state }) => {
+const store = async ({ documentName, state }: storePayload) => {
   const [entityType, entityId, entityField] = documentName.split('.');
 
   if (entityType === 'issue' && entityField === 'description') {
@@ -68,10 +68,7 @@ const store = async ({ documentName, state }) => {
     );
   }
 
-  if (entityType === 'issueComment' && entityField === 'comment') {
-    // @ts-ignore
-    if (!isFinite(entityId)) return;
-
+  if (entityType === 'issueComment' && entityField === 'comment' && isFinite(Number(entityId))) {
     await db.sequelize.models.IssueComment.update(
       {
         commentRaw: state,
