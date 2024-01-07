@@ -1,8 +1,8 @@
 import axios from 'axios';
 import * as console from 'console';
 import { FastifyInstance, type FastifyReply } from 'fastify';
+import { GraphQLError } from 'graphql';
 import processRequest from 'graphql-upload/processRequest.mjs';
-import { GraphQLError } from 'graphql/error';
 
 import db from '../db/index.js';
 import { cache } from '../services/cache.js';
@@ -12,7 +12,7 @@ import {
   ALLOW_SIGNUP,
   FRONTEND_HOSTNAME,
 } from '../services/config.js';
-import { hash } from '../services/utils';
+import { hash } from '../services/utils.js';
 import type { CustomFastifyRequest, requestGeneric } from '../typings.js';
 
 const addUserToRequest = async (request: CustomFastifyRequest, reply: FastifyReply) => {

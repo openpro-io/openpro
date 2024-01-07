@@ -1,6 +1,6 @@
 'use strict';
 
-import { DataTypes, Sequelize } from 'sequelize';
+import { Sequelize } from 'sequelize';
 
 import { ENABLE_SEQUELIZE_LOGGING, SQL_URI } from '../../services/config.js';
 import type { Db } from '../../typings.js';

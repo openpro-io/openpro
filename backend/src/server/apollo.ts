@@ -1,7 +1,7 @@
 import { ApolloServer } from '@apollo/server';
 import { fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
 import type { FastifyInstance } from 'fastify';
-import { GraphQLError } from 'graphql/error';
+import { GraphQLError } from 'graphql';
 
 import db from '../db/index.js';
 import type { User } from '../db/models/types.js';
