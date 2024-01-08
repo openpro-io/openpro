@@ -1,7 +1,7 @@
 import { mergeResolvers } from '@graphql-tools/merge';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Resolvers } from '../__generated__/resolvers-types.js';
+import type { Resolvers } from '../__generated__/resolvers-types.js';
 import { ASSET_PROVIDER, BUCKET_NAME } from '../services/config.js';
 import { minioClient } from '../services/minio-client.js';
 import BoardResolvers from './board/index.js';

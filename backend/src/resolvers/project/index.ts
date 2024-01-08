@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 
-import { MutationResolvers, ProjectResolvers, QueryResolvers, Resolvers } from '../../__generated__/resolvers-types.js';
+import type { MutationResolvers, ProjectResolvers, QueryResolvers, Resolvers } from '../../__generated__/resolvers-types.js';
 
 const Query: QueryResolvers = {
   projects: (parent, args, { db }) => {

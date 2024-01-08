@@ -1,8 +1,13 @@
 import { fastifyWebsocket } from '@fastify/websocket';
 import type { FastifyInstance } from 'fastify';
 import { nanoid } from 'nanoid';
+import type { WebSocket } from 'ws';
 
 import * as wsServer from '../services/ws-server.js';
+
+interface MyWebSocket extends WebSocket {
+  isAlive: boolean;
+}
 
 export const fastifyWsHandler = async (fastify: FastifyInstance) => {
   await fastify.register(fastifyWebsocket, {
@@ -10,21 +15,21 @@ export const fastifyWsHandler = async (fastify: FastifyInstance) => {
   });
 
   await fastify.register(async function (fastify) {
-    fastify.websocketServer.on('connection', function connection(ws) {
+    fastify.websocketServer.on('connection', function connection(ws: MyWebSocket) {
       ws.isAlive = true;
 
       // Heartbeat
       ws.on('message', function (message) {
         const msg = message.toString();
         if (['ping', 'pong'].includes(msg)) {
-          this.isAlive = true;
+          ws.isAlive = true;
           ws.send(msg === 'ping' ? 'pong' : 'ping');
         }
       });
     });
 
     const interval = setInterval(function ping() {
-      fastify.websocketServer.clients.forEach(function each(ws) {
+      fastify.websocketServer.clients.forEach(function each(ws: MyWebSocket) {
         if (ws.isAlive === false) return ws.terminate();
 
         ws.isAlive = false;
@@ -35,16 +40,18 @@ export const fastifyWsHandler = async (fastify: FastifyInstance) => {
       clearInterval(interval);
     });
 
-    fastify.get('/ws', { websocket: true }, (connection /* SocketStream */, req /* FastifyRequest */) => {
+    fastify.get('/ws', { websocket: true }, (connection, req) => {
       const context = {};
 
-      connection.socket.id = nanoid();
-      connection.socket.user = req?.user;
-      connection.socket.namespace = 'ws';
       const clients = fastify.websocketServer.clients;
 
       wsServer.handleConnection({
-        socket: connection.socket,
+        socket: {
+          ...connection.socket,
+          id: nanoid(),
+          user: req?.user,
+          namespace: 'ws',
+        },
         req,
         context,
         clients,

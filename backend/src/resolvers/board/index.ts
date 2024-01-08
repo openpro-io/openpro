@@ -1,4 +1,4 @@
-import { BoardResolvers, MutationResolvers, QueryResolvers } from '../../__generated__/resolvers-types.js';
+import type { BoardResolvers, MutationResolvers, QueryResolvers } from '../../__generated__/resolvers-types.js';
 import { websocketBroadcast } from '../../services/ws-server.js';
 
 const Query: QueryResolvers = {

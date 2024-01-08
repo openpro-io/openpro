@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as console from 'console';
-import { FastifyInstance, type FastifyReply } from 'fastify';
+import { type FastifyInstance, type FastifyReply } from 'fastify';
 import { GraphQLError } from 'graphql';
 import processRequest from 'graphql-upload/processRequest.mjs';
 

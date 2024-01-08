@@ -1,5 +1,5 @@
-import cors, { OriginFunction } from '@fastify/cors';
-import Fastify, { FastifyRequest } from 'fastify';
+import cors, { type OriginFunction } from '@fastify/cors';
+import Fastify, { type FastifyRequest } from 'fastify';
 import * as http from 'http';
 
 import db from '../db/index.js';

@@ -8,9 +8,14 @@ const config: CodegenConfig = {
       plugins: ['typescript', 'typescript-resolvers'],
     },
   },
+  hooks: {
+    afterOneFileWrite: [
+      'sed -i \'\' -e \'1s|import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from "graphql";|import { type GraphQLResolveInfo, GraphQLScalarType, type GraphQLScalarTypeConfig } from "graphql";|\' src/__generated__/resolvers-types.ts',
+    ],
+  },
   config: {
     useIndexSignature: true,
-    contextType: '../server/apollo.js#ApolloContext',
+    contextType: '../server/apollo.js#type ApolloContext',
     mappers: {
       Project: '../db/models/types.js#Project as ProjectModel',
       ProjectTag: '../db/models/types.js#ProjectTag as ProjectTagModel',

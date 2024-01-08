@@ -1,5 +1,5 @@
 import { ApolloServer } from '@apollo/server';
-import { ApolloFastifyContextFunction, fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
+import { type ApolloFastifyContextFunction, fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
 import type { FastifyInstance } from 'fastify';
 import { GraphQLError } from 'graphql';
 

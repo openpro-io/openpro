@@ -1,4 +1,4 @@
-import { BinaryLike } from 'crypto';
+import type { BinaryLike } from 'crypto';
 import * as crypto from 'node:crypto';
 import * as url from 'node:url';
 

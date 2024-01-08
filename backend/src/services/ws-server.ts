@@ -7,15 +7,15 @@ export const handleConnection = ({ socket, req, context, clients }) => {
   // });
 };
 
-/**
- * Broadcasts a message to all connected clients in a specific namespace.
- *
- * @param {object} args - The function arguments.
- * @param {Array} args.clients - The array of connected clients.
- * @param {string} args.message - The message to be sent.
- * @param {string} [args.namespace] - The namespace in which to broadcast the message. Optional.
- */
-export const websocketBroadcast = ({ clients, message, namespace }) => {
+export const websocketBroadcast = ({
+  clients,
+  message,
+  namespace,
+}: {
+  clients: Array<any>;
+  message: string;
+  namespace?: string;
+}) => {
   clients.forEach((client) => {
     if (namespace && client.namespace === namespace) {
       client.send(message);

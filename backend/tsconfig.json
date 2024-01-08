@@ -16,7 +16,9 @@
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
   },
   "include": ["./src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"],

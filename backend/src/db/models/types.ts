@@ -1,5 +1,5 @@
 // https://sequelize.org/docs/v6/other-topics/typescript/
-import {
+import type {
   Association,
   BelongsToGetAssociationMixin,
   BelongsToManyGetAssociationsMixin,
@@ -17,11 +17,11 @@ import {
   HasManySetAssociationsMixin,
   InferAttributes,
   InferCreationAttributes,
-  Model,
   NonAttribute,
 } from 'sequelize';
+import { Model } from 'sequelize';
 
-import { Db } from '../../typings.js';
+import type { Db } from '../../typings.js';
 
 type Associate = (db: Db) => void;
 
