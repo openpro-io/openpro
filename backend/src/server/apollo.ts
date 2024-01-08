@@ -1,5 +1,5 @@
 import { ApolloServer } from '@apollo/server';
-import { fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
+import { ApolloFastifyContextFunction, fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
 import type { FastifyInstance } from 'fastify';
 import { GraphQLError } from 'graphql';
 
@@ -9,8 +9,14 @@ import resolvers from '../resolvers/index.js';
 import typeDefs from '../type-defs.js';
 import type { CustomFastifyRequest } from '../typings.js';
 
+export interface ApolloContext {
+  websocketServer: any;
+  db: typeof db;
+  user: User | null;
+}
+
 export const apolloHandler = async (fastify: FastifyInstance) => {
-  const apollo = new ApolloServer({
+  const apollo = new ApolloServer<ApolloContext>({
     typeDefs,
     resolvers,
     // Using graphql-upload without CSRF prevention is very insecure.
@@ -22,7 +28,7 @@ export const apolloHandler = async (fastify: FastifyInstance) => {
 
   await apollo.start();
 
-  const myContextFunction = async (request: CustomFastifyRequest): Promise<object> => {
+  const myContextFunction: ApolloFastifyContextFunction<ApolloContext> = async (request: CustomFastifyRequest) => {
     // get the user token from the headers
     let user: User | null = request?.user;
 
@@ -31,6 +37,7 @@ export const apolloHandler = async (fastify: FastifyInstance) => {
       return {
         db,
         user,
+        websocketServer: fastify?.websocketServer,
       };
     }
 

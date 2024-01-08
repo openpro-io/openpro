@@ -69,7 +69,7 @@ const addUserToRequest = async (request: CustomFastifyRequest, reply: FastifyRep
 
     const externalId = `${data.provider}__${data.sub}`;
 
-    user = await db.sequelize.models.User.findOne({
+    user = await db.User.findOne({
       where: { externalId },
     });
 
@@ -77,7 +77,7 @@ const addUserToRequest = async (request: CustomFastifyRequest, reply: FastifyRep
       try {
         const [firstName, lastName] = data.name.split(' ');
 
-        user = await db.sequelize.models.User.create({
+        user = await db.User.create({
           email: data.email,
           externalId,
           firstName,

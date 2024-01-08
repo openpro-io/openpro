@@ -6,19 +6,19 @@ import { minioClient } from '../../services/minio-client.js';
 const resolvers = {
   Query: {
     users: (parent, args, { db }) => {
-      return db.sequelize.models.User.findAll();
+      return db.User.findAll();
     },
     user: (parent, { id, externalId }, { db }) => {
       if (externalId) {
-        return db.sequelize.models.User.findOne({ where: { externalId } });
+        return db.User.findOne({ where: { externalId } });
       }
 
       if (id) {
-        return db.sequelize.models.User.findByPk(id);
+        return db.User.findByPk(id);
       }
     },
     me: (parent, args, { db, user }) => {
-      return db.sequelize.models.User.findByPk(user.id);
+      return db.User.findByPk(user.id);
     },
   },
   Mutation: {
@@ -37,10 +37,10 @@ const resolvers = {
       let findOldAvatarAsset;
 
       if (user.avatarAssetId) {
-        findOldAvatarAsset = await db.sequelize.models.Asset.findByPk(user.avatarAssetId);
+        findOldAvatarAsset = await db.Asset.findByPk(user.avatarAssetId);
       }
 
-      const findAsset = await db.sequelize.models.Asset.findByPk(assetId);
+      const findAsset = await db.Asset.findByPk(assetId);
 
       user.avatarAssetId = assetId;
       await user.save();
@@ -57,7 +57,7 @@ const resolvers = {
   User: {
     name: (parent) => `${parent?.firstName} ${parent?.lastName}`,
     avatarUrl: async (parent, args, { db }) => {
-      const findAvatarAsset = await db.sequelize.models.Asset.findByPk(parent.avatarAssetId);
+      const findAvatarAsset = await db.Asset.findByPk(parent.avatarAssetId);
 
       if (findAvatarAsset) {
         return '/' + findAvatarAsset.assetPath;

@@ -58,12 +58,16 @@ export default (sequelize: Sequelize) => {
     }
   );
 
-  Board.associate = ({ IssueBoard, Issue }) => {
+  Board.associate = ({ IssueBoard, Project, Issue }) => {
     Board.belongsToMany(Issue, {
       through: IssueBoard,
       foreignKey: 'board_id',
       otherKey: 'issue_id',
       as: 'issues',
+    });
+    Board.belongsTo(Project, {
+      foreignKey: 'project_id',
+      as: 'project',
     });
   };
 

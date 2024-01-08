@@ -56,10 +56,10 @@ export default (sequelize: Sequelize) => {
     }
   );
 
-  Project.associate = ({ ProjectTag, User, ProjectPermissions }) => {
+  Project.associate = ({ ProjectTag, User, ProjectPermission }) => {
     Project.hasMany(ProjectTag, { foreignKey: 'project_id', as: 'projectTags' });
     Project.belongsToMany(User, {
-      through: ProjectPermissions,
+      through: ProjectPermission,
       foreignKey: 'project_id',
       otherKey: 'user_id',
       as: 'users',

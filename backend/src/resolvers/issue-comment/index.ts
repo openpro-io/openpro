@@ -5,7 +5,7 @@ const resolvers = {
       const { issueId, comment, commentRaw } = input;
       const reporterId = user.id;
 
-      return await db.sequelize.models.IssueComment.create({
+      return await db.IssueComment.create({
         issueId,
         reporterId,
         comment,
@@ -15,7 +15,7 @@ const resolvers = {
     deleteIssueComment: async (parent, { input }, { db }) => {
       const { commentId } = input;
 
-      const findIssueComment = await db.sequelize.models.IssueComment.findByPk(commentId);
+      const findIssueComment = await db.IssueComment.findByPk(commentId);
 
       if (!findIssueComment) {
         throw new Error('issue comment not found');
@@ -31,7 +31,7 @@ const resolvers = {
     updateIssueComment: async (parent, { input }, { db }) => {
       const { commentId, comment } = input;
 
-      const findIssueComment = await db.sequelize.models.IssueComment.findByPk(commentId);
+      const findIssueComment = await db.IssueComment.findByPk(commentId);
 
       if (!findIssueComment) {
         throw new Error('Issue comment not found');
@@ -45,7 +45,7 @@ const resolvers = {
   },
   IssueComment: {
     reporter: (parent, args, { db }) => {
-      return db.sequelize.models.User.findByPk(parent.reporterId);
+      return db.User.findByPk(parent.reporterId);
     },
   },
 };

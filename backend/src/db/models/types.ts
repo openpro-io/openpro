@@ -107,30 +107,16 @@ export class Project extends Model<
   declare status: CreationOptional<string | null>;
   declare visibility: CreationOptional<string | null>;
 
-  // Since TS cannot determine model association at compile time
-  // we have to declare them here purely virtually
-  // these will not exist until `Model.init` was called.
-  declare getProjectTags: HasManyGetAssociationsMixin<ProjectTag>; // Note the null assertions!
-  declare addProjectTag: HasManyAddAssociationMixin<ProjectTag, number>;
-  declare addProjectTags: HasManyAddAssociationsMixin<ProjectTag, number>;
-  declare setProjectTags: HasManySetAssociationsMixin<ProjectTag, number>;
-  declare removeProjectTag: HasManyRemoveAssociationMixin<ProjectTag, number>;
-  declare removeProjectTags: HasManyRemoveAssociationsMixin<ProjectTag, number>;
-  declare hasProjectTag: HasManyHasAssociationMixin<ProjectTag, number>;
-  declare hasProjectTags: HasManyHasAssociationsMixin<ProjectTag, number>;
-  declare countProjectTags: HasManyCountAssociationsMixin;
-  declare createProjectTag: HasManyCreateAssociationMixin<ProjectTag, 'projectId'>;
-
-  declare getUsers: BelongsToManyGetAssociationsMixin<User>;
-
   // You can also pre-declare possible inclusions, these will only be populated if you
   // actively include a relation.
   declare projectTags?: NonAttribute<ProjectTag[]>; // Note this is optional since it's only populated when explicitly requested in code
   declare users?: NonAttribute<User[]>;
+  declare boards?: NonAttribute<Board[]>;
 
   declare static associations: {
     projectTags: Association<Project, ProjectTag>;
     users: Association<Project, User>;
+    boards: Association<Project, Board>;
   };
 
   declare static associate?: Associate;
@@ -294,14 +280,14 @@ export class Issue extends Model<
   declare vectorSearch?: CreationOptional<unknown>;
   declare customFields?: CreationOptional<object>; // ??
 
-  declare getProject: BelongsToGetAssociationMixin<Project>;
-  declare getIssueStatus: BelongsToGetAssociationMixin<IssueStatus>; // TODO: Write this association
-  declare getAssignee: BelongsToGetAssociationMixin<User>;
-  declare getReporter: BelongsToGetAssociationMixin<User>;
-  declare getIssueComments: HasManyGetAssociationsMixin<IssueComment[]>;
-  declare getIssueBoards: HasManyGetAssociationsMixin<IssueBoard[]>;
-  declare getLinkedToIssues: BelongsToManyGetAssociationsMixin<IssueLink[]>;
-  declare getLinkedByIssues: BelongsToManyGetAssociationsMixin<IssueLink[]>;
+  // declare getProject: BelongsToGetAssociationMixin<Project>;
+  // declare getIssueStatus: BelongsToGetAssociationMixin<IssueStatus>; // TODO: Write this association
+  // declare getAssignee: BelongsToGetAssociationMixin<User>;
+  // declare getReporter: BelongsToGetAssociationMixin<User>;
+  // declare getIssueComments: HasManyGetAssociationsMixin<IssueComment[]>;
+  // declare getIssueBoards: HasManyGetAssociationsMixin<IssueBoard[]>;
+  // declare getLinkedToIssues: BelongsToManyGetAssociationsMixin<IssueLink[]>;
+  // declare getLinkedByIssues: BelongsToManyGetAssociationsMixin<IssueLink[]>;
 
   declare static associate: Associate;
 

@@ -16,7 +16,7 @@ const fetch = async ({ documentName }: fetchPayload): Promise<Uint8Array | null>
       let issue = null;
 
       try {
-        issue = await db.sequelize.models.Issue.findOne({
+        issue = await db.Issue.findOne({
           where: {
             id: entityId,
           },
@@ -35,7 +35,7 @@ const fetch = async ({ documentName }: fetchPayload): Promise<Uint8Array | null>
       // @ts-ignore
       if (!isFinite(entityId)) return resolve(null);
 
-      const comment = await db.sequelize.models.IssueComment.findOne({
+      const comment = await db.IssueComment.findOne({
         where: {
           id: entityId,
         },
@@ -57,8 +57,9 @@ const store = async ({ documentName, state }: storePayload) => {
   const [entityType, entityId, entityField] = documentName.split('.');
 
   if (entityType === 'issue' && entityField === 'description') {
-    await db.sequelize.models.Issue.update(
+    await db.Issue.update(
       {
+        // @ts-ignore
         descriptionRaw: state,
       },
       {
@@ -70,8 +71,9 @@ const store = async ({ documentName, state }: storePayload) => {
   }
 
   if (entityType === 'issueComment' && entityField === 'comment' && isFinite(Number(entityId))) {
-    await db.sequelize.models.IssueComment.update(
+    await db.IssueComment.update(
       {
+        // @ts-ignore
         commentRaw: state,
       },
       {
@@ -126,7 +128,7 @@ const onAuthenticate = async (data: OnAuthenticatePayload): Promise<OnAuthentica
 
   const externalId = `${provider}__${sub}`;
 
-  const user = <User>await db.sequelize.models.User.findOne({
+  const user = <User>await db.User.findOne({
     where: { externalId },
   });
 

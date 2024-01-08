@@ -1,6 +1,7 @@
 import { mergeResolvers } from '@graphql-tools/merge';
 import { v4 as uuidv4 } from 'uuid';
 
+import { Resolvers } from '../__generated__/resolvers-types.js';
 import { ASSET_PROVIDER, BUCKET_NAME } from '../services/config.js';
 import { minioClient } from '../services/minio-client.js';
 import BoardResolvers from './board/index.js';
@@ -17,7 +18,7 @@ const miscResolvers = {
     createIssueStatus: async (parent, { input }, { db }) => {
       const { projectId, name } = input;
 
-      return await db.sequelize.models.IssueStatuses.create({
+      return await db.IssueStatuses.create({
         projectId: Number(projectId),
         name,
       });
@@ -26,7 +27,7 @@ const miscResolvers = {
     deleteAsset: async (parent, { input }, { db }) => {
       const { assetId } = input;
 
-      const findAsset = await db.sequelize.models.Asset.findByPk(assetId);
+      const findAsset = await db.Asset.findByPk(assetId);
 
       if (!findAsset) {
         throw new Error('Asset not found');
@@ -54,7 +55,7 @@ const miscResolvers = {
 
       await minioClient.putObject(BUCKET_NAME, assetFilename, createReadStream(), metaData);
 
-      return await db.sequelize.models.Asset.create({
+      return await db.Asset.create({
         ownerId: user.id,
         assetType: '',
         assetSubType: '',
@@ -100,7 +101,7 @@ const miscResolvers = {
     //     // TODO: implement s3
     //   }
     //
-    //   const findAsset = await db.sequelize.models.Asset.findOne({
+    //   const findAsset = await db.Asset.findOne({
     //     where: {
     //       ownerId: user.id,
     //       assetType: 'avatar',
@@ -115,7 +116,7 @@ const miscResolvers = {
     //   }
     //
     //   // TODO: decide if we want to await inside or outside... probably inside for now to catch exceptions
-    //   return await db.sequelize.models.Asset.create({
+    //   return await db.Asset.create({
     //     ownerId: user.id,
     //     assetType: 'avatar',
     //     assetSubType: 'image',
@@ -131,7 +132,7 @@ const miscResolvers = {
   },
 };
 
-const resolvers = mergeResolvers([
+const resolvers: Resolvers = mergeResolvers([
   miscResolvers,
   IssueResolvers,
   IssueCommentResolvers,

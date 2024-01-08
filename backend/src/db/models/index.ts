@@ -12,8 +12,8 @@ import IssueLink from './issue-link.js';
 import IssueStatuses from './issue-statuses.js';
 import IssueTag from './issue-tag.js';
 import Issue from './issue.js';
-import ProjectCustomFields from './project-custom-fields.js';
-import ProjectPermissions from './project-permissions.js';
+import ProjectCustomField from './project-custom-field.js';
+import ProjectPermission from './project-permission.js';
 import ProjectTag from './project-tag.js';
 import Project from './project.js';
 import User from './user.js';
@@ -36,8 +36,8 @@ const init = async () => {
   db.IssueTag = IssueTag(db.sequelize);
   db.IssueBoard = IssueBoard(db.sequelize);
   db.IssueLink = IssueLink(db.sequelize);
-  db.ProjectPermissions = ProjectPermissions(db.sequelize);
-  db.ProjectCustomFields = ProjectCustomFields(db.sequelize);
+  db.ProjectPermission = ProjectPermission(db.sequelize);
+  db.ProjectCustomField = ProjectCustomField(db.sequelize);
 
   Object.values(db).forEach((model: any) => {
     if (model.associate) {

@@ -37,8 +37,8 @@ export type Db = {
   IssueTag?: typeof IssueTag;
   IssueBoard?: typeof IssueBoard;
   IssueLink?: typeof IssueLink;
-  ProjectPermissions?: typeof ProjectPermission;
-  ProjectCustomFields?: typeof ProjectCustomField;
+  ProjectPermission?: typeof ProjectPermission;
+  ProjectCustomField?: typeof ProjectCustomField;
   init?: () => Promise<void>;
 };
 

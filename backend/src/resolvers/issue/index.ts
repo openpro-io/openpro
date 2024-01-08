@@ -30,13 +30,14 @@ const resolvers = {
       if (searchOperator === 'and') queryOperator = Op.and;
       if (searchOperator === 'or') queryOperator = Op.or;
 
-      return db.sequelize.models.Issue.findAll({
+      return db.Issue.findAll({
         include: [
           {
-            model: db.sequelize.models.Project,
+            model: db.Project,
+            as: 'project',
           },
           {
-            model: db.sequelize.models.Issue,
+            model: db.Issue,
             as: 'linkedToIssues',
             through: {
               attributes: [
@@ -47,7 +48,7 @@ const resolvers = {
             },
           },
           {
-            model: db.sequelize.models.Issue,
+            model: db.Issue,
             as: 'linkedByIssues',
             through: {
               attributes: [
@@ -64,10 +65,10 @@ const resolvers = {
       });
     },
     issue: (parent, { input: { id } }, { db }) => {
-      return db.sequelize.models.Issue.findByPk(id, {
+      return db.Issue.findByPk(id, {
         include: [
           {
-            model: db.sequelize.models.Issue,
+            model: db.Issue,
             as: 'linkedToIssues',
             through: {
               attributes: [
@@ -78,7 +79,7 @@ const resolvers = {
             },
           },
           {
-            model: db.sequelize.models.Issue,
+            model: db.Issue,
             as: 'linkedByIssues',
             through: {
               attributes: [
@@ -94,7 +95,7 @@ const resolvers = {
   },
   Mutation: {
     deleteIssueLink: async (parent, { input: { issueId, linkType, linkedIssueId } }, { db }) => {
-      await db.sequelize.models.IssueLink.destroy({
+      await db.IssueLink.destroy({
         where: {
           issueId,
           linkType,
@@ -105,14 +106,14 @@ const resolvers = {
       return { message: 'success', status: 'success' };
     },
     createIssueLink: async (parent, { input: { issueId, linkType, linkedIssueId } }, { db }) => {
-      const issue = await db.sequelize.models.Issue.findByPk(issueId);
-      const linkedIssue = await db.sequelize.models.Issue.findByPk(linkedIssueId);
+      const issue = await db.Issue.findByPk(issueId);
+      const linkedIssue = await db.Issue.findByPk(linkedIssueId);
 
       if (!issue || !linkedIssue) {
         throw new Error('Issue not found');
       }
 
-      await db.sequelize.models.IssueLink.create({
+      await db.IssueLink.create({
         issueId,
         linkType,
         linkedIssueId,
@@ -135,7 +136,7 @@ const resolvers = {
         customFieldValue,
       } = input;
 
-      const issue = await db.sequelize.models.Issue.findByPk(id);
+      const issue = await db.Issue.findByPk(id);
 
       if (issueStatusId) issue.issueStatusId = issueStatusId;
       if (assigneeId) issue.assigneeId = Number(assigneeId);
@@ -144,8 +145,8 @@ const resolvers = {
       if (description) issue.description = description;
       if (priority) issue.priority = Number(priority);
       if (tagIds) {
-        await db.sequelize.models.IssueTag.destroy({ where: { issueId: id } });
-        await db.sequelize.models.IssueTag.bulkCreate(
+        await db.IssueTag.destroy({ where: { issueId: id } });
+        await db.IssueTag.bulkCreate(
           tagIds.map((tagId) => ({
             issueId: Number(id),
             projectTagId: Number(tagId),
@@ -159,7 +160,7 @@ const resolvers = {
       if (issue.reporterId === 0) issue.reporterId = null;
 
       if (customFieldId && customFieldValue) {
-        const customField = await db.sequelize.models.ProjectCustomField.findByPk(Number(customFieldId));
+        const customField = await db.ProjectCustomField.findByPk(Number(customFieldId));
         if (!customField) throw new Error('Custom field not found');
 
         let valueCasted = customFieldValue;
@@ -182,7 +183,7 @@ const resolvers = {
 
       await issue.save();
 
-      const issueStatus = await db.sequelize.models.IssueStatuses.findByPk(issueStatusId ?? issue.issueStatusId);
+      const issueStatus = await db.IssueStatuses.findByPk(issueStatusId ?? issue.issueStatusId);
 
       const returnData = { ...issue.toJSON(), status: issueStatus.toJSON() };
 
@@ -199,7 +200,7 @@ const resolvers = {
 
       // TODO: create issue status as unassigned option
 
-      const issue = await db.sequelize.models.Issue.create({
+      const issue = await db.Issue.create({
         projectId,
         issueStatusId,
         assigneeId,
@@ -210,13 +211,13 @@ const resolvers = {
       });
 
       if (typeof boardId !== 'undefined') {
-        await db.sequelize.models.IssueBoard.create({
+        await db.IssueBoard.create({
           boardId,
           issueId: issue.id,
         });
       }
 
-      const issueStatus = await db.sequelize.models.IssueStatuses.findByPk(issueStatusId);
+      const issueStatus = await db.IssueStatuses.findByPk(issueStatusId);
 
       return { ...issue.toJSON(), status: issueStatus.toJSON() };
     },
@@ -224,7 +225,7 @@ const resolvers = {
       const { id } = input;
 
       await db.sequelize.transaction(async (t) => {
-        await db.sequelize.models.Issue.destroy({
+        await db.Issue.destroy({
           where: {
             id,
           },
@@ -232,7 +233,7 @@ const resolvers = {
         });
 
         // TODO: not needed due to cascade
-        await db.sequelize.models.IssueComment.destroy({ where: { issueId: id }, transaction: t });
+        await db.IssueComment.destroy({ where: { issueId: id }, transaction: t });
       });
 
       return { message: 'issue deleted', status: 'success' };
@@ -240,7 +241,7 @@ const resolvers = {
   },
   CustomFieldValue: {
     customField: async (parent, args, { db }) => {
-      return db.sequelize.models.ProjectCustomField.findByPk(parent.customFieldId);
+      return db.ProjectCustomField.findByPk(parent.customFieldId);
     },
   },
   Issue: {
@@ -259,26 +260,23 @@ const resolvers = {
       ];
     },
     tags: async (parent, args, { db }) => {
-      const issueTags = await db.sequelize.models.IssueTag.findAll({ where: { issueId: parent.id } });
+      const issueTags = await db.IssueTag.findAll({ where: { issueId: parent.id } });
 
-      return await db.sequelize.models.ProjectTag.findAll({
+      return await db.ProjectTag.findAll({
         where: { id: issueTags.map((issueTag) => issueTag.projectTagId) },
       });
     },
     comments: (parent, args, { db }) => {
-      return db.sequelize.models.IssueComment.findAll(
-        { where: { issueId: parent.id } },
-        { order: [['createdAt', 'DESC']] }
-      );
+      return db.IssueComment.findAll({ where: { issueId: parent.id } }, { order: [['createdAt', 'DESC']] });
     },
     status: (parent, args, { db }) => {
-      return db.sequelize.models.IssueStatuses.findByPk(parent.issueStatusId);
+      return db.IssueStatuses.findByPk(parent.issueStatusId);
     },
     reporter: (parent, args, { db }) => {
-      return db.sequelize.models.User.findByPk(parent.reporterId);
+      return db.User.findByPk(parent.reporterId);
     },
     assignee: (parent, args, { db }) => {
-      return db.sequelize.models.User.findByPk(parent.assigneeId);
+      return db.User.findByPk(parent.assigneeId);
     },
     project: (parent) => parent.Project,
   },
