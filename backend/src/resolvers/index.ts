@@ -64,67 +64,6 @@ const miscResolvers = {
         assetFilename: assetFilename,
       });
     },
-
-    // uploadAvatar: async (parent, { input }, { db, user }) => {
-    //   const { data } = input;
-    //   let finalAssetPath = '';
-    //
-    //   // Split the string on comma
-    //   const parts = data.split(',');
-    //
-    //   // this gets the image extension of the uploaded source image
-    //   // const imageExtension = parts[0].split(',')[0].split(';')[0].split(':')[1].replace('image/', '');
-    //
-    //   const base64Data = new Buffer(parts[1], 'base64');
-    //
-    //   let image = await sharp(base64Data, {
-    //     height: 32,
-    //     width: 32,
-    //   });
-    //
-    //   // TODO: lets find more dynamic way to handle this
-    //   if (ASSET_PROVIDER === 'filesystem') {
-    //     finalAssetPath = `${ASSET_PATH}/avatars/user-${user.id}.webp`;
-    //
-    //     // Get the directory name from the file path
-    //     const finalAssetDirectory = path.dirname(finalAssetPath);
-    //
-    //     try {
-    //       await fs.access(finalAssetDirectory);
-    //     } catch (error) {
-    //       await fs.mkdir(finalAssetDirectory, { recursive: true });
-    //     }
-    //
-    //     await image.webp().resize({ width: 128, height: 128 }).toFile(finalAssetPath);
-    //   } else if (ASSET_PROVIDER === 's3') {
-    //     finalAssetPath = `${ASSET_PATH}/avatars/user-${user.id}.webp`;
-    //     // TODO: implement s3
-    //   }
-    //
-    //   const findAsset = await db.Asset.findOne({
-    //     where: {
-    //       ownerId: user.id,
-    //       assetType: 'avatar',
-    //       assetSubType: 'image',
-    //     },
-    //   });
-    //
-    //   if (findAsset) {
-    //     findAsset.updatedAt = new Date();
-    //     await findAsset.save();
-    //     return findAsset;
-    //   }
-    //
-    //   // TODO: decide if we want to await inside or outside... probably inside for now to catch exceptions
-    //   return await db.Asset.create({
-    //     ownerId: user.id,
-    //     assetType: 'avatar',
-    //     assetSubType: 'image',
-    //     assetPath: finalAssetPath,
-    //     assetProvider: ASSET_PROVIDER,
-    //     assetFilename: path.basename(finalAssetPath),
-    //   });
-    // },
   },
 
   Query: {
