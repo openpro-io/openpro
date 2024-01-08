@@ -129,6 +129,9 @@ devDependencies:
   '@types/node':
     specifier: ^20.10.6
     version: 20.10.6
+  '@types/uuid':
+    specifier: ^9.0.7
+    version: 9.0.7
   '@types/ws':
     specifier: ^8.5.10
     version: 8.5.10
@@ -2520,6 +2523,10 @@ packages:
       '@types/mime': 3.0.3
       '@types/node': 20.10.6
     dev: false
+
+  /@types/uuid@9.0.7:
+    resolution: {integrity: sha512-WUtIVRUZ9i5dYXefDEAI7sh9/O7jGvHg7Df/5O/gtH3Yabe5odI3UWopVR1qbPXQtvOxWu3mM4XxlYeZtMWF4g==}
+    dev: true
 
   /@types/validator@13.11.5:
     resolution: {integrity: sha512-xW4qsT4UIYILu+7ZrBnfQdBYniZrMLYYK3wN9M/NdeIHgBN5pZI2/8Q7UfdWIcr5RLJv/OGENsx91JIpUUoC7Q==}
