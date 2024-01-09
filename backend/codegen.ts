@@ -6,6 +6,9 @@ const config: CodegenConfig = {
   generates: {
     'src/__generated__/resolvers-types.ts': {
       plugins: ['typescript', 'typescript-resolvers'],
+      config: {
+        allowParentTypeOverride: true,
+      },
     },
   },
   hooks: {
@@ -15,7 +18,7 @@ const config: CodegenConfig = {
   },
   config: {
     useIndexSignature: true,
-    contextType: '../server/apollo.js#type ApolloContext',
+    contextType: '../server/apollo.js#ApolloContext',
     mappers: {
       Project: '../db/models/types.js#Project as ProjectModel',
       ProjectTag: '../db/models/types.js#ProjectTag as ProjectTagModel',

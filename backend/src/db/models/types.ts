@@ -262,8 +262,8 @@ export class IssueBoard extends Model<
 }
 
 export class Issue extends Model<
-  InferAttributes<Issue, { omit: 'project' }>,
-  InferCreationAttributes<Issue, { omit: 'project' }>
+  InferAttributes<Issue, { omit: 'project' | 'linkedToIssues' | 'linkedByIssues' | 'IssueLink' }>,
+  InferCreationAttributes<Issue, { omit: 'project' | 'linkedToIssues' | 'linkedByIssues' | 'IssueLink' }>
 > {
   // id can be undefined during creation when using `autoIncrement`
   declare id: CreationOptional<number>;
@@ -294,9 +294,14 @@ export class Issue extends Model<
   // TODO: Add the other relationships
 
   declare project?: NonAttribute<Project>; // Note this is optional since it's only populated when explicitly requested in code
+  declare linkedToIssues?: NonAttribute<Issue[]>;
+  declare linkedByIssues?: NonAttribute<Issue[]>;
+  declare IssueLink?: NonAttribute<IssueLink>;
 
   declare static associations: {
     project: Association<Issue, Project>;
+    linkedToIssues: Association<Issue, Issue>;
+    linkedByIssues: Association<Issue, Issue>;
   };
 
   // timestamps!

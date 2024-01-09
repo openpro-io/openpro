@@ -764,10 +764,7 @@ export type ResolversParentTypes = ResolversObject<{
   ViewStateItemInput: ViewStateItemInput;
 }>;
 
-export type AssetResolvers<
-  ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['Asset'] = ResolversParentTypes['Asset'],
-> = ResolversObject<{
+export type AssetResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['Asset']> = ResolversObject<{
   assetPath?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   assetSubType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   assetType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -778,10 +775,7 @@ export type AssetResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type BoardResolvers<
-  ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['Board'] = ResolversParentTypes['Board'],
-> = ResolversObject<{
+export type BoardResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['Board']> = ResolversObject<{
   backlogEnabled?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   columns?: Resolver<Maybe<Array<Maybe<ResolversTypes['Column']>>>, ParentType, ContextType>;
   containerOrder?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -800,7 +794,7 @@ export type BoardResolvers<
 
 export type ColumnResolvers<
   ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['Column'] = ResolversParentTypes['Column'],
+  ParentType = ResolversParentTypes['Column'],
 > = ResolversObject<{
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   issues?: Resolver<Maybe<Array<Maybe<ResolversTypes['Issue']>>>, ParentType, ContextType>;
@@ -810,7 +804,7 @@ export type ColumnResolvers<
 
 export type CustomFieldResolvers<
   ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['CustomField'] = ResolversParentTypes['CustomField'],
+  ParentType = ResolversParentTypes['CustomField'],
 > = ResolversObject<{
   createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -823,7 +817,7 @@ export type CustomFieldResolvers<
 
 export type CustomFieldValueResolvers<
   ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['CustomFieldValue'] = ResolversParentTypes['CustomFieldValue'],
+  ParentType = ResolversParentTypes['CustomFieldValue'],
 > = ResolversObject<{
   createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   customField?: Resolver<Maybe<ResolversTypes['CustomField']>, ParentType, ContextType>;
@@ -834,20 +828,14 @@ export type CustomFieldValueResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type FileResolvers<
-  ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['File'] = ResolversParentTypes['File'],
-> = ResolversObject<{
+export type FileResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['File']> = ResolversObject<{
   encoding?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   filename?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   mimetype?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type IssueResolvers<
-  ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['Issue'] = ResolversParentTypes['Issue'],
-> = ResolversObject<{
+export type IssueResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['Issue']> = ResolversObject<{
   archived?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   assignee?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   comments?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueComment']>>>, ParentType, ContextType>;
@@ -871,7 +859,7 @@ export type IssueResolvers<
 
 export type IssueCommentResolvers<
   ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['IssueComment'] = ResolversParentTypes['IssueComment'],
+  ParentType = ResolversParentTypes['IssueComment'],
 > = ResolversObject<{
   comment?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -884,7 +872,7 @@ export type IssueCommentResolvers<
 
 export type IssueStatusResolvers<
   ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['IssueStatus'] = ResolversParentTypes['IssueStatus'],
+  ParentType = ResolversParentTypes['IssueStatus'],
 > = ResolversObject<{
   createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -896,7 +884,7 @@ export type IssueStatusResolvers<
 
 export type MessageAndStatusResolvers<
   ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['MessageAndStatus'] = ResolversParentTypes['MessageAndStatus'],
+  ParentType = ResolversParentTypes['MessageAndStatus'],
 > = ResolversObject<{
   message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -905,7 +893,7 @@ export type MessageAndStatusResolvers<
 
 export type MutationResolvers<
   ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation'],
+  ParentType = ResolversParentTypes['Mutation'],
 > = ResolversObject<{
   addUserToProject?: Resolver<
     Maybe<ResolversTypes['MessageAndStatus']>,
@@ -1023,7 +1011,7 @@ export type MutationResolvers<
 
 export type ProjectResolvers<
   ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['Project'] = ResolversParentTypes['Project'],
+  ParentType = ResolversParentTypes['Project'],
 > = ResolversObject<{
   boards?: Resolver<Maybe<Array<Maybe<ResolversTypes['Board']>>>, ParentType, ContextType>;
   createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1046,7 +1034,7 @@ export type ProjectResolvers<
 
 export type ProjectTagResolvers<
   ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['ProjectTag'] = ResolversParentTypes['ProjectTag'],
+  ParentType = ResolversParentTypes['ProjectTag'],
 > = ResolversObject<{
   createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -1056,10 +1044,7 @@ export type ProjectTagResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type QueryResolvers<
-  ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query'],
-> = ResolversObject<{
+export type QueryResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['Query']> = ResolversObject<{
   board?: Resolver<Maybe<ResolversTypes['Board']>, ParentType, ContextType, RequireFields<QueryBoardArgs, 'input'>>;
   boards?: Resolver<Maybe<Array<Maybe<ResolversTypes['Board']>>>, ParentType, ContextType>;
   createProjectValidation?: Resolver<
@@ -1093,10 +1078,7 @@ export interface UploadScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
   name: 'Upload';
 }
 
-export type UserResolvers<
-  ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User'],
-> = ResolversObject<{
+export type UserResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['User']> = ResolversObject<{
   avatarUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   externalId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1109,7 +1091,7 @@ export type UserResolvers<
 
 export type ViewStateResolvers<
   ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['ViewState'] = ResolversParentTypes['ViewState'],
+  ParentType = ResolversParentTypes['ViewState'],
 > = ResolversObject<{
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   items?: Resolver<Maybe<Array<Maybe<ResolversTypes['ViewStateItem']>>>, ParentType, ContextType>;
@@ -1119,7 +1101,7 @@ export type ViewStateResolvers<
 
 export type ViewStateIssueStatusResolvers<
   ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['ViewStateIssueStatus'] = ResolversParentTypes['ViewStateIssueStatus'],
+  ParentType = ResolversParentTypes['ViewStateIssueStatus'],
 > = ResolversObject<{
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1129,7 +1111,7 @@ export type ViewStateIssueStatusResolvers<
 
 export type ViewStateItemResolvers<
   ContextType = ApolloContext,
-  ParentType extends ResolversParentTypes['ViewStateItem'] = ResolversParentTypes['ViewStateItem'],
+  ParentType = ResolversParentTypes['ViewStateItem'],
 > = ResolversObject<{
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   status?: Resolver<Maybe<ResolversTypes['ViewStateIssueStatus']>, ParentType, ContextType>;

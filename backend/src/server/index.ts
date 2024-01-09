@@ -29,7 +29,7 @@ fastify.server.headersTimeout = 65 * 1000;
 
 const corsHandler: OriginFunction = (origin, cb) => {
   // undefined is for SSR to backend server requests
-  if (CORS_ORIGIN.split(',').includes(origin) || origin === undefined) {
+  if ((CORS_ORIGIN && CORS_ORIGIN.split(',').includes(origin)) || origin === undefined) {
     cb(null, true);
     return;
   }

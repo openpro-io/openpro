@@ -46,7 +46,11 @@ const addUserToRequest = async (request: CustomFastifyRequest, reply: FastifyRep
 
     // TODO: We can inject from DB here the whitelist domains and emails in addition to ENV vars
 
-    if (ALLOW_LOGIN_EMAILS_LIST.length > 0 && !ALLOW_LOGIN_EMAILS_LIST.includes(data.email)) {
+    if (
+      ALLOW_LOGIN_EMAILS_LIST &&
+      ALLOW_LOGIN_EMAILS_LIST.length > 0 &&
+      !ALLOW_LOGIN_EMAILS_LIST.includes(data.email)
+    ) {
       throw new GraphQLError('Email is not allowed to login', {
         extensions: {
           code: 'UNAUTHENTICATED',
@@ -56,6 +60,7 @@ const addUserToRequest = async (request: CustomFastifyRequest, reply: FastifyRep
     }
 
     if (
+      ALLOW_LOGIN_DOMAINS_LIST &&
       ALLOW_LOGIN_DOMAINS_LIST.length > 0 &&
       !ALLOW_LOGIN_DOMAINS_LIST.includes(data.email.split('@')[1].toLowerCase())
     ) {
