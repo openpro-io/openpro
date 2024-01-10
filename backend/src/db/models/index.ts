@@ -1,5 +1,3 @@
-'use strict';
-
 import { Sequelize } from 'sequelize';
 
 import { ENABLE_SEQUELIZE_LOGGING, SQL_URI } from '../../services/config.js';

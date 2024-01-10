@@ -1,5 +1,10 @@
 import { ApolloServer } from '@apollo/server';
-import { type ApolloFastifyContextFunction, fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
+import {
+  type ApolloFastifyContextFunction,
+  fastifyApolloDrainPlugin,
+  fastifyApolloHandler,
+} from '@as-integrations/fastify';
+import { EXPECTED_OPTIONS_KEY, createContext } from 'dataloader-sequelize';
 import type { FastifyInstance } from 'fastify';
 import { GraphQLError } from 'graphql';
 
@@ -9,10 +14,17 @@ import resolvers from '../resolvers/index.js';
 import typeDefs from '../type-defs.js';
 import type { CustomFastifyRequest } from '../typings.js';
 
+type DataloaderCreateContext = {
+  loaders: any;
+  prime: (data: any) => void;
+};
+
 export interface ApolloContext {
   websocketServer: any;
   db: typeof db;
   user: User | null;
+  dataLoaderContext: DataloaderCreateContext;
+  EXPECTED_OPTIONS_KEY: typeof EXPECTED_OPTIONS_KEY;
 }
 
 export const apolloHandler = async (fastify: FastifyInstance) => {
@@ -31,14 +43,19 @@ export const apolloHandler = async (fastify: FastifyInstance) => {
   const myContextFunction: ApolloFastifyContextFunction<ApolloContext> = async (request: CustomFastifyRequest) => {
     // get the user token from the headers
     let user: User | null = request?.user;
+    const dataLoaderContext = createContext(db.sequelize);
+
+    const myContextFunctionData = {
+      db,
+      dataLoaderContext,
+      EXPECTED_OPTIONS_KEY,
+      user,
+      websocketServer: fastify?.websocketServer,
+    };
 
     // Allow if introspection query only
     if (!Array.isArray(request.body) && request?.body?.query?.includes('IntrospectionQuery')) {
-      return {
-        db,
-        user,
-        websocketServer: fastify?.websocketServer,
-      };
+      return myContextFunctionData;
     }
 
     // optionally block the user
@@ -54,11 +71,7 @@ export const apolloHandler = async (fastify: FastifyInstance) => {
       });
     }
 
-    return {
-      websocketServer: fastify?.websocketServer,
-      db,
-      user,
-    };
+    return myContextFunctionData;
   };
 
   fastify.post(

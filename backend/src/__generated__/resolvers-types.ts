@@ -1,15 +1,5 @@
 import { type GraphQLResolveInfo, GraphQLScalarType, type GraphQLScalarTypeConfig } from 'graphql';
 
-import {
-  Board as BoardModel,
-  IssueComment as IssueCommentModel,
-  Issue as IssueModel,
-  IssueStatus as IssueStatusModel,
-  ProjectCustomField as ProjectCustomFieldModel,
-  Project as ProjectModel,
-  ProjectTag as ProjectTagModel,
-  User as UserModel,
-} from '../db/models/types.js';
 import { type ApolloContext } from '../server/apollo.js';
 
 export type Maybe<T> = T | null;
@@ -19,7 +9,6 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
@@ -28,6 +17,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
+  Date: { input: any; output: any };
   Upload: { input: any; output: any };
 };
 
@@ -41,10 +31,10 @@ export type Asset = {
   assetPath?: Maybe<Scalars['String']['output']>;
   assetSubType?: Maybe<Scalars['String']['output']>;
   assetType?: Maybe<Scalars['String']['output']>;
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['Date']['output']>;
   id: Scalars['ID']['output'];
   ownerId?: Maybe<Scalars['String']['output']>;
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['Date']['output']>;
 };
 
 export type AssignAssetAsAvatarInput = {
@@ -56,7 +46,7 @@ export type Board = {
   backlogEnabled?: Maybe<Scalars['Boolean']['output']>;
   columns?: Maybe<Array<Maybe<Column>>>;
   containerOrder?: Maybe<Scalars['String']['output']>;
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['Date']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
   issues?: Maybe<Array<Maybe<Issue>>>;
   name?: Maybe<Scalars['String']['output']>;
@@ -64,7 +54,7 @@ export type Board = {
   settings?: Maybe<Scalars['String']['output']>;
   status?: Maybe<Scalars['String']['output']>;
   style?: Maybe<Scalars['String']['output']>;
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['Date']['output']>;
   viewState?: Maybe<Array<Maybe<ViewState>>>;
 };
 
@@ -147,21 +137,21 @@ export type CreateProjectValidationInput = {
 
 export type CustomField = {
   __typename?: 'CustomField';
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['Date']['output']>;
   fieldName: Scalars['String']['output'];
   fieldType: Custom_Field_Type;
   id: Scalars['ID']['output'];
   projectId: Scalars['String']['output'];
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['Date']['output']>;
 };
 
 export type CustomFieldValue = {
   __typename?: 'CustomFieldValue';
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['Date']['output']>;
   customField?: Maybe<CustomField>;
   customFieldId: Scalars['String']['output'];
   id: Scalars['ID']['output'];
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['Date']['output']>;
   value: Scalars['String']['output'];
 };
 
@@ -203,7 +193,7 @@ export type Issue = {
   archived?: Maybe<Scalars['Boolean']['output']>;
   assignee?: Maybe<User>;
   comments?: Maybe<Array<Maybe<IssueComment>>>;
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['Date']['output']>;
   customFields?: Maybe<Array<Maybe<CustomFieldValue>>>;
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -217,26 +207,26 @@ export type Issue = {
   status?: Maybe<IssueStatus>;
   tags?: Maybe<Array<Maybe<ProjectTag>>>;
   title: Scalars['String']['output'];
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['Date']['output']>;
 };
 
 export type IssueComment = {
   __typename?: 'IssueComment';
   comment: Scalars['String']['output'];
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['Date']['output']>;
   id: Scalars['ID']['output'];
   issueId: Scalars['String']['output'];
   reporter: User;
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['Date']['output']>;
 };
 
 export type IssueStatus = {
   __typename?: 'IssueStatus';
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['Date']['output']>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   projectId?: Maybe<Scalars['String']['output']>;
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['Date']['output']>;
 };
 
 export type MessageAndStatus = {
@@ -367,7 +357,7 @@ export enum Order {
 export type Project = {
   __typename?: 'Project';
   boards?: Maybe<Array<Maybe<Board>>>;
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['Date']['output']>;
   customFields?: Maybe<Array<Maybe<CustomField>>>;
   description?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
@@ -379,7 +369,7 @@ export type Project = {
   name?: Maybe<Scalars['String']['output']>;
   status?: Maybe<Scalars['String']['output']>;
   tags?: Maybe<Array<Maybe<ProjectTag>>>;
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['Date']['output']>;
   users?: Maybe<Array<Maybe<User>>>;
   visibility?: Maybe<ProjectVisibility>;
 };
@@ -390,11 +380,11 @@ export type ProjectIssuesArgs = {
 
 export type ProjectTag = {
   __typename?: 'ProjectTag';
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['Date']['output']>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   projectId: Scalars['String']['output'];
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['Date']['output']>;
 };
 
 export enum ProjectVisibility {
@@ -642,136 +632,134 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
-  AddUserToProjectInput: AddUserToProjectInput;
-  Asset: ResolverTypeWrapper<Asset>;
-  AssignAssetAsAvatarInput: AssignAssetAsAvatarInput;
-  Board: ResolverTypeWrapper<BoardModel>;
-  BoardStyle: BoardStyle;
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
-  CUSTOM_FIELD_TYPE: Custom_Field_Type;
-  Column: ResolverTypeWrapper<Omit<Column, 'issues'> & { issues?: Maybe<Array<Maybe<ResolversTypes['Issue']>>> }>;
-  CreateBoardInput: CreateBoardInput;
-  CreateIssueCommentInput: CreateIssueCommentInput;
-  CreateIssueInput: CreateIssueInput;
-  CreateIssueLinkInput: CreateIssueLinkInput;
-  CreateIssueStatusInput: CreateIssueStatusInput;
-  CreateProjectCustomFieldInput: CreateProjectCustomFieldInput;
-  CreateProjectInput: CreateProjectInput;
-  CreateProjectTagInput: CreateProjectTagInput;
-  CreateProjectValidationInput: CreateProjectValidationInput;
-  CustomField: ResolverTypeWrapper<ProjectCustomFieldModel>;
-  CustomFieldValue: ResolverTypeWrapper<
-    Omit<CustomFieldValue, 'customField'> & { customField?: Maybe<ResolversTypes['CustomField']> }
-  >;
-  DeleteAssetInput: DeleteAssetInput;
-  DeleteIssueCommentInput: DeleteIssueCommentInput;
-  DeleteIssueInput: DeleteIssueInput;
-  DeleteIssueLinkInput: DeleteIssueLinkInput;
-  DeleteProjectCustomFieldInput: DeleteProjectCustomFieldInput;
-  DeleteProjectTagInput: DeleteProjectTagInput;
-  File: ResolverTypeWrapper<File>;
-  ID: ResolverTypeWrapper<Scalars['ID']['output']>;
-  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
-  Issue: ResolverTypeWrapper<IssueModel>;
-  IssueComment: ResolverTypeWrapper<IssueCommentModel>;
-  IssueStatus: ResolverTypeWrapper<IssueStatusModel>;
-  MessageAndStatus: ResolverTypeWrapper<MessageAndStatus>;
+  AddUserToProjectInput: ResolverTypeWrapper<Partial<AddUserToProjectInput>>;
+  Asset: ResolverTypeWrapper<Partial<Asset>>;
+  AssignAssetAsAvatarInput: ResolverTypeWrapper<Partial<AssignAssetAsAvatarInput>>;
+  Board: ResolverTypeWrapper<Partial<Board>>;
+  BoardStyle: ResolverTypeWrapper<Partial<BoardStyle>>;
+  Boolean: ResolverTypeWrapper<Partial<Scalars['Boolean']['output']>>;
+  CUSTOM_FIELD_TYPE: ResolverTypeWrapper<Partial<Custom_Field_Type>>;
+  Column: ResolverTypeWrapper<Partial<Column>>;
+  CreateBoardInput: ResolverTypeWrapper<Partial<CreateBoardInput>>;
+  CreateIssueCommentInput: ResolverTypeWrapper<Partial<CreateIssueCommentInput>>;
+  CreateIssueInput: ResolverTypeWrapper<Partial<CreateIssueInput>>;
+  CreateIssueLinkInput: ResolverTypeWrapper<Partial<CreateIssueLinkInput>>;
+  CreateIssueStatusInput: ResolverTypeWrapper<Partial<CreateIssueStatusInput>>;
+  CreateProjectCustomFieldInput: ResolverTypeWrapper<Partial<CreateProjectCustomFieldInput>>;
+  CreateProjectInput: ResolverTypeWrapper<Partial<CreateProjectInput>>;
+  CreateProjectTagInput: ResolverTypeWrapper<Partial<CreateProjectTagInput>>;
+  CreateProjectValidationInput: ResolverTypeWrapper<Partial<CreateProjectValidationInput>>;
+  CustomField: ResolverTypeWrapper<Partial<CustomField>>;
+  CustomFieldValue: ResolverTypeWrapper<Partial<CustomFieldValue>>;
+  Date: ResolverTypeWrapper<Partial<Scalars['Date']['output']>>;
+  DeleteAssetInput: ResolverTypeWrapper<Partial<DeleteAssetInput>>;
+  DeleteIssueCommentInput: ResolverTypeWrapper<Partial<DeleteIssueCommentInput>>;
+  DeleteIssueInput: ResolverTypeWrapper<Partial<DeleteIssueInput>>;
+  DeleteIssueLinkInput: ResolverTypeWrapper<Partial<DeleteIssueLinkInput>>;
+  DeleteProjectCustomFieldInput: ResolverTypeWrapper<Partial<DeleteProjectCustomFieldInput>>;
+  DeleteProjectTagInput: ResolverTypeWrapper<Partial<DeleteProjectTagInput>>;
+  File: ResolverTypeWrapper<Partial<File>>;
+  ID: ResolverTypeWrapper<Partial<Scalars['ID']['output']>>;
+  Int: ResolverTypeWrapper<Partial<Scalars['Int']['output']>>;
+  Issue: ResolverTypeWrapper<Partial<Issue>>;
+  IssueComment: ResolverTypeWrapper<Partial<IssueComment>>;
+  IssueStatus: ResolverTypeWrapper<Partial<IssueStatus>>;
+  MessageAndStatus: ResolverTypeWrapper<Partial<MessageAndStatus>>;
   Mutation: ResolverTypeWrapper<{}>;
-  Order: Order;
-  Project: ResolverTypeWrapper<ProjectModel>;
-  ProjectTag: ResolverTypeWrapper<ProjectTagModel>;
-  ProjectVisibility: ProjectVisibility;
+  Order: ResolverTypeWrapper<Partial<Order>>;
+  Project: ResolverTypeWrapper<Partial<Project>>;
+  ProjectTag: ResolverTypeWrapper<Partial<ProjectTag>>;
+  ProjectVisibility: ResolverTypeWrapper<Partial<ProjectVisibility>>;
   Query: ResolverTypeWrapper<{}>;
-  QueryBoardInput: QueryBoardInput;
-  QueryIssueInput: QueryIssueInput;
-  QueryProjectInput: QueryProjectInput;
-  QueryProjectTagsInput: QueryProjectTagsInput;
-  RemoveUserFromProjectInput: RemoveUserFromProjectInput;
-  SortBy: SortBy;
-  String: ResolverTypeWrapper<Scalars['String']['output']>;
-  UpdateBoardInput: UpdateBoardInput;
-  UpdateIssueCommentInput: UpdateIssueCommentInput;
-  UpdateIssueInput: UpdateIssueInput;
-  UpdateMeInput: UpdateMeInput;
-  Upload: ResolverTypeWrapper<Scalars['Upload']['output']>;
-  UploadAssetInput: UploadAssetInput;
-  User: ResolverTypeWrapper<UserModel>;
-  ViewState: ResolverTypeWrapper<ViewState>;
-  ViewStateInput: ViewStateInput;
-  ViewStateIssueStatus: ResolverTypeWrapper<ViewStateIssueStatus>;
-  ViewStateIssueStatusInput: ViewStateIssueStatusInput;
-  ViewStateItem: ResolverTypeWrapper<ViewStateItem>;
-  ViewStateItemInput: ViewStateItemInput;
+  QueryBoardInput: ResolverTypeWrapper<Partial<QueryBoardInput>>;
+  QueryIssueInput: ResolverTypeWrapper<Partial<QueryIssueInput>>;
+  QueryProjectInput: ResolverTypeWrapper<Partial<QueryProjectInput>>;
+  QueryProjectTagsInput: ResolverTypeWrapper<Partial<QueryProjectTagsInput>>;
+  RemoveUserFromProjectInput: ResolverTypeWrapper<Partial<RemoveUserFromProjectInput>>;
+  SortBy: ResolverTypeWrapper<Partial<SortBy>>;
+  String: ResolverTypeWrapper<Partial<Scalars['String']['output']>>;
+  UpdateBoardInput: ResolverTypeWrapper<Partial<UpdateBoardInput>>;
+  UpdateIssueCommentInput: ResolverTypeWrapper<Partial<UpdateIssueCommentInput>>;
+  UpdateIssueInput: ResolverTypeWrapper<Partial<UpdateIssueInput>>;
+  UpdateMeInput: ResolverTypeWrapper<Partial<UpdateMeInput>>;
+  Upload: ResolverTypeWrapper<Partial<Scalars['Upload']['output']>>;
+  UploadAssetInput: ResolverTypeWrapper<Partial<UploadAssetInput>>;
+  User: ResolverTypeWrapper<Partial<User>>;
+  ViewState: ResolverTypeWrapper<Partial<ViewState>>;
+  ViewStateInput: ResolverTypeWrapper<Partial<ViewStateInput>>;
+  ViewStateIssueStatus: ResolverTypeWrapper<Partial<ViewStateIssueStatus>>;
+  ViewStateIssueStatusInput: ResolverTypeWrapper<Partial<ViewStateIssueStatusInput>>;
+  ViewStateItem: ResolverTypeWrapper<Partial<ViewStateItem>>;
+  ViewStateItemInput: ResolverTypeWrapper<Partial<ViewStateItemInput>>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
-  AddUserToProjectInput: AddUserToProjectInput;
-  Asset: Asset;
-  AssignAssetAsAvatarInput: AssignAssetAsAvatarInput;
-  Board: BoardModel;
-  Boolean: Scalars['Boolean']['output'];
-  Column: Omit<Column, 'issues'> & { issues?: Maybe<Array<Maybe<ResolversParentTypes['Issue']>>> };
-  CreateBoardInput: CreateBoardInput;
-  CreateIssueCommentInput: CreateIssueCommentInput;
-  CreateIssueInput: CreateIssueInput;
-  CreateIssueLinkInput: CreateIssueLinkInput;
-  CreateIssueStatusInput: CreateIssueStatusInput;
-  CreateProjectCustomFieldInput: CreateProjectCustomFieldInput;
-  CreateProjectInput: CreateProjectInput;
-  CreateProjectTagInput: CreateProjectTagInput;
-  CreateProjectValidationInput: CreateProjectValidationInput;
-  CustomField: ProjectCustomFieldModel;
-  CustomFieldValue: Omit<CustomFieldValue, 'customField'> & {
-    customField?: Maybe<ResolversParentTypes['CustomField']>;
-  };
-  DeleteAssetInput: DeleteAssetInput;
-  DeleteIssueCommentInput: DeleteIssueCommentInput;
-  DeleteIssueInput: DeleteIssueInput;
-  DeleteIssueLinkInput: DeleteIssueLinkInput;
-  DeleteProjectCustomFieldInput: DeleteProjectCustomFieldInput;
-  DeleteProjectTagInput: DeleteProjectTagInput;
-  File: File;
-  ID: Scalars['ID']['output'];
-  Int: Scalars['Int']['output'];
-  Issue: IssueModel;
-  IssueComment: IssueCommentModel;
-  IssueStatus: IssueStatusModel;
-  MessageAndStatus: MessageAndStatus;
+  AddUserToProjectInput: Partial<AddUserToProjectInput>;
+  Asset: Partial<Asset>;
+  AssignAssetAsAvatarInput: Partial<AssignAssetAsAvatarInput>;
+  Board: Partial<Board>;
+  Boolean: Partial<Scalars['Boolean']['output']>;
+  Column: Partial<Column>;
+  CreateBoardInput: Partial<CreateBoardInput>;
+  CreateIssueCommentInput: Partial<CreateIssueCommentInput>;
+  CreateIssueInput: Partial<CreateIssueInput>;
+  CreateIssueLinkInput: Partial<CreateIssueLinkInput>;
+  CreateIssueStatusInput: Partial<CreateIssueStatusInput>;
+  CreateProjectCustomFieldInput: Partial<CreateProjectCustomFieldInput>;
+  CreateProjectInput: Partial<CreateProjectInput>;
+  CreateProjectTagInput: Partial<CreateProjectTagInput>;
+  CreateProjectValidationInput: Partial<CreateProjectValidationInput>;
+  CustomField: Partial<CustomField>;
+  CustomFieldValue: Partial<CustomFieldValue>;
+  Date: Partial<Scalars['Date']['output']>;
+  DeleteAssetInput: Partial<DeleteAssetInput>;
+  DeleteIssueCommentInput: Partial<DeleteIssueCommentInput>;
+  DeleteIssueInput: Partial<DeleteIssueInput>;
+  DeleteIssueLinkInput: Partial<DeleteIssueLinkInput>;
+  DeleteProjectCustomFieldInput: Partial<DeleteProjectCustomFieldInput>;
+  DeleteProjectTagInput: Partial<DeleteProjectTagInput>;
+  File: Partial<File>;
+  ID: Partial<Scalars['ID']['output']>;
+  Int: Partial<Scalars['Int']['output']>;
+  Issue: Partial<Issue>;
+  IssueComment: Partial<IssueComment>;
+  IssueStatus: Partial<IssueStatus>;
+  MessageAndStatus: Partial<MessageAndStatus>;
   Mutation: {};
-  Project: ProjectModel;
-  ProjectTag: ProjectTagModel;
+  Project: Partial<Project>;
+  ProjectTag: Partial<ProjectTag>;
   Query: {};
-  QueryBoardInput: QueryBoardInput;
-  QueryIssueInput: QueryIssueInput;
-  QueryProjectInput: QueryProjectInput;
-  QueryProjectTagsInput: QueryProjectTagsInput;
-  RemoveUserFromProjectInput: RemoveUserFromProjectInput;
-  SortBy: SortBy;
-  String: Scalars['String']['output'];
-  UpdateBoardInput: UpdateBoardInput;
-  UpdateIssueCommentInput: UpdateIssueCommentInput;
-  UpdateIssueInput: UpdateIssueInput;
-  UpdateMeInput: UpdateMeInput;
-  Upload: Scalars['Upload']['output'];
-  UploadAssetInput: UploadAssetInput;
-  User: UserModel;
-  ViewState: ViewState;
-  ViewStateInput: ViewStateInput;
-  ViewStateIssueStatus: ViewStateIssueStatus;
-  ViewStateIssueStatusInput: ViewStateIssueStatusInput;
-  ViewStateItem: ViewStateItem;
-  ViewStateItemInput: ViewStateItemInput;
+  QueryBoardInput: Partial<QueryBoardInput>;
+  QueryIssueInput: Partial<QueryIssueInput>;
+  QueryProjectInput: Partial<QueryProjectInput>;
+  QueryProjectTagsInput: Partial<QueryProjectTagsInput>;
+  RemoveUserFromProjectInput: Partial<RemoveUserFromProjectInput>;
+  SortBy: Partial<SortBy>;
+  String: Partial<Scalars['String']['output']>;
+  UpdateBoardInput: Partial<UpdateBoardInput>;
+  UpdateIssueCommentInput: Partial<UpdateIssueCommentInput>;
+  UpdateIssueInput: Partial<UpdateIssueInput>;
+  UpdateMeInput: Partial<UpdateMeInput>;
+  Upload: Partial<Scalars['Upload']['output']>;
+  UploadAssetInput: Partial<UploadAssetInput>;
+  User: Partial<User>;
+  ViewState: Partial<ViewState>;
+  ViewStateInput: Partial<ViewStateInput>;
+  ViewStateIssueStatus: Partial<ViewStateIssueStatus>;
+  ViewStateIssueStatusInput: Partial<ViewStateIssueStatusInput>;
+  ViewStateItem: Partial<ViewStateItem>;
+  ViewStateItemInput: Partial<ViewStateItemInput>;
 }>;
 
 export type AssetResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['Asset']> = ResolversObject<{
   assetPath?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   assetSubType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   assetType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   ownerId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -779,7 +767,7 @@ export type BoardResolvers<ContextType = ApolloContext, ParentType = ResolversPa
   backlogEnabled?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   columns?: Resolver<Maybe<Array<Maybe<ResolversTypes['Column']>>>, ParentType, ContextType>;
   containerOrder?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   issues?: Resolver<Maybe<Array<Maybe<ResolversTypes['Issue']>>>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -787,7 +775,7 @@ export type BoardResolvers<ContextType = ApolloContext, ParentType = ResolversPa
   settings?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   style?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   viewState?: Resolver<Maybe<Array<Maybe<ResolversTypes['ViewState']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -806,12 +794,12 @@ export type CustomFieldResolvers<
   ContextType = ApolloContext,
   ParentType = ResolversParentTypes['CustomField'],
 > = ResolversObject<{
-  createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   fieldType?: Resolver<ResolversTypes['CUSTOM_FIELD_TYPE'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   projectId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -819,14 +807,18 @@ export type CustomFieldValueResolvers<
   ContextType = ApolloContext,
   ParentType = ResolversParentTypes['CustomFieldValue'],
 > = ResolversObject<{
-  createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   customField?: Resolver<Maybe<ResolversTypes['CustomField']>, ParentType, ContextType>;
   customFieldId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   value?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
+
+export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
+  name: 'Date';
+}
 
 export type FileResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['File']> = ResolversObject<{
   encoding?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -839,7 +831,7 @@ export type IssueResolvers<ContextType = ApolloContext, ParentType = ResolversPa
   archived?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   assignee?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   comments?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueComment']>>>, ParentType, ContextType>;
-  createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   customFields?: Resolver<Maybe<Array<Maybe<ResolversTypes['CustomFieldValue']>>>, ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -853,7 +845,7 @@ export type IssueResolvers<ContextType = ApolloContext, ParentType = ResolversPa
   status?: Resolver<Maybe<ResolversTypes['IssueStatus']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<Maybe<ResolversTypes['ProjectTag']>>>, ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -862,11 +854,11 @@ export type IssueCommentResolvers<
   ParentType = ResolversParentTypes['IssueComment'],
 > = ResolversObject<{
   comment?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   issueId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   reporter?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
-  updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -874,11 +866,11 @@ export type IssueStatusResolvers<
   ContextType = ApolloContext,
   ParentType = ResolversParentTypes['IssueStatus'],
 > = ResolversObject<{
-  createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   projectId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1014,7 +1006,7 @@ export type ProjectResolvers<
   ParentType = ResolversParentTypes['Project'],
 > = ResolversObject<{
   boards?: Resolver<Maybe<Array<Maybe<ResolversTypes['Board']>>>, ParentType, ContextType>;
-  createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   customFields?: Resolver<Maybe<Array<Maybe<ResolversTypes['CustomField']>>>, ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
@@ -1026,7 +1018,7 @@ export type ProjectResolvers<
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<Maybe<ResolversTypes['ProjectTag']>>>, ParentType, ContextType>;
-  updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   users?: Resolver<Maybe<Array<Maybe<ResolversTypes['User']>>>, ParentType, ContextType>;
   visibility?: Resolver<Maybe<ResolversTypes['ProjectVisibility']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -1036,11 +1028,11 @@ export type ProjectTagResolvers<
   ContextType = ApolloContext,
   ParentType = ResolversParentTypes['ProjectTag'],
 > = ResolversObject<{
-  createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   projectId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -1125,6 +1117,7 @@ export type Resolvers<ContextType = ApolloContext> = ResolversObject<{
   Column?: ColumnResolvers<ContextType>;
   CustomField?: CustomFieldResolvers<ContextType>;
   CustomFieldValue?: CustomFieldValueResolvers<ContextType>;
+  Date?: GraphQLScalarType;
   File?: FileResolvers<ContextType>;
   Issue?: IssueResolvers<ContextType>;
   IssueComment?: IssueCommentResolvers<ContextType>;

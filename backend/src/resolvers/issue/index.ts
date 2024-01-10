@@ -2,18 +2,20 @@ import { keyBy, merge, values } from 'lodash-es';
 import { Op } from 'sequelize';
 import yn from 'yn';
 
-import type {
-  CustomFieldValueResolvers,
-  IssueResolvers,
-  MutationResolvers,
-  QueryResolvers,
-  Resolvers,
-} from '../../__generated__/resolvers-types';
+import {
+  type CustomFieldValueResolvers,
+  Custom_Field_Type,
+  type IssueResolvers,
+  type MutationResolvers,
+  ProjectVisibility,
+  type QueryResolvers,
+  type Resolvers,
+} from '../../__generated__/resolvers-types.js';
 import { Issue as IssueModel } from '../../db/models/types.js';
 import { websocketBroadcast } from '../../services/ws-server.js';
 
 const Query: QueryResolvers = {
-  issues: (parent, { input: { projectId, id, search, searchOperator } }, { db }) => {
+  issues: async (parent, { input: { projectId, id, search, searchOperator } }, { db, dataLoaderContext }) => {
     let whereOr = [];
     let queryOperator = Op.or;
 
@@ -37,67 +39,65 @@ const Query: QueryResolvers = {
     if (searchOperator === 'and') queryOperator = Op.and;
     if (searchOperator === 'or') queryOperator = Op.or;
 
-    return db.Issue.findAll({
-      include: [
-        {
-          model: db.Project,
-          as: 'project',
-        },
-        {
-          model: db.Issue,
-          as: 'linkedToIssues',
-          through: {
-            attributes: [
-              ['issue_id', 'issueId'],
-              ['linked_issue_id', 'linkedIssueId'],
-              ['link_type', 'linkType'],
-            ],
-          },
-        },
-        {
-          model: db.Issue,
-          as: 'linkedByIssues',
-          through: {
-            attributes: [
-              ['issue_id', 'issueId'],
-              ['linked_issue_id', 'linkedIssueId'],
-              ['link_type', 'linkType'],
-            ],
-          },
-        },
-      ],
+    const issuesListPlain = await db.Issue.findAll({
+      // include: [
+      // {
+      //   model: db.Project,
+      //   as: 'project',
+      // },
+      // {
+      //   model: db.Issue,
+      //   as: 'linkedToIssues',
+      //   through: {
+      //     attributes: [
+      //       ['issue_id', 'issueId'],
+      //       ['linked_issue_id', 'linkedIssueId'],
+      //       ['link_type', 'linkType'],
+      //     ],
+      //   },
+      // },
+      // {
+      //   model: db.Issue,
+      //   as: 'linkedByIssues',
+      //   through: {
+      //     attributes: [
+      //       ['issue_id', 'issueId'],
+      //       ['linked_issue_id', 'linkedIssueId'],
+      //       ['link_type', 'linkType'],
+      //     ],
+      //   },
+      // },
+      // ],
       where: {
         [queryOperator]: whereOr,
       },
     });
+
+    dataLoaderContext.prime(issuesListPlain);
+
+    return (
+      issuesListPlain &&
+      issuesListPlain.map((issue) => ({
+        ...issue.toJSON(),
+        id: `${issue.id}`,
+        projectId: `${issue.projectId}`,
+        project: undefined,
+        customFields: undefined,
+      }))
+    );
   },
-  issue: (parent, { input: { id } }, { db }) => {
-    return db.Issue.findByPk(id, {
-      include: [
-        {
-          model: db.Issue,
-          as: 'linkedToIssues',
-          through: {
-            attributes: [
-              ['issue_id', 'issueId'],
-              ['linked_issue_id', 'linkedIssueId'],
-              ['link_type', 'linkType'],
-            ],
-          },
-        },
-        {
-          model: db.Issue,
-          as: 'linkedByIssues',
-          through: {
-            attributes: [
-              ['issue_id', 'issueId'],
-              ['linked_issue_id', 'linkedIssueId'],
-              ['link_type', 'linkType'],
-            ],
-          },
-        },
-      ],
+  issue: async (parent, { input: { id } }, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
+    const databaseIssue = await db.Issue.findByPk(id, {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
+
+    return {
+      ...databaseIssue.toJSON(),
+      id: `${databaseIssue.id}`,
+      projectId: `${databaseIssue.projectId}`,
+      project: undefined,
+      customFields: undefined,
+    };
   },
 };
 
@@ -129,7 +129,7 @@ const Mutation: MutationResolvers = {
 
     return { message: 'success', status: 'success' };
   },
-  updateIssue: async (parent, { input }, { db, websocketServer }) => {
+  updateIssue: async (parent, { input }, { db, websocketServer, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const {
       id,
       issueStatusId,
@@ -144,7 +144,9 @@ const Mutation: MutationResolvers = {
       customFieldValue,
     } = input;
 
-    const issue = await db.Issue.findByPk(id);
+    const issue = await db.Issue.findByPk(Number(id), {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
 
     if (issueStatusId) issue.issueStatusId = Number(issueStatusId);
     if (assigneeId) issue.assigneeId = Number(assigneeId);
@@ -168,7 +170,9 @@ const Mutation: MutationResolvers = {
     if (issue.reporterId === 0) issue.reporterId = null;
 
     if (customFieldId && customFieldValue) {
-      const customField = await db.ProjectCustomField.findByPk(Number(customFieldId));
+      const customField = await db.ProjectCustomField.findByPk(Number(customFieldId), {
+        [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      });
       if (!customField) throw new Error('Custom field not found');
 
       let valueCasted: number | string | boolean = customFieldValue;
@@ -190,10 +194,24 @@ const Mutation: MutationResolvers = {
     }
 
     await issue.save();
+    dataLoaderContext.prime(issue);
 
-    const issueStatus = await db.IssueStatuses.findByPk(issueStatusId ?? issue.issueStatusId);
+    const issueStatus = await db.IssueStatuses.findByPk(Number(issueStatusId ?? issue.issueStatusId), {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
 
-    const returnData = { ...issue.toJSON(), status: issueStatus.toJSON() };
+    const returnData = {
+      ...issue.toJSON(),
+      id: `${issue.id}`,
+      projectId: `${issue.projectId}`,
+      project: undefined,
+      customFields: undefined,
+      status: {
+        ...issueStatus.toJSON(),
+        id: `${issueStatus.id}`,
+        projectId: `${issueStatus.projectId}`,
+      },
+    };
 
     websocketBroadcast({
       clients: websocketServer.clients,
@@ -201,9 +219,9 @@ const Mutation: MutationResolvers = {
       message: JSON.stringify({ type: 'ISSUE_UPDATED', payload: returnData }),
     });
 
-    return returnData as unknown as IssueModel;
+    return returnData;
   },
-  createIssue: async (parent, { input }, { db, user }) => {
+  createIssue: async (parent, { input }, { db, user, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const { projectId, boardId, issueStatusId, assigneeId, title, description, priority } = input;
 
     // TODO: create issue status as unassigned option
@@ -211,23 +229,40 @@ const Mutation: MutationResolvers = {
     const issue = await db.Issue.create({
       projectId: Number(projectId),
       issueStatusId: Number(issueStatusId),
-      assigneeId: Number(assigneeId),
+      assigneeId: assigneeId ? Number(assigneeId) : undefined,
       reporterId: user.id,
       title,
       description,
       priority,
     });
 
+    dataLoaderContext.prime(issue);
+
     if (typeof boardId !== 'undefined') {
-      await db.IssueBoard.create({
+      const issueBoard = await db.IssueBoard.create({
         boardId: Number(boardId),
         issueId: issue.id,
       });
+
+      dataLoaderContext.prime(issueBoard);
     }
 
-    const issueStatus = await db.IssueStatuses.findByPk(issueStatusId);
+    const issueStatus = await db.IssueStatuses.findByPk(issueStatusId, {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
 
-    return { ...issue.toJSON(), status: issueStatus.toJSON() } as unknown as IssueModel;
+    return {
+      ...issue.toJSON(),
+      id: `${issue.id}`,
+      projectId: `${issue.projectId}`,
+      project: undefined,
+      customFields: undefined,
+      status: {
+        ...issueStatus.toJSON(),
+        id: `${issueStatus.id}`,
+        projectId: `${issueStatus.projectId}`,
+      },
+    };
   },
   deleteIssue: async (parent, { input }, { db }) => {
     const { id } = input;
@@ -249,60 +284,163 @@ const Mutation: MutationResolvers = {
 };
 
 const CustomFieldValue: CustomFieldValueResolvers = {
-  customField: async (parent, args, { db }) => {
-    return db.ProjectCustomField.findByPk(parent.customFieldId);
+  customField: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
+    if (!parent.customFieldId) return null;
+
+    const customFieldData = await db.ProjectCustomField.findByPk(Number(parent.customFieldId), {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
+
+    return {
+      ...customFieldData.toJSON(),
+      id: `${customFieldData.id}`,
+      projectId: `${customFieldData.projectId}`,
+      fieldType: customFieldData.fieldType as Custom_Field_Type,
+    };
   },
 };
 
 const Issue: IssueResolvers = {
-  links: async (parent, args, { db }) => {
+  links: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
+    const databaseIssues = await db.Issue.findByPk(Number(parent.id), {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      include: [
+        {
+          model: db.Issue,
+          as: 'linkedToIssues',
+          through: {
+            attributes: [
+              ['issue_id', 'issueId'],
+              ['linked_issue_id', 'linkedIssueId'],
+              ['link_type', 'linkType'],
+            ],
+          },
+        },
+        {
+          model: db.Issue,
+          as: 'linkedByIssues',
+          through: {
+            attributes: [
+              ['issue_id', 'issueId'],
+              ['linked_issue_id', 'linkedIssueId'],
+              ['link_type', 'linkType'],
+            ],
+          },
+        },
+      ],
+    });
+
+    const issueToPlainObject = (issue: IssueModel) => ({
+      ...issue.toJSON(),
+      id: `${issue.id}`,
+      projectId: `${issue.projectId}`,
+      createdAt: `${issue.createdAt}`,
+      updatedAt: issue.updatedAt ? `${issue.updatedAt}` : null,
+      linkedIssueId: `${parent.id}`,
+      customFields: undefined,
+      project: undefined,
+    });
+
     return [
-      ...parent.linkedToIssues?.map(
-        (issue) =>
-          ({
-            ...issue.toJSON(),
-            id: `${issue.id}`,
-            projectId: `${issue.projectId}`,
-            createdAt: `${issue.createdAt}`,
-            updatedAt: issue.updatedAt ? `${issue.updatedAt}` : null,
-            linkType: issue.IssueLink.linkType,
-            linkedIssueId: `${parent.id}`,
-          }) as unknown as IssueModel
-      ),
-      ...parent.linkedByIssues?.map(
-        (issue) =>
-          ({
-            ...issue.toJSON(),
-            id: `${issue.id}`,
-            projectId: `${issue.projectId}`,
-            createdAt: `${issue.createdAt}`,
-            updatedAt: issue.updatedAt ? `${issue.updatedAt}` : null,
-            linkType: issue.IssueLink.linkType,
-            linkedIssueId: `${parent.id}`,
-          }) as unknown as IssueModel
-      ),
+      ...(databaseIssues.linkedByIssues?.map(issueToPlainObject) ?? []),
+      ...(databaseIssues.linkedToIssues?.map(issueToPlainObject) ?? []),
     ];
   },
-  tags: async (parent, args, { db }) => {
+  tags: async (parent, args, { db, dataLoaderContext }) => {
     const issueTags = await db.IssueTag.findAll({ where: { issueId: parent.id } });
+    dataLoaderContext.prime(issueTags);
 
-    return await db.ProjectTag.findAll({
+    const projectTags = await db.ProjectTag.findAll({
       where: { id: issueTags.map((issueTag) => issueTag.projectTagId) },
     });
+    dataLoaderContext.prime(projectTags);
+
+    return {
+      ...projectTags.map((projectTag) => ({
+        ...projectTag.toJSON(),
+        projectId: `${projectTag.projectId}`,
+        id: `${projectTag.id}`,
+      })),
+    };
   },
-  comments: (parent, args, { db }) => {
-    return db.IssueComment.findAll({ where: { issueId: parent.id }, order: [['createdAt', 'DESC']] });
+  comments: async (parent, args, { db, dataLoaderContext }) => {
+    const comments = await db.IssueComment.findAll({
+      where: { issueId: Number(parent.id) },
+      order: [['createdAt', 'DESC']],
+    });
+    dataLoaderContext.prime(comments);
+
+    return comments.map((comment) => ({
+      ...comment.toJSON(),
+      id: `${comment.id}`,
+      issueId: `${comment.issueId}`,
+    }));
   },
-  status: (parent, args, { db }) => {
-    return db.IssueStatuses.findByPk(parent.issueStatusId);
+  status: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
+    // TODO: parent.issueStatusId does exist but since it is not part of the graphql type it is not available according to typescript
+    const issue = await db.Issue.findByPk(Number(parent.id), {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
+
+    if (!issue.issueStatusId) return null;
+
+    const issueStatus = await db.IssueStatuses.findByPk(issue.issueStatusId, {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
+
+    return {
+      ...issueStatus.toJSON(),
+      id: `${issueStatus.id}`,
+      projectId: `${issueStatus.projectId}`,
+    };
   },
-  reporter: (parent, args, { db }) => {
-    return db.User.findByPk(parent.reporterId);
+  reporter: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
+    const issue = await db.Issue.findByPk(Number(parent.id), {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
+
+    const reporterUser = await db.User.findByPk(Number(issue.reporterId), {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
+
+    if (!reporterUser) return null;
+
+    return {
+      ...reporterUser.toJSON(),
+      id: `${reporterUser.id}`,
+    };
   },
-  assignee: (parent, args, { db }) => {
-    return db.User.findByPk(parent.assigneeId);
+  assignee: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
+    const databaseIssue = await db.Issue.findByPk(Number(parent.id), {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
+
+    if (!databaseIssue?.assigneeId) return null;
+
+    const user = await db.User.findByPk(Number(databaseIssue.assigneeId), {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
+
+    return {
+      ...user.toJSON(),
+      id: `${user.id}`,
+    };
   },
-  project: (parent) => parent.project,
+  project: async (parent, __, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
+    if (parent.project) return parent.project;
+
+    const databaseProject = await db.Project.findByPk(Number(parent.projectId), {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
+
+    return {
+      ...databaseProject.toJSON(),
+      id: `${databaseProject.id}`,
+      visibility: databaseProject.visibility as ProjectVisibility,
+      boards: undefined,
+      users: undefined,
+    };
+  },
 };
 
 const resolvers: Resolvers = {
