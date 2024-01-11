@@ -15,12 +15,12 @@ const Query: QueryResolvers = {
     // TODO: If project is internal only show projects that the user is a member of
     const databaseProjects = await db.Project.findAll({
       order: [['id', 'ASC']],
-      include: [
-        {
-          model: db.User,
-          as: 'users',
-        },
-      ],
+      // include: [
+      //   {
+      //     model: db.User,
+      //     as: 'users',
+      //   },
+      // ],
     });
 
     dataLoaderContext.prime(databaseProjects);

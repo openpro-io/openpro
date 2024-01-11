@@ -238,10 +238,11 @@ const Mutation: MutationResolvers = {
 
     dataLoaderContext.prime(issue);
 
+    // TODO: This isnt currently implemented in the UI
     if (typeof boardId !== 'undefined') {
       const issueBoard = await db.IssueBoard.create({
         boardId: Number(boardId),
-        issueId: issue.id,
+        issueId: Number(issue.id),
       });
 
       dataLoaderContext.prime(issueBoard);

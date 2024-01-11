@@ -71,6 +71,7 @@ const Mutation: MutationResolvers = {
 };
 
 const Board: BoardResolvers = {
+  // TODO: this section needs some improvement
   issues: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const board = await db.Board.findByPk(Number(parent.id), {
       include: {
@@ -80,6 +81,18 @@ const Board: BoardResolvers = {
       [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
+    const boardIssueIdsFromViewState = board.viewState
+      // TODO: its typed as object when its an array
+      // @ts-ignore
+      .flatMap((container) => container.items)
+      .map((item) => Number(item.id.replace('item-', '')));
+
+    const issuesInViewState = await db.Issue.findAll({
+      where: {
+        id: boardIssueIdsFromViewState,
+      },
+    });
+
     const boardIssues = await db.IssueBoard.findAll({
       where: { boardId: parent.id },
       raw: true,
@@ -87,12 +100,12 @@ const Board: BoardResolvers = {
 
     dataLoaderContext.prime(boardIssues);
 
-    return board.issues.map((issue) => ({
-      ...issue,
+    return issuesInViewState.map((issue) => ({
+      ...issue.toJSON(),
       id: `${issue.id}`,
       boardId: `${parent.id}`,
       projectId: `${parent.projectId}`,
-      position: boardIssues.find((boardIssue) => Number(boardIssue.issueId) === Number(issue.id)).position,
+      position: boardIssues.find((boardIssue) => Number(boardIssue.issueId) === Number(issue.id))?.position,
       project: undefined,
       customFields: undefined,
     }));
