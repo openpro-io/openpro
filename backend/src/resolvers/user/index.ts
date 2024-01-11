@@ -1,7 +1,7 @@
 import { isUndefined } from 'lodash-es';
 
 import type { MutationResolvers, QueryResolvers, UserResolvers } from '../../__generated__/resolvers-types.js';
-import { User as UserModel } from '../../db/models/types.js';
+import { Asset as AssetModel, User as UserModel } from '../../db/models/types.js';
 import { BUCKET_NAME } from '../../services/config.js';
 import { minioClient } from '../../services/minio-client.js';
 
@@ -52,7 +52,7 @@ const Mutation: MutationResolvers = {
   },
   assignAssetAsAvatar: async (parent, { input }, { db, user, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const { assetId } = input;
-    let findOldAvatarAsset;
+    let findOldAvatarAsset: AssetModel;
 
     if (user.avatarAssetId) {
       findOldAvatarAsset = await db.Asset.findByPk(Number(user.avatarAssetId), {
