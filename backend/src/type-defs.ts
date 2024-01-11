@@ -6,7 +6,7 @@ const typeDefs = gql`
   # in the resolver map below.
   scalar Upload
 
-  scalar Date
+  scalar DateTime
 
   enum ProjectVisibility {
     PUBLIC
@@ -48,8 +48,8 @@ const typeDefs = gql`
     issueId: String!
     comment: String!
     reporter: User!
-    createdAt: Date
-    updatedAt: Date
+    createdAt: DateTime
+    updatedAt: DateTime
   }
 
   type User {
@@ -66,8 +66,8 @@ const typeDefs = gql`
     id: ID!
     name: String!
     projectId: String!
-    createdAt: Date
-    updatedAt: Date
+    createdAt: DateTime
+    updatedAt: DateTime
   }
 
   type Project {
@@ -78,8 +78,8 @@ const typeDefs = gql`
     imageId: Int
     status: String
     visibility: ProjectVisibility
-    createdAt: Date
-    updatedAt: Date
+    createdAt: DateTime
+    updatedAt: DateTime
     boards: [Board]
     issueStatuses: [IssueStatus]
     issues(input: QueryIssueInput): [Issue]
@@ -94,8 +94,8 @@ const typeDefs = gql`
     projectId: String!
     fieldName: String!
     fieldType: CUSTOM_FIELD_TYPE!
-    createdAt: Date
-    updatedAt: Date
+    createdAt: DateTime
+    updatedAt: DateTime
   }
 
   type CustomFieldValue {
@@ -103,8 +103,8 @@ const typeDefs = gql`
     customFieldId: String!
     customField: CustomField
     value: String!
-    createdAt: Date
-    updatedAt: Date
+    createdAt: DateTime
+    updatedAt: DateTime
   }
 
   type Issue {
@@ -116,8 +116,8 @@ const typeDefs = gql`
     status: IssueStatus
     reporter: User
     assignee: User
-    createdAt: Date
-    updatedAt: Date
+    createdAt: DateTime
+    updatedAt: DateTime
     priority: Int
     archived: Boolean
     comments: [IssueComment]
@@ -162,8 +162,8 @@ const typeDefs = gql`
     status: String
     viewState: [ViewState]
     backlogEnabled: Boolean
-    createdAt: Date
-    updatedAt: Date
+    createdAt: DateTime
+    updatedAt: DateTime
     settings: String
     columns: [Column]
     issues: [Issue]
@@ -174,8 +174,8 @@ const typeDefs = gql`
     id: ID!
     projectId: String
     name: String!
-    createdAt: Date
-    updatedAt: Date
+    createdAt: DateTime
+    updatedAt: DateTime
   }
 
   type Asset {
@@ -184,8 +184,8 @@ const typeDefs = gql`
     assetType: String
     assetSubType: String
     assetPath: String
-    createdAt: Date
-    updatedAt: Date
+    createdAt: DateTime
+    updatedAt: DateTime
   }
 
   enum BoardStyle {

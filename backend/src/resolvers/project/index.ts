@@ -1,11 +1,19 @@
 import { Op } from 'sequelize';
 
-import type { MutationResolvers, ProjectResolvers, QueryResolvers, Resolvers } from '../../__generated__/resolvers-types.js';
+import {
+  Custom_Field_Type,
+  type MutationResolvers,
+  type ProjectResolvers,
+  ProjectVisibility,
+  type QueryResolvers,
+  type Resolvers,
+  type ViewState,
+} from '../../__generated__/resolvers-types.js';
 
 const Query: QueryResolvers = {
-  projects: (parent, args, { db }) => {
+  projects: async (parent, args, { db, dataLoaderContext }) => {
     // TODO: If project is internal only show projects that the user is a member of
-    return db.Project.findAll({
+    const databaseProjects = await db.Project.findAll({
       order: [['id', 'ASC']],
       include: [
         {
@@ -14,6 +22,18 @@ const Query: QueryResolvers = {
         },
       ],
     });
+
+    dataLoaderContext.prime(databaseProjects);
+
+    return [
+      ...databaseProjects.map((project) => ({
+        ...project.toJSON(),
+        id: `${project.id}`,
+        visibility: project.visibility as ProjectVisibility,
+        boards: undefined,
+        users: undefined,
+      })),
+    ];
   },
   createProjectValidation: async (parent, { input }, { db }) => {
     const { name, key } = input;
@@ -39,18 +59,29 @@ const Query: QueryResolvers = {
       message: 'Project name and key are available',
     };
   },
-  project: (parent, args, { db }) => {
+  project: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const { id } = args?.input;
-    return db.Project.findByPk(id, {
+    const databaseProject = await db.Project.findByPk(id, {
       include: [
         {
           model: db.User,
           as: 'users',
         },
       ],
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
+
+    return {
+      ...databaseProject.toJSON(),
+      id: `${databaseProject.id}`,
+      visibility: databaseProject.visibility as ProjectVisibility,
+      boards: undefined,
+      users: databaseProject.users
+        ? databaseProject.users.map((user) => ({ ...user.toJSON(), id: `${user.id}` }))
+        : undefined,
+    };
   },
-  projectTags: (parent, { input: { projectId, id, name } }, { db }) => {
+  projectTags: async (parent, { input: { projectId, id, name } }, { db, dataLoaderContext }) => {
     const where: any = { projectId };
 
     if (id) where.id = id;
@@ -60,22 +91,49 @@ const Query: QueryResolvers = {
       };
     }
 
-    return db.ProjectTag.findAll({ where });
+    const databaseProjectTags = await db.ProjectTag.findAll({ where });
+    dataLoaderContext.prime(databaseProjectTags);
+
+    return [
+      ...databaseProjectTags.map((projectTag) => ({
+        ...projectTag.toJSON(),
+        id: `${projectTag.id}`,
+        projectId: `${projectTag.projectId}`,
+      })),
+    ];
   },
 };
 
 const Mutation: MutationResolvers = {
-  createProjectCustomField: async (parent, { input: { projectId, fieldName, fieldType } }, { db }) =>
-    await db.ProjectCustomField.create(
+  createProjectCustomField: async (
+    parent,
+    { input: { projectId, fieldName, fieldType } },
+    { db, dataLoaderContext }
+  ) => {
+    const projectCustomField = await db.ProjectCustomField.create(
       {
         projectId: Number(projectId),
         fieldName,
         fieldType,
       },
-      { returning: true }
-    ),
-  deleteProjectCustomField: async (parent, { input: { id } }, { db }) => {
-    const findCustomField = await db.ProjectCustomField.findByPk(id);
+      {
+        returning: true,
+      }
+    );
+
+    dataLoaderContext.prime(projectCustomField);
+
+    return {
+      ...projectCustomField.toJSON(),
+      id: `${projectCustomField.id}`,
+      projectId: `${projectCustomField.projectId}`,
+      fieldType: projectCustomField.fieldType as Custom_Field_Type,
+    };
+  },
+  deleteProjectCustomField: async (parent, { input: { id } }, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
+    const findCustomField = await db.ProjectCustomField.findByPk(id, {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
 
     if (!findCustomField) throw new Error('Custom field not found');
 
@@ -86,16 +144,31 @@ const Mutation: MutationResolvers = {
       status: 'success',
     };
   },
-  createProjectTag: async (parent, { input }, { db }) => {
+  createProjectTag: async (parent, { input }, { db, dataLoaderContext }) => {
     const { projectId, name } = input;
 
-    return await db.ProjectTag.create({
-      projectId: Number(projectId),
-      name,
-    });
+    const projectTag = await db.ProjectTag.create(
+      {
+        projectId: Number(projectId),
+        name,
+      },
+      {
+        returning: true,
+      }
+    );
+
+    dataLoaderContext.prime(projectTag);
+
+    return {
+      ...projectTag.toJSON(),
+      id: `${projectTag.id}`,
+      projectId: `${projectTag.projectId}`,
+    };
   },
-  deleteProjectTag: async (parent, { input: { id } }, { db }) => {
-    const findProjectTag = await db.ProjectTag.findByPk(id);
+  deleteProjectTag: async (parent, { input: { id } }, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
+    const findProjectTag = await db.ProjectTag.findByPk(id, {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
 
     if (!findProjectTag) {
       throw new Error('Project tag not found');
@@ -108,7 +181,7 @@ const Mutation: MutationResolvers = {
       status: 'success',
     };
   },
-  addUserToProject: async (parent, { input: { userId, projectId } }, { db }) => {
+  addUserToProject: async (parent, { input: { userId, projectId } }, { db, dataLoaderContext }) => {
     const existingPermission = await db.ProjectPermission.findOne({
       where: { userId, projectId },
     });
@@ -145,7 +218,7 @@ const Mutation: MutationResolvers = {
 
     return { message: 'User removed from project', status: 'success' };
   },
-  createProject: async (parent, { input }, { db, user }) => {
+  createProject: async (parent, { input }, { db, user, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     // TODO: we should do a sequelize transaction here
     const project = await db.Project.create({
       name: input.name,
@@ -153,7 +226,7 @@ const Mutation: MutationResolvers = {
       visibility: input.visibility ?? 'INTERNAL',
     });
 
-    await db.ProjectPermission.create({
+    const projectPermission = await db.ProjectPermission.create({
       userId: user.id,
       projectId: project.id,
     });
@@ -179,46 +252,108 @@ const Mutation: MutationResolvers = {
       })),
     });
 
-    project.boards = [board];
+    // TODO: we may not even need this
+    dataLoaderContext.prime(projectPermission);
+    dataLoaderContext.prime(issueStatuses);
+    dataLoaderContext.prime(project);
+    dataLoaderContext.prime(board);
 
-    return project;
+    return {
+      ...project.toJSON(),
+      id: `${project.id}`,
+      visibility: project.visibility as ProjectVisibility,
+      boards: [
+        {
+          ...board.toJSON(),
+          id: `${board.id}`,
+          projectId: `${board.projectId}`,
+          containerOrder: JSON.stringify(board.containerOrder), // TODO: Fix this
+          settings: JSON.stringify(board.settings), // TODO: Fix this
+          viewState: board.viewState as ViewState[], // TODO: fix this
+        },
+      ],
+    };
   },
 };
 
 const Project: ProjectResolvers = {
-  customFields: (parent, args, { db }) => {
-    return db.ProjectCustomField.findAll({
+  customFields: async (parent, args, { db, dataLoaderContext }) => {
+    const projectFields = await db.ProjectCustomField.findAll({
       where: { projectId: parent.id },
     });
+
+    dataLoaderContext.prime(projectFields);
+
+    return projectFields.map((field) => ({
+      ...field.toJSON(),
+      id: `${field.id}`,
+      projectId: `${field.projectId}`,
+      fieldType: field.fieldType as Custom_Field_Type,
+    }));
   },
-  tags: (parent, args, { db }) => {
-    return db.ProjectTag.findAll({
+  tags: async (parent, args, { db, dataLoaderContext }) => {
+    const projectTags = await db.ProjectTag.findAll({
       where: { projectId: parent.id },
     });
+
+    dataLoaderContext.prime(projectTags);
+
+    return projectTags.map((tag) => ({
+      ...tag.toJSON(),
+      id: `${tag.id}`,
+      projectId: `${tag.projectId}`,
+    }));
   },
-  issues: (parent, args, { db }) => {
-    const { input } = args;
-    const findAllInput: any = { where: { projectId: parent.id } };
+  issues: async (parent, { input }, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
+    const findAllInput: any = { where: { projectId: Number(parent.id) } };
 
     if (input && input?.sortBy) {
       findAllInput.order = [input?.sortBy.map(({ field, order }) => [field, order])];
     }
 
-    return db.Issue.findAll(findAllInput);
+    const databaseIssues = await db.Issue.findAll(findAllInput);
+
+    dataLoaderContext.prime(databaseIssues);
+
+    return databaseIssues.map((issue) => ({
+      ...issue.toJSON(),
+      id: `${issue.id}`,
+      projectId: `${issue.projectId}`,
+      customFields: undefined,
+    }));
   },
-  boards: (parent, args, { db }) => {
-    return db.Board.findAll({
+  boards: async (parent, args, { db, dataLoaderContext }) => {
+    const boards = await db.Board.findAll({
       where: { projectId: parent.id },
     });
+
+    dataLoaderContext.prime(boards);
+
+    return boards.map((board) => ({
+      ...board.toJSON(),
+      id: `${board.id}`,
+      projectId: `${board.projectId}`,
+      containerOrder: JSON.stringify(board.containerOrder), // TODO: Fix this
+      settings: JSON.stringify(board.settings), // TODO: Fix this
+      viewState: board.viewState as ViewState[], // TODO: fix this
+    }));
   },
-  issueStatuses: (parent, args, { db }) => {
-    return db.IssueStatuses.findAll({
+  issueStatuses: async (parent, args, { db, dataLoaderContext }) => {
+    const issueStatuses = await db.IssueStatuses.findAll({
       where: { projectId: parent.id },
     });
+
+    dataLoaderContext.prime(issueStatuses);
+
+    return issueStatuses.map((issueStatus) => ({
+      ...issueStatus.toJSON(),
+      id: `${issueStatus.id}`,
+      projectId: `${issueStatus.projectId}`,
+    }));
   },
   issueCount: async (parent, args, { db }) => {
     return db.Issue.count({
-      where: { projectId: parent.id },
+      where: { projectId: Number(parent.id) },
     });
   },
 };
