@@ -106,7 +106,7 @@ export const apolloClient = new ApolloClient({
             read(_, { readField }) {
               const createdAt: string | undefined = readField('createdAt');
               return createdAt
-                ? DateTime.fromMillis(Number(createdAt)).toRelative()
+                ? DateTime.fromISO(createdAt).toRelative()
                 : null;
             },
           },

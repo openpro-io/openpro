@@ -1,16 +1,16 @@
+import { useFragment, useMutation } from '@apollo/client';
 import { Disclosure, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
+import { DateTime } from 'luxon';
+
+import IssueTags from '@/components/IssueModal/IssueTags';
+import IssuePriorityDropdown from '@/components/IssuePriorityDropdown';
 import UserSelectionDropdown from '@/components/UserSelectionDropdown';
+import { User } from '@/constants/types';
 import {
-  GET_ISSUE_QUERY,
   ISSUE_FIELDS,
   UPDATE_ISSUE_MUTATION,
 } from '@/gql/gql-queries-mutations';
-import { useFragment, useMutation, useQuery } from '@apollo/client';
-import { User } from '@/constants/types';
-import { DateTime } from 'luxon';
-import IssueTags from '@/components/IssueModal/IssueTags';
-import IssuePriorityDropdown from '@/components/IssuePriorityDropdown';
 
 /**
  * Returns the actual or relative timestamp based on the given timestamp and options.
@@ -21,12 +21,12 @@ import IssuePriorityDropdown from '@/components/IssuePriorityDropdown';
  * @return {string|null} - The actual or relative timestamp.
  */
 const returnActualOrRelativeTimestamp = (
-  timestamp: number,
+  timestamp: string | null,
   { showRelativeDaysMin = 5 }: { showRelativeDaysMin?: number } = {}
 ): string | null => {
   if (!timestamp) return null;
 
-  const ts = DateTime.fromMillis(Number(timestamp));
+  const ts = DateTime.fromISO(timestamp);
   const now = DateTime.local();
   const diffInDays = Math.floor(now.diff(ts, 'days').days);
   const fullDateFormat = "LLLL d, yyyy 'at' h:mm a";

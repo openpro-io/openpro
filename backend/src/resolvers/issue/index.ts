@@ -334,8 +334,8 @@ const Issue: IssueResolvers = {
       ...issue.toJSON(),
       id: `${issue.id}`,
       projectId: `${issue.projectId}`,
-      createdAt: `${issue.createdAt}`,
-      updatedAt: issue.updatedAt ? `${issue.updatedAt}` : null,
+      createdAt: issue.createdAt,
+      updatedAt: issue.updatedAt,
       linkedIssueId: `${parent.id}`,
       customFields: undefined,
       project: undefined,
@@ -355,13 +355,11 @@ const Issue: IssueResolvers = {
     });
     dataLoaderContext.prime(projectTags);
 
-    return {
-      ...projectTags.map((projectTag) => ({
-        ...projectTag.toJSON(),
-        projectId: `${projectTag.projectId}`,
-        id: `${projectTag.id}`,
-      })),
-    };
+    return projectTags.map((projectTag) => ({
+      ...projectTag.toJSON(),
+      projectId: `${projectTag.projectId}`,
+      id: `${projectTag.id}`,
+    }));
   },
   comments: async (parent, args, { db, dataLoaderContext }) => {
     const comments = await db.IssueComment.findAll({

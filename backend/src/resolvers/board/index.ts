@@ -98,7 +98,7 @@ const Board: BoardResolvers = {
     }));
   },
   containerOrder: (parent) => {
-    return parent.containerOrder;
+    return parent.containerOrder ?? undefined;
   },
 };
 

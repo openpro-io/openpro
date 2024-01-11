@@ -25,15 +25,13 @@ const Query: QueryResolvers = {
 
     dataLoaderContext.prime(databaseProjects);
 
-    return [
-      ...databaseProjects.map((project) => ({
-        ...project.toJSON(),
-        id: `${project.id}`,
-        visibility: project.visibility as ProjectVisibility,
-        boards: undefined,
-        users: undefined,
-      })),
-    ];
+    return databaseProjects.map((project) => ({
+      ...project.toJSON(),
+      id: `${project.id}`,
+      visibility: project.visibility as ProjectVisibility,
+      boards: undefined,
+      users: undefined,
+    }));
   },
   createProjectValidation: async (parent, { input }, { db }) => {
     const { name, key } = input;
@@ -94,13 +92,11 @@ const Query: QueryResolvers = {
     const databaseProjectTags = await db.ProjectTag.findAll({ where });
     dataLoaderContext.prime(databaseProjectTags);
 
-    return [
-      ...databaseProjectTags.map((projectTag) => ({
-        ...projectTag.toJSON(),
-        id: `${projectTag.id}`,
-        projectId: `${projectTag.projectId}`,
-      })),
-    ];
+    return databaseProjectTags.map((projectTag) => ({
+      ...projectTag.toJSON(),
+      id: `${projectTag.id}`,
+      projectId: `${projectTag.projectId}`,
+    }));
   },
 };
 
@@ -267,9 +263,9 @@ const Mutation: MutationResolvers = {
           ...board.toJSON(),
           id: `${board.id}`,
           projectId: `${board.projectId}`,
-          containerOrder: JSON.stringify(board.containerOrder), // TODO: Fix this
-          settings: JSON.stringify(board.settings), // TODO: Fix this
-          viewState: board.viewState as ViewState[], // TODO: fix this
+          containerOrder: board.containerOrder ? JSON.stringify(board.containerOrder) : undefined, // TODO: Fix this
+          settings: board.settings ? JSON.stringify(board.settings) : undefined, // TODO: Fix this
+          viewState: board.viewState ? (board.viewState as ViewState[]) : undefined, // TODO: fix this
         },
       ],
     };
@@ -333,9 +329,9 @@ const Project: ProjectResolvers = {
       ...board.toJSON(),
       id: `${board.id}`,
       projectId: `${board.projectId}`,
-      containerOrder: JSON.stringify(board.containerOrder), // TODO: Fix this
-      settings: JSON.stringify(board.settings), // TODO: Fix this
-      viewState: board.viewState as ViewState[], // TODO: fix this
+      containerOrder: board.containerOrder ? JSON.stringify(board.containerOrder) : undefined, // TODO: Fix this
+      settings: board.settings ? JSON.stringify(board.settings) : undefined, // TODO: Fix this
+      viewState: board.viewState ? (board.viewState as ViewState[]) : undefined, // TODO: fix this
     }));
   },
   issueStatuses: async (parent, args, { db, dataLoaderContext }) => {
