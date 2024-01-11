@@ -61,7 +61,7 @@ const Query: QueryResolvers = {
   },
   project: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const { id } = args?.input;
-    const databaseProject = await db.Project.findByPk(id, {
+    const databaseProject = await db.Project.findByPk(Number(id), {
       include: [
         {
           model: db.User,
@@ -84,7 +84,7 @@ const Query: QueryResolvers = {
   projectTags: async (parent, { input: { projectId, id, name } }, { db, dataLoaderContext }) => {
     const where: any = { projectId };
 
-    if (id) where.id = id;
+    if (id) where.id = Number(id);
     if (name) {
       where.name = {
         [Op.like]: `%${name}%`,
@@ -131,7 +131,7 @@ const Mutation: MutationResolvers = {
     };
   },
   deleteProjectCustomField: async (parent, { input: { id } }, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
-    const findCustomField = await db.ProjectCustomField.findByPk(id, {
+    const findCustomField = await db.ProjectCustomField.findByPk(Number(id), {
       [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
@@ -166,7 +166,7 @@ const Mutation: MutationResolvers = {
     };
   },
   deleteProjectTag: async (parent, { input: { id } }, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
-    const findProjectTag = await db.ProjectTag.findByPk(id, {
+    const findProjectTag = await db.ProjectTag.findByPk(Number(id), {
       [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 

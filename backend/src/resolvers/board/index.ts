@@ -1,26 +1,52 @@
-import type { BoardResolvers, MutationResolvers, QueryResolvers } from '../../__generated__/resolvers-types.js';
+import type {
+  BoardResolvers,
+  MutationResolvers,
+  QueryResolvers,
+  ViewState,
+} from '../../__generated__/resolvers-types.js';
+import type { Board as BoardModel } from '../../db/models/types.js';
 import { websocketBroadcast } from '../../services/ws-server.js';
 
+const formatBoardResponse = (board: BoardModel) => {
+  return {
+    ...board.toJSON(),
+    id: `${board.id}`,
+    projectId: `${board.projectId}`,
+    containerOrder: board.containerOrder ? JSON.stringify(board.containerOrder) : undefined,
+    settings: board.settings ? JSON.stringify(board.settings) : undefined,
+    viewState: board.viewState ? (board.viewState as ViewState[]) : undefined, // TODO: verify this is correct
+  };
+};
+
 const Query: QueryResolvers = {
-  boards: (parent, args, { db }) => {
+  boards: async (parent, args, { db, dataLoaderContext }) => {
     // TODO: should we require a project id to show boards?
-    return db.Board.findAll();
+    const boards = await db.Board.findAll();
+
+    dataLoaderContext.prime(boards);
+
+    return boards.map(formatBoardResponse);
   },
-  board: (parent, { input: { id } }, { db }) => {
-    return db.Board.findByPk(id, {
-      include: {
-        model: db.Issue,
-        as: 'issues',
-      },
+  board: async (parent, { input: { id } }, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
+    const board = await db.Board.findByPk(Number(id), {
+      // include: {
+      //   model: db.Issue,
+      //   as: 'issues',
+      // },
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
+
+    return formatBoardResponse(board);
   },
 };
 
 const Mutation: MutationResolvers = {
-  updateBoard: async (parent, { input }, { db, websocketServer }) => {
+  updateBoard: async (parent, { input }, { db, websocketServer, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const { id, name, viewState, backlogEnabled, settings, containerOrder } = input;
 
-    const board = await db.Board.findByPk(id);
+    const board = await db.Board.findByPk(Number(id), {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
     if (name) board.name = name;
     if (typeof viewState !== 'undefined') board.viewState = viewState;
     if (backlogEnabled !== undefined) board.backlogEnabled = backlogEnabled;
@@ -32,34 +58,47 @@ const Mutation: MutationResolvers = {
 
     await board.save();
 
+    dataLoaderContext.prime(board);
+
     websocketBroadcast({
       clients: websocketServer.clients,
       namespace: 'ws',
       message: JSON.stringify({ type: 'BOARD_UPDATED', payload: board.toJSON() }),
     });
 
-    return board;
+    return formatBoardResponse(board);
   },
 };
 
 const Board: BoardResolvers = {
-  issues: async (parent, args, { db }) => {
+  issues: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
+    const board = await db.Board.findByPk(Number(parent.id), {
+      include: {
+        model: db.Issue,
+        as: 'issues',
+      },
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
+
     const boardIssues = await db.IssueBoard.findAll({
       where: { boardId: parent.id },
       raw: true,
     });
 
-    return parent.issues.map((issue) => {
-      return db.Issue.build({
-        ...issue.toJSON(),
-        // @ts-ignore
-        boardId: parent.id,
-        position: boardIssues.find((boardIssue) => Number(boardIssue.issueId) === Number(issue.id)).position,
-      });
-    });
+    dataLoaderContext.prime(boardIssues);
+
+    return board.issues.map((issue) => ({
+      ...issue,
+      id: `${issue.id}`,
+      boardId: `${parent.id}`,
+      projectId: `${parent.projectId}`,
+      position: boardIssues.find((boardIssue) => Number(boardIssue.issueId) === Number(issue.id)).position,
+      project: undefined,
+      customFields: undefined,
+    }));
   },
   containerOrder: (parent) => {
-    return parent.containerOrder ? JSON.stringify(parent.containerOrder) : undefined;
+    return parent.containerOrder;
   },
 };
 
