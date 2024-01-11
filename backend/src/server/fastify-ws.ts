@@ -6,7 +6,10 @@ import type { WebSocket } from 'ws';
 import * as wsServer from '../services/ws-server.js';
 
 interface MyWebSocket extends WebSocket {
-  isAlive: boolean;
+  isAlive?: boolean;
+  id?: string;
+  user?: any;
+  namespace?: string;
 }
 
 export const fastifyWsHandler = async (fastify: FastifyInstance) => {
@@ -45,13 +48,13 @@ export const fastifyWsHandler = async (fastify: FastifyInstance) => {
 
       const clients = fastify.websocketServer.clients;
 
+      const handleConnectionSocket: MyWebSocket = connection.socket;
+      handleConnectionSocket.id = nanoid();
+      handleConnectionSocket.user = req?.user;
+      handleConnectionSocket.namespace = 'ws';
+
       wsServer.handleConnection({
-        socket: {
-          ...connection.socket,
-          id: nanoid(),
-          user: req?.user,
-          namespace: 'ws',
-        },
+        socket: handleConnectionSocket,
         req,
         context,
         clients,
