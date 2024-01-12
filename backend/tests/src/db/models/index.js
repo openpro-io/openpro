@@ -1,25 +1,25 @@
 import chai from 'chai';
-import sinonChai from 'sinon-chai';
-import {
-  sequelize,
-  dataTypes,
-  checkModelName,
-  checkUniqueIndex,
-  checkPropertyExists,
-  makeMockModels,
-} from 'sequelize-test-helpers';
-
-import IssueCommentModel from '../../../../src/db/models/issue-comment.js';
-import IssueModel from '../../../../src/db/models/issue.js';
 import { DataTypes, Sequelize } from 'sequelize';
-import User from '../../../../src/db/models/user.js';
-import Project from '../../../../src/db/models/project.js';
-import Board from '../../../../src/db/models/board.js';
-import IssueStatuses from '../../../../src/db/models/issue-statuses.js';
-import Issue from '../../../../src/db/models/issue.js';
+import {
+  checkModelName,
+  checkPropertyExists,
+  checkUniqueIndex,
+  dataTypes,
+  makeMockModels,
+  sequelize,
+} from 'sequelize-test-helpers';
+import sinonChai from 'sinon-chai';
+
 import Asset from '../../../../src/db/models/asset.js';
+import Board from '../../../../src/db/models/board.js';
+import IssueCommentModel from '../../../../src/db/models/issue-comment.js';
 import IssueComment from '../../../../src/db/models/issue-comment.js';
+import IssueStatuses from '../../../../src/db/models/issue-statuses.js';
+import IssueModel from '../../../../src/db/models/issue.js';
+import Issue from '../../../../src/db/models/issue.js';
 import ProjectTags from '../../../../src/db/models/project-tag.js';
+import Project from '../../../../src/db/models/project.js';
+import User from '../../../../src/db/models/user.js';
 
 chai.use(sinonChai);
 
@@ -50,7 +50,7 @@ const init = async () => {
   return db;
 };
 
-describe('src/models/IssueComment', () => {
+describe('src/models/issue-comment', () => {
   const Issue = IssueModel(sequelize, dataTypes);
   const IssueComment = IssueCommentModel(sequelize, dataTypes);
   const issue = new Issue();
@@ -76,13 +76,13 @@ describe('src/models/IssueComment', () => {
       Issue.associate({ IssueComment });
     });
 
-    it('defined a hasMany association with Issue', () => {
+    it('defined a hasMany association with issue', () => {
       expect(Issue.hasMany).to.have.been.calledWith(IssueComment);
     });
   });
 });
 
-describe('src/models/Issue relations', () => {
+describe('src/models/issue relations', () => {
   let db = {};
 
   before(async () => {
@@ -90,7 +90,7 @@ describe('src/models/Issue relations', () => {
   });
 
   context('IssueComment', () => {
-    it('defined a hasMany association with Issue', async () => {
+    it('defined a hasMany association with issue', async () => {
       const projectId = 1;
       const issueStatusId = 2;
       const reporterId = 3;
@@ -185,8 +185,8 @@ describe('src/models/Issue relations', () => {
 //     db = await init();
 //   });
 //
-//   context('IssueComment', () => {
-//     it('defined a hasMany association with Issue', async () => {
+//   context('issue-comment', () => {
+//     it('defined a hasMany association with issue', async () => {
 //       const projectId = 1;
 //       const issueStatusId = 2;
 //       const reporterId = 3;
@@ -232,9 +232,9 @@ describe('src/models/Issue relations', () => {
 //         comment: 'test',
 //       };
 //
-//       const newAssigneeUser = await db.User.create(assigneeUserData);
-//       const newReporterUser = await db.User.create(reporterUserData);
-//       const newProject = await db.Project.create(projectData);
+//       const newAssigneeUser = await db.user.create(assigneeUserData);
+//       const newReporterUser = await db.user.create(reporterUserData);
+//       const newProject = await db.project.create(projectData);
 //       const newIssueStatuses = await db.IssueStatuses.bulkCreate([
 //         {
 //           projectId: Number(projectId),
@@ -249,8 +249,8 @@ describe('src/models/Issue relations', () => {
 //           name: 'Done',
 //         },
 //       ]);
-//       const newIssue = await db.Issue.create(issueData);
-//       const newIssueComment = await db.IssueComment.create(issueCommentData);
+//       const newIssue = await db.issue.create(issueData);
+//       const newIssueComment = await db.issue-comment.create(issueCommentData);
 //       const issueComments = await newIssue.getIssueComments();
 //
 //       expect(newIssue.toJSON()).to.deep.include({ id: issueId, reporterId, assigneeId });
@@ -262,8 +262,8 @@ describe('src/models/Issue relations', () => {
 //       // We test the cascade delete at this point
 //       await newIssue.destroy();
 //
-//       const findIssueAfterDestroy = await db.Issue.findOne({ where: { id: issueId } });
-//       const findIssueCommentAfterDestroy = await db.IssueComment.findOne({
+//       const findIssueAfterDestroy = await db.issue.findOne({ where: { id: issueId } });
+//       const findIssueCommentAfterDestroy = await db.issue-comment.findOne({
 //         where: { id: issueCommentId },
 //       });
 //

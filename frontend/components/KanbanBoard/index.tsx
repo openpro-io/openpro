@@ -195,7 +195,7 @@ export default function KanbanBoard({
 
     const notification = {
       type: 'notification',
-      title: 'New Issue Created',
+      title: 'New issue Created',
       message: `Ticket title: ${itemName}`,
       topic: `user:${session?.user?.id}`,
       tags: ['white_check_mark', 'openpro.notificationDuration=3000'],

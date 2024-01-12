@@ -5,7 +5,7 @@
   "singleQuote": true,
   "overrides": [
     {
-      "files": ["backend/**/*.js"],
+      "files": ["backend/**/*.ts"],
       "options": {
         "printWidth": 120,
         "importOrder": ["^[./]"],

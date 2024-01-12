@@ -172,7 +172,7 @@ export default function Backlog({ projectId }: { projectId: string }) {
 
     const notification = {
       type: 'notification',
-      title: 'New Issue Created',
+      title: 'New issue Created',
       message: `Ticket title: ${backlogState.itemName}`,
       topic: `user:${session?.user?.id}`,
       tags: ['white_check_mark', 'openpro.notificationDuration=3000'],

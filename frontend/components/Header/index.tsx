@@ -1,9 +1,10 @@
+import Image from 'next/image';
 import Link from 'next/link';
+
 import DarkModeSwitcher from './DarkModeSwitcher';
 import DropdownMessage from './DropdownMessage';
 import DropdownNotification from './DropdownNotification';
 import DropdownUser from './DropdownUser';
-import Image from 'next/image';
 
 const Header = (props: {
   sidebarOpen: string | boolean | undefined;
@@ -88,9 +89,9 @@ const Header = (props: {
             {/* <!-- Chat Notification Area --> */}
           </ul>
 
-          {/* <!-- User Area --> */}
+          {/* <!-- user Area --> */}
           <DropdownUser />
-          {/* <!-- User Area --> */}
+          {/* <!-- user Area --> */}
         </div>
       </div>
     </header>

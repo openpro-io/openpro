@@ -131,3 +131,7 @@ assets/
 /frontend/.pnpm-store/
 /backend/.pnpm-store/
 .history
+/backend/dist/
+
+docker-compose-dev.yml
+/backend/.env.local

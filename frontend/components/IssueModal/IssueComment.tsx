@@ -50,7 +50,7 @@ const IssueComment = ({
           <Avatar person={reporter} className='h-6 w-6' />
           <div className=''>{reporter.name}</div>
           <div className='pt-0.5 text-sm'>
-            {DateTime.fromMillis(Number(comment.createdAt)).toRelative()}
+            {DateTime.fromISO(comment.createdAt).toRelative()}
           </div>
         </div>
         {!showEditor && (

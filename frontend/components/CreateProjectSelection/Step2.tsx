@@ -1,12 +1,13 @@
-import React, { Dispatch, Fragment, SetStateAction } from 'react';
-import { CreateProjectDetails } from '@/constants/types';
-import { useField, useFormik, useFormikContext } from 'formik';
-import { object, string } from 'yup';
-import { apolloClient } from '@/services/apollo-client';
-import { CREATE_PROJECT_VALIDATION_QUERY } from '@/gql/gql-queries-mutations';
-import { Button } from '@/components/Button';
 import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
+import { useField, useFormik, useFormikContext } from 'formik';
+import React, { Dispatch, Fragment, SetStateAction } from 'react';
+import { object, string } from 'yup';
+
+import { Button } from '@/components/Button';
+import { CreateProjectDetails } from '@/constants/types';
+import { CREATE_PROJECT_VALIDATION_QUERY } from '@/gql/gql-queries-mutations';
+import { apolloClient } from '@/services/apollo-client';
 
 // Function to check if the field is unique
 const createProjectValidationQuery = async ({
@@ -222,7 +223,7 @@ const Step2 = ({
               >
                 Key
               </label>
-              {/* Project keys must start with an uppercase letter, followed by one or more uppercase alphanumeric characters. */}
+              {/* project keys must start with an uppercase letter, followed by one or more uppercase alphanumeric characters. */}
               {/* The project key must not exceed 10 characters in length. */}
               <div className='mt-2'>
                 <div className='flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md'>

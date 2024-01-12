@@ -37,7 +37,7 @@ export const IssueDescription = ({ issueId }: { issueId?: string }) => {
   //   update(cache, { data: { createIssueComment } }) {
   //     cache.modify({
   //       id: cache.identify({
-  //         __typename: 'Issue',
+  //         __typename: 'issue',
   //         id: createIssueComment.issueId,
   //       }),
   //       fields: {

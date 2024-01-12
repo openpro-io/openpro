@@ -14,6 +14,8 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
+  DateTime: { input: any; output: any; }
   /** The `Upload` scalar type represents a file upload. */
   Upload: { input: any; output: any; }
 };
@@ -28,10 +30,10 @@ export type Asset = {
   assetPath?: Maybe<Scalars['String']['output']>;
   assetSubType?: Maybe<Scalars['String']['output']>;
   assetType?: Maybe<Scalars['String']['output']>;
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['ID']['output'];
   ownerId?: Maybe<Scalars['String']['output']>;
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type AssignAssetAsAvatarInput = {
@@ -43,7 +45,7 @@ export type Board = {
   backlogEnabled?: Maybe<Scalars['Boolean']['output']>;
   columns?: Maybe<Array<Maybe<Column>>>;
   containerOrder?: Maybe<Scalars['String']['output']>;
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
   issues?: Maybe<Array<Maybe<Issue>>>;
   name?: Maybe<Scalars['String']['output']>;
@@ -51,13 +53,20 @@ export type Board = {
   settings?: Maybe<Scalars['String']['output']>;
   status?: Maybe<Scalars['String']['output']>;
   style?: Maybe<Scalars['String']['output']>;
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
   viewState?: Maybe<Array<Maybe<ViewState>>>;
 };
 
 export enum BoardStyle {
   Kanban = 'KANBAN',
   Scrum = 'SCRUM'
+}
+
+export enum Custom_Field_Type {
+  Boolean = 'BOOLEAN',
+  Date = 'DATE',
+  Number = 'NUMBER',
+  Text = 'TEXT'
 }
 
 export type Column = {
@@ -100,6 +109,12 @@ export type CreateIssueStatusInput = {
   projectId: Scalars['String']['input'];
 };
 
+export type CreateProjectCustomFieldInput = {
+  fieldName: Scalars['String']['input'];
+  fieldType: Custom_Field_Type;
+  projectId: Scalars['String']['input'];
+};
+
 export type CreateProjectInput = {
   boardName: Scalars['String']['input'];
   boardStyle: BoardStyle;
@@ -117,6 +132,26 @@ export type CreateProjectTagInput = {
 export type CreateProjectValidationInput = {
   key?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CustomField = {
+  __typename?: 'CustomField';
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  fieldName: Scalars['String']['output'];
+  fieldType: Custom_Field_Type;
+  id: Scalars['ID']['output'];
+  projectId: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type CustomFieldValue = {
+  __typename?: 'CustomFieldValue';
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  customField?: Maybe<CustomField>;
+  customFieldId: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  value: Scalars['String']['output'];
 };
 
 export type DeleteAssetInput = {
@@ -137,6 +172,10 @@ export type DeleteIssueLinkInput = {
   linkedIssueId: Scalars['String']['input'];
 };
 
+export type DeleteProjectCustomFieldInput = {
+  id: Scalars['String']['input'];
+};
+
 export type DeleteProjectTagInput = {
   id: Scalars['String']['input'];
 };
@@ -153,7 +192,8 @@ export type Issue = {
   archived?: Maybe<Scalars['Boolean']['output']>;
   assignee?: Maybe<User>;
   comments?: Maybe<Array<Maybe<IssueComment>>>;
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  customFields?: Maybe<Array<Maybe<CustomFieldValue>>>;
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   linkType?: Maybe<Scalars['String']['output']>;
@@ -166,26 +206,26 @@ export type Issue = {
   status?: Maybe<IssueStatus>;
   tags?: Maybe<Array<Maybe<ProjectTag>>>;
   title: Scalars['String']['output'];
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type IssueComment = {
   __typename?: 'IssueComment';
   comment: Scalars['String']['output'];
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['ID']['output'];
   issueId: Scalars['String']['output'];
   reporter: User;
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type IssueStatus = {
   __typename?: 'IssueStatus';
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   projectId?: Maybe<Scalars['String']['output']>;
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type MessageAndStatus = {
@@ -204,11 +244,13 @@ export type Mutation = {
   createIssueLink?: Maybe<MessageAndStatus>;
   createIssueStatus?: Maybe<IssueStatus>;
   createProject?: Maybe<Project>;
+  createProjectCustomField?: Maybe<CustomField>;
   createProjectTag?: Maybe<ProjectTag>;
   deleteAsset?: Maybe<MessageAndStatus>;
   deleteIssue?: Maybe<MessageAndStatus>;
   deleteIssueComment?: Maybe<MessageAndStatus>;
   deleteIssueLink?: Maybe<MessageAndStatus>;
+  deleteProjectCustomField?: Maybe<MessageAndStatus>;
   deleteProjectTag?: Maybe<MessageAndStatus>;
   removeUserFromProject?: Maybe<MessageAndStatus>;
   updateBoard?: Maybe<Board>;
@@ -259,6 +301,11 @@ export type MutationCreateProjectArgs = {
 };
 
 
+export type MutationCreateProjectCustomFieldArgs = {
+  input: CreateProjectCustomFieldInput;
+};
+
+
 export type MutationCreateProjectTagArgs = {
   input: CreateProjectTagInput;
 };
@@ -281,6 +328,11 @@ export type MutationDeleteIssueCommentArgs = {
 
 export type MutationDeleteIssueLinkArgs = {
   input: DeleteIssueLinkInput;
+};
+
+
+export type MutationDeleteProjectCustomFieldArgs = {
+  input: DeleteProjectCustomFieldInput;
 };
 
 
@@ -326,7 +378,8 @@ export enum Order {
 export type Project = {
   __typename?: 'Project';
   boards?: Maybe<Array<Maybe<Board>>>;
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  customFields?: Maybe<Array<Maybe<CustomField>>>;
   description?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
   imageId?: Maybe<Scalars['Int']['output']>;
@@ -337,7 +390,7 @@ export type Project = {
   name?: Maybe<Scalars['String']['output']>;
   status?: Maybe<Scalars['String']['output']>;
   tags?: Maybe<Array<Maybe<ProjectTag>>>;
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
   users?: Maybe<Array<Maybe<User>>>;
   visibility?: Maybe<ProjectVisibility>;
 };
@@ -349,11 +402,11 @@ export type ProjectIssuesArgs = {
 
 export type ProjectTag = {
   __typename?: 'ProjectTag';
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   projectId: Scalars['String']['output'];
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export enum ProjectVisibility {
@@ -462,6 +515,8 @@ export type UpdateIssueCommentInput = {
 export type UpdateIssueInput = {
   archived?: InputMaybe<Scalars['Boolean']['input']>;
   assigneeId?: InputMaybe<Scalars['String']['input']>;
+  customFieldId?: InputMaybe<Scalars['String']['input']>;
+  customFieldValue?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['String']['input'];
   issueStatusId?: InputMaybe<Scalars['String']['input']>;
@@ -533,10 +588,10 @@ export type ViewStateItemInput = {
 
 export type UpdateIssueStatusFragment = { __typename?: 'Issue', id: string, status?: { __typename?: 'IssueStatus', id: string, name: string } | null } & { ' $fragmentName'?: 'UpdateIssueStatusFragment' };
 
-export type ProjectFieldsFragment = { __typename?: 'Project', id?: string | null, name?: string | null, key?: string | null, description?: string | null, visibility?: ProjectVisibility | null, createdAt?: string | null, updatedAt?: string | null, boards?: Array<{ __typename?: 'Board', id?: string | null, name?: string | null, backlogEnabled?: boolean | null, settings?: string | null, createdAt?: string | null, updatedAt?: string | null, viewState?: Array<(
+export type ProjectFieldsFragment = { __typename?: 'Project', id?: string | null, name?: string | null, key?: string | null, description?: string | null, visibility?: ProjectVisibility | null, createdAt?: any | null, updatedAt?: any | null, boards?: Array<{ __typename?: 'Board', id?: string | null, name?: string | null, backlogEnabled?: boolean | null, settings?: string | null, createdAt?: any | null, updatedAt?: any | null, viewState?: Array<(
       { __typename?: 'ViewState' }
       & { ' $fragmentRefs'?: { 'ViewStateFieldsFragment': ViewStateFieldsFragment } }
-    ) | null> | null } | null> | null, issueStatuses?: Array<{ __typename?: 'IssueStatus', id: string, name: string, projectId?: string | null, createdAt?: string | null, updatedAt?: string | null } | null> | null, issues?: Array<(
+    ) | null> | null } | null> | null, issueStatuses?: Array<{ __typename?: 'IssueStatus', id: string, name: string, projectId?: string | null, createdAt?: any | null, updatedAt?: any | null } | null> | null, issues?: Array<(
     { __typename?: 'Issue' }
     & { ' $fragmentRefs'?: { 'IssueFieldsFragment': IssueFieldsFragment } }
   ) | null> | null, users?: Array<(
@@ -544,9 +599,9 @@ export type ProjectFieldsFragment = { __typename?: 'Project', id?: string | null
     & { ' $fragmentRefs'?: { 'UserFieldsFragment': UserFieldsFragment } }
   ) | null> | null } & { ' $fragmentName'?: 'ProjectFieldsFragment' };
 
-export type ProjectOnlyFieldsFragment = { __typename?: 'Project', id?: string | null, name?: string | null, key?: string | null, visibility?: ProjectVisibility | null, description?: string | null, createdAt?: string | null, updatedAt?: string | null } & { ' $fragmentName'?: 'ProjectOnlyFieldsFragment' };
+export type ProjectOnlyFieldsFragment = { __typename?: 'Project', id?: string | null, name?: string | null, key?: string | null, visibility?: ProjectVisibility | null, description?: string | null, createdAt?: any | null, updatedAt?: any | null } & { ' $fragmentName'?: 'ProjectOnlyFieldsFragment' };
 
-export type IssueFieldsFragment = { __typename?: 'Issue', id: string, title: string, description?: string | null, projectId?: string | null, priority?: number | null, archived?: boolean | null, createdAt?: string | null, updatedAt?: string | null, tags?: Array<{ __typename?: 'ProjectTag', id: string, name: string, projectId: string, createdAt?: string | null, updatedAt?: string | null } | null> | null, status?: { __typename?: 'IssueStatus', id: string, name: string, projectId?: string | null } | null, reporter?: (
+export type IssueFieldsFragment = { __typename?: 'Issue', id: string, title: string, description?: string | null, projectId?: string | null, priority?: number | null, archived?: boolean | null, createdAt?: any | null, updatedAt?: any | null, tags?: Array<{ __typename?: 'ProjectTag', id: string, name: string, projectId: string, createdAt?: any | null, updatedAt?: any | null } | null> | null, status?: { __typename?: 'IssueStatus', id: string, name: string, projectId?: string | null } | null, reporter?: (
     { __typename?: 'User' }
     & { ' $fragmentRefs'?: { 'UserFieldsFragment': UserFieldsFragment } }
   ) | null, assignee?: (
@@ -559,7 +614,7 @@ export type IssueFieldsFragment = { __typename?: 'Issue', id: string, title: str
 
 export type UserFieldsFragment = { __typename?: 'User', id?: string | null, email?: string | null, externalId?: string | null, name?: string | null, firstName?: string | null, lastName?: string | null, avatarUrl?: string | null } & { ' $fragmentName'?: 'UserFieldsFragment' };
 
-export type IssueCommentFieldsFragment = { __typename?: 'IssueComment', id: string, comment: string, issueId: string, createdAt?: string | null, updatedAt?: string | null, reporter: (
+export type IssueCommentFieldsFragment = { __typename?: 'IssueComment', id: string, comment: string, issueId: string, createdAt?: any | null, updatedAt?: any | null, reporter: (
     { __typename?: 'User' }
     & { ' $fragmentRefs'?: { 'UserFieldsFragment': UserFieldsFragment } }
   ) } & { ' $fragmentName'?: 'IssueCommentFieldsFragment' };
@@ -618,7 +673,7 @@ export type GetProjectInfoQuery = { __typename?: 'Query', project?: (
     ) | null> | null, boards?: Array<{ __typename?: 'Board', id?: string | null, backlogEnabled?: boolean | null, containerOrder?: string | null, viewState?: Array<(
         { __typename?: 'ViewState' }
         & { ' $fragmentRefs'?: { 'ViewStateFieldsFragment': ViewStateFieldsFragment } }
-      ) | null> | null } | null> | null, issueStatuses?: Array<{ __typename?: 'IssueStatus', id: string, projectId?: string | null, name: string, createdAt?: string | null } | null> | null, issues?: Array<(
+      ) | null> | null } | null> | null, issueStatuses?: Array<{ __typename?: 'IssueStatus', id: string, projectId?: string | null, name: string, createdAt?: any | null } | null> | null, issues?: Array<(
       { __typename?: 'Issue' }
       & { ' $fragmentRefs'?: { 'IssueFieldsFragment': IssueFieldsFragment } }
     ) | null> | null }
@@ -667,7 +722,7 @@ export type GetIssueStatusesQueryVariables = Exact<{
 }>;
 
 
-export type GetIssueStatusesQuery = { __typename?: 'Query', project?: { __typename?: 'Project', id?: string | null, name?: string | null, description?: string | null, issueStatuses?: Array<{ __typename?: 'IssueStatus', id: string, projectId?: string | null, name: string, createdAt?: string | null } | null> | null } | null };
+export type GetIssueStatusesQuery = { __typename?: 'Query', project?: { __typename?: 'Project', id?: string | null, name?: string | null, description?: string | null, issueStatuses?: Array<{ __typename?: 'IssueStatus', id: string, projectId?: string | null, name: string, createdAt?: any | null } | null> | null } | null };
 
 export type UpdateIssueMutationVariables = Exact<{
   input?: InputMaybe<UpdateIssueInput>;
@@ -728,7 +783,7 @@ export type CreateIssueStatusMutationVariables = Exact<{
 }>;
 
 
-export type CreateIssueStatusMutation = { __typename?: 'Mutation', createIssueStatus?: { __typename?: 'IssueStatus', id: string, name: string, projectId?: string | null, createdAt?: string | null } | null };
+export type CreateIssueStatusMutation = { __typename?: 'Mutation', createIssueStatus?: { __typename?: 'IssueStatus', id: string, name: string, projectId?: string | null, createdAt?: any | null } | null };
 
 export type CreateProjectMutationVariables = Exact<{
   input?: InputMaybe<CreateProjectInput>;
@@ -736,7 +791,7 @@ export type CreateProjectMutationVariables = Exact<{
 
 
 export type CreateProjectMutation = { __typename?: 'Mutation', createProject?: (
-    { __typename?: 'Project', boards?: Array<{ __typename?: 'Board', id?: string | null, style?: string | null, backlogEnabled?: boolean | null, createdAt?: string | null, viewState?: Array<(
+    { __typename?: 'Project', boards?: Array<{ __typename?: 'Board', id?: string | null, style?: string | null, backlogEnabled?: boolean | null, createdAt?: any | null, viewState?: Array<(
         { __typename?: 'ViewState' }
         & { ' $fragmentRefs'?: { 'ViewStateFieldsFragment': ViewStateFieldsFragment } }
       ) | null> | null } | null> | null }
@@ -771,7 +826,7 @@ export type GetProjectTagsQueryVariables = Exact<{
 }>;
 
 
-export type GetProjectTagsQuery = { __typename?: 'Query', projectTags?: Array<{ __typename?: 'ProjectTag', id: string, name: string, projectId: string, createdAt?: string | null, updatedAt?: string | null } | null> | null };
+export type GetProjectTagsQuery = { __typename?: 'Query', projectTags?: Array<{ __typename?: 'ProjectTag', id: string, name: string, projectId: string, createdAt?: any | null, updatedAt?: any | null } | null> | null };
 
 export type CreateProjectTagMutationVariables = Exact<{
   input: CreateProjectTagInput;

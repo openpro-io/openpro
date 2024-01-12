@@ -1,22 +1,22 @@
-import React, { Fragment, useState } from 'react';
+import { useQuery } from '@apollo/client';
 import { Menu, Transition } from '@headlessui/react';
-
-import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid';
 import {
   ArrowLongLeftIcon,
   ArrowLongRightIcon,
 } from '@heroicons/react/20/solid';
-import { useRouter } from 'next/navigation';
-import { useQuery } from '@apollo/client';
-import { GET_PROJECTS } from '@/gql/gql-queries-mutations';
-import { GetProjectsQuery, Project } from '@/gql/__generated__/graphql';
+import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import React, { Fragment, useState } from 'react';
+
+import { GetProjectsQuery, Project } from '@/gql/__generated__/graphql';
+import { GET_PROJECTS } from '@/gql/gql-queries-mutations';
 
 const cols = [
   'ID',
   'Name',
   'Key',
-  'Board Style',
+  'board Style',
   'Visibility',
   'Description',
   '',

@@ -15,4 +15,4 @@ CMD "pnpm install --frozen-lockfile -f"
 
 EXPOSE 8080
 
-CMD sh -c "pnpm migrate:up && pnpm dev"
+CMD sh -c "pnpm tsx src/umzug-runner.ts up && pnpm dev"
