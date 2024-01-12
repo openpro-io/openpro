@@ -1,13 +1,12 @@
-// import './MentionList.scss';
-
 import React, {
   forwardRef,
   useEffect,
   useImperativeHandle,
   useState,
 } from 'react';
-import { classNames } from '@/services/utils';
+
 import { User } from '@/gql/__generated__/graphql';
+import { classNames } from '@/services/utils';
 
 const cssItems =
   'flex flex-col relative overflow-hidden rounded-lg bg-surface p-2 text-sm text-primary shadow-sm';
@@ -17,19 +16,17 @@ const cssItem =
 
 type Props = {
   items: User[];
-  command: (options: { id: string }) => void;
+  command: (options: { id: string; label: string | null | undefined }) => void;
 };
 
 const MentionList = forwardRef((props: Props, ref) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const selectItem = (index: number) => {
-    // This displays the name of the user in the editor when selected
-    const item = props.items[index].name;
+    const id = props.items[index].id; // the user id
+    const label = props.items[index].name; // the user full name
 
-    if (item) {
-      props.command({ id: item });
-    }
+    if (id) props.command({ id, label });
   };
 
   const upHandler = () => {

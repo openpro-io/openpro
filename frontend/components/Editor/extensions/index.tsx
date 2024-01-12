@@ -1,35 +1,32 @@
-import StarterKit from '@tiptap/starter-kit';
-import TiptapLink from '@tiptap/extension-link';
-import TiptapUnderline from '@tiptap/extension-underline';
-import TextStyle from '@tiptap/extension-text-style';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { Color } from '@tiptap/extension-color';
+import Gapcursor from '@tiptap/extension-gapcursor';
+import TiptapLink from '@tiptap/extension-link';
+import { Mention } from '@tiptap/extension-mention';
 import TaskItem from '@tiptap/extension-task-item';
 import TaskList from '@tiptap/extension-task-list';
-// @ts-ignore
-import { Markdown } from 'tiptap-markdown';
-import Gapcursor from '@tiptap/extension-gapcursor';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-// Load all highlight.js supported languages
-import { common, createLowlight } from 'lowlight';
-
-import { ColorHighlighter } from './color-highlighter';
-import { SmilieReplacer } from './smile-replacer';
-
+import TextStyle from '@tiptap/extension-text-style';
+import { Typography } from '@tiptap/extension-typography';
+import TiptapUnderline from '@tiptap/extension-underline';
+import StarterKit from '@tiptap/starter-kit';
 // import ts from 'highlight.js/lib/languages/typescript';
 // import js from 'highlight.js/lib/languages/javascript';
 // TODO: we use this theme
 // import 'highlight.js/styles/tokyo-night-dark.css';
 import 'highlight.js/styles/atom-one-dark.css';
-
-const lowlight = createLowlight(common);
-
-import ImageExtension from './image';
-import suggestion from './suggestion';
+// Load all highlight.js supported languages
+import { common, createLowlight } from 'lowlight';
+// @ts-ignore
+import { Markdown } from 'tiptap-markdown';
 
 import { DeleteImage } from '../types/delete-image';
 import { isValidHttpUrl } from '../utils';
-import { Typography } from '@tiptap/extension-typography';
-import { Mention } from '@tiptap/extension-mention';
+import { ColorHighlighter } from './color-highlighter';
+import ImageExtension from './image';
+import { SmilieReplacer } from './smile-replacer';
+import suggestion from './suggestion';
+
+const lowlight = createLowlight(common);
 
 export const CoreEditorExtensions = (
   deleteFile: DeleteImage,
@@ -112,6 +109,9 @@ export const CoreEditorExtensions = (
   ColorHighlighter,
   SmilieReplacer,
   Mention.configure({
+    renderLabel({ options, node }) {
+      return `${options.suggestion.char}${node.attrs.label ?? node.attrs.id}`;
+    },
     HTMLAttributes: {
       class:
         'border border-primary rounded-md box-decoration-clone px-1 py-0.5 bg-surface-overlay-hovered',
