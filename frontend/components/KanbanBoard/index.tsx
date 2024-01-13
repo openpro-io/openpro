@@ -27,6 +27,9 @@ import { cloneDeep, isEmpty, isEqual, pick } from 'lodash';
 import { getSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Fireworks from 'react-canvas-confetti/dist/presets/fireworks';
+import Realistic from 'react-canvas-confetti/dist/presets/realistic';
+import { TConductorInstance } from 'react-canvas-confetti/dist/types';
 
 import { Button } from '@/components/Button';
 import IssueModal from '@/components/IssueModal';
@@ -35,6 +38,7 @@ import Toolbar from '@/components/KanbanBoard/Toolbar';
 import {
   CREATE_ISSUE_MUTATION,
   CREATE_ISSUE_STATUS_MUTATION,
+  GET_ME,
   GET_PROJECT_INFO,
   ISSUE_FIELDS,
   UPDATE_BOARD_MUTATION,
@@ -86,6 +90,7 @@ export default function KanbanBoard({
   const searchParams = useSearchParams()!;
   const selectedIssueId = searchParams.get('selectedIssueId');
 
+  const [conductor, setConductor] = useState<TConductorInstance>();
   const { sendJsonMessage } = useWsAuthenticatedSocket();
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
   const [showAddContainerModal, setShowAddContainerModal] = useState(false);
@@ -98,6 +103,10 @@ export default function KanbanBoard({
     itemName: '',
     saveToBackend: false,
   });
+
+  const onInit = ({ conductor }: { conductor: TConductorInstance }) => {
+    setConductor(conductor);
+  };
 
   const {
     containers,
@@ -113,6 +122,7 @@ export default function KanbanBoard({
   const [updateBoard] = useMutation(UPDATE_BOARD_MUTATION);
   const [addIssueStatus] = useMutation(CREATE_ISSUE_STATUS_MUTATION);
 
+  const getMe = useQuery(GET_ME);
   const getProjectInfo = useQuery(GET_PROJECT_INFO, {
     skip: !projectId,
     fetchPolicy: 'cache-first',
@@ -656,6 +666,19 @@ export default function KanbanBoard({
               containers: newItems,
             };
           });
+
+          const isIssueDone =
+            data.updateIssue.status.name.toLowerCase() === 'done';
+          const userEnabledCelebrateCompletedIssue = getMe?.data?.me?.settings
+            ? JSON.parse(getMe.data.me.settings)?.celebrateCompletedIssue
+            : true;
+
+          if (isIssueDone && userEnabledCelebrateCompletedIssue) {
+            conductor?.run({
+              duration: 1000,
+              speed: 2,
+            });
+          }
         },
       });
     }
@@ -912,6 +935,7 @@ export default function KanbanBoard({
           </IssueModal>
         </div>
       </div>
+      <Fireworks onInit={onInit} />
     </div>
   );
 }

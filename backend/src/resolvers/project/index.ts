@@ -9,6 +9,7 @@ import {
   type Resolvers,
   type ViewState,
 } from '../../__generated__/resolvers-types.js';
+import { formatUserForGraphql } from '../user/helpers';
 
 const Query: QueryResolvers = {
   projects: async (parent, args, { db, dataLoaderContext }) => {
@@ -74,9 +75,7 @@ const Query: QueryResolvers = {
       id: `${databaseProject.id}`,
       visibility: databaseProject.visibility as ProjectVisibility,
       boards: undefined,
-      users: databaseProject.users
-        ? databaseProject.users.map((user) => ({ ...user.toJSON(), id: `${user.id}` }))
-        : undefined,
+      users: databaseProject.users ? databaseProject.users.map(formatUserForGraphql) : undefined,
     };
   },
   projectTags: async (parent, { input: { projectId, id, name } }, { db, dataLoaderContext }) => {

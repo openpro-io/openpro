@@ -60,6 +60,7 @@ const typeDefs = gql`
     name: String
     email: String
     avatarUrl: String
+    settings: String
   }
 
   type ProjectTag {
@@ -339,6 +340,7 @@ const typeDefs = gql`
   input UpdateMeInput {
     firstName: String
     lastName: String
+    settings: String
   }
 
   input CreateIssueLinkInput {

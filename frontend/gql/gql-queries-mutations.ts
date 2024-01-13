@@ -91,6 +91,7 @@ export const USER_FIELDS = gql(/* GraphQL */ `
     firstName
     lastName
     avatarUrl
+    settings
   }
 `);
 

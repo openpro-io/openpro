@@ -1,14 +1,10 @@
 import { isUndefined } from 'lodash-es';
 
 import type { MutationResolvers, QueryResolvers, UserResolvers } from '../../__generated__/resolvers-types.js';
-import { Asset as AssetModel, User as UserModel } from '../../db/models/types.js';
+import { Asset as AssetModel } from '../../db/models/types.js';
 import { BUCKET_NAME } from '../../services/config.js';
 import { minioClient } from '../../services/minio-client.js';
-
-const formatUserResponse = (user: UserModel) => ({
-  ...user.toJSON(),
-  id: `${user.id}`,
-});
+import { formatUserForGraphql } from './helpers.js';
 
 const Query: QueryResolvers = {
   users: async (parent, args, { db, dataLoaderContext }) => {
@@ -16,7 +12,7 @@ const Query: QueryResolvers = {
 
     dataLoaderContext.prime(dbUsers);
 
-    return dbUsers.map(formatUserResponse);
+    return dbUsers.map(formatUserForGraphql);
   },
   user: (parent, __, { db }) => {
     // if (externalId) {
@@ -33,24 +29,30 @@ const Query: QueryResolvers = {
       [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
-    return formatUserResponse(dbUser);
+    return formatUserForGraphql(dbUser);
   },
 };
 
 const Mutation: MutationResolvers = {
   updateMe: async (parent, { input }, { db, user, dataLoaderContext }) => {
-    const { firstName, lastName } = input;
+    // We reload here in cases where the cached user is out of date from fastify auth cache
+    await user.reload();
+
+    const { firstName, lastName, settings } = input;
+    if (!user.id) throw new Error('User not found');
 
     if (!isUndefined(firstName)) user.firstName = firstName;
     if (!isUndefined(lastName)) user.lastName = lastName;
+    if (!isUndefined(settings)) user.settings = JSON.parse(settings);
 
     await user.save();
 
-    dataLoaderContext.prime(user);
-
-    return formatUserResponse(user);
+    return formatUserForGraphql(user);
   },
   assignAssetAsAvatar: async (parent, { input }, { db, user, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
+    // We reload here in cases where the cached user is out of date from fastify auth cache
+    await user.reload();
+
     const { assetId } = input;
     let findOldAvatarAsset: AssetModel;
 

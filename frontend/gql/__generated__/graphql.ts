@@ -529,6 +529,7 @@ export type UpdateIssueInput = {
 export type UpdateMeInput = {
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
+  settings?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UploadAssetInput = {
@@ -545,6 +546,7 @@ export type User = {
   id?: Maybe<Scalars['ID']['output']>;
   lastName?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+  settings?: Maybe<Scalars['String']['output']>;
 };
 
 export type ViewState = {

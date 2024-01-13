@@ -13,6 +13,7 @@ import {
 } from '../../__generated__/resolvers-types.js';
 import { Issue as IssueModel } from '../../db/models/types.js';
 import { websocketBroadcast } from '../../services/ws-server.js';
+import { formatUserForGraphql } from '../user/helpers';
 
 const Query: QueryResolvers = {
   issues: async (parent, { input: { projectId, id, search, searchOperator } }, { db, dataLoaderContext }) => {
@@ -404,10 +405,7 @@ const Issue: IssueResolvers = {
 
     if (!reporterUser) return null;
 
-    return {
-      ...reporterUser.toJSON(),
-      id: `${reporterUser.id}`,
-    };
+    return formatUserForGraphql(reporterUser);
   },
   assignee: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const databaseIssue = await db.Issue.findByPk(Number(parent.id), {
@@ -420,10 +418,7 @@ const Issue: IssueResolvers = {
       [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
-    return {
-      ...user.toJSON(),
-      id: `${user.id}`,
-    };
+    return formatUserForGraphql(user);
   },
   project: async (parent, __, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     if (parent.project) return parent.project;
