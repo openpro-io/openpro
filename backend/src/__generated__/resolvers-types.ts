@@ -500,6 +500,7 @@ export type UpdateIssueInput = {
 export type UpdateMeInput = {
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
+  settings?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UploadAssetInput = {
@@ -516,6 +517,7 @@ export type User = {
   id?: Maybe<Scalars['ID']['output']>;
   lastName?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+  settings?: Maybe<Scalars['String']['output']>;
 };
 
 export type ViewState = {
@@ -1078,6 +1080,7 @@ export type UserResolvers<ContextType = ApolloContext, ParentType = ResolversPar
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  settings?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

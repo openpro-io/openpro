@@ -33,6 +33,7 @@ export class User extends Model<InferAttributes<User>, InferCreationAttributes<U
   declare lastName: CreationOptional<string | null>;
   declare email: CreationOptional<string | null>;
   declare avatarAssetId: CreationOptional<number | null>;
+  declare settings: CreationOptional<object | object[] | null>; // JSONB
 
   declare static associate?: Associate;
 

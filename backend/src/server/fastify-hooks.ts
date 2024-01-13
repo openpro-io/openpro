@@ -5,6 +5,7 @@ import { GraphQLError } from 'graphql';
 import processRequest from 'graphql-upload/processRequest.mjs';
 
 import db from '../db/index.js';
+import { User as UserModel } from '../db/models/types.js';
 import { cache } from '../services/cache.js';
 import {
   ALLOW_LOGIN_DOMAINS_LIST,
@@ -31,10 +32,10 @@ const addUserToRequest = async (request: CustomFastifyRequest, reply: FastifyRep
 
   const cacheKey = hash(token);
 
-  const cachedUser = cache.get(cacheKey);
+  const cachedUser = <UserModel>cache.get(cacheKey);
 
   if (cachedUser) {
-    request.user = db.User.build(cachedUser);
+    request.user = cachedUser;
     return;
   }
 

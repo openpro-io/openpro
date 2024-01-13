@@ -34,6 +34,10 @@ export default (sequelize: Sequelize) =>
           key: 'id',
         },
       },
+      settings: {
+        type: DataTypes.JSONB,
+        field: 'settings',
+      },
       createdAt: {
         type: DataTypes.DATE,
         field: 'created_at',

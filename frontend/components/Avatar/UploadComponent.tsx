@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
-const Avatar = dynamic(() => import('react-avatar-edit'), { ssr: false });
+import React, { useState } from 'react';
+
 import { Button } from '@/components/Button';
+
+const Avatar = dynamic(() => import('react-avatar-edit'), { ssr: false });
 
 export const AvatarUploadComponent = ({
   onAvatarSave,
@@ -24,7 +26,7 @@ export const AvatarUploadComponent = ({
   }
 
   return (
-    <div className='flex flex-row space-x-1'>
+    <div className='flex flex-row space-x-1 text-primary hover:cursor-pointer'>
       <Avatar
         width={600}
         height={300}
@@ -32,6 +34,7 @@ export const AvatarUploadComponent = ({
         onClose={onClose}
         onBeforeFileLoad={onBeforeFileLoad}
         src={undefined}
+        labelStyle={{ color: undefined }}
       />
       <br />
       {preview && (

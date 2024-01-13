@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "dev:migrate": "pnpm tsx src/umzug-runner.ts up",
     "lint": "pnpm oxlint && pnpm eslint && tsc --noEmit",
     "start": "node dist",
     "format": "prettier --check --ignore-path ../.gitignore .",
