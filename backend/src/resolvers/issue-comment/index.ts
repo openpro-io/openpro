@@ -1,4 +1,5 @@
 import type { IssueCommentResolvers, MutationResolvers } from '../../__generated__/resolvers-types.js';
+import { formatUserForGraphql } from '../user/helpers.js';
 
 const Mutation: MutationResolvers = {
   createIssueComment: async (parent, { input }, { db, user }) => {
@@ -52,6 +53,8 @@ const Mutation: MutationResolvers = {
 
     await findIssueComment.save();
 
+    dataLoaderContext.prime(findIssueComment);
+
     return {
       ...findIssueComment.toJSON(),
       id: `${findIssueComment.id}`,
@@ -70,10 +73,7 @@ const IssueComment: IssueCommentResolvers = {
       [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
-    return {
-      ...dbUser.toJSON(),
-      id: `${dbUser.id}`,
-    };
+    return formatUserForGraphql(dbUser);
   },
 };
 

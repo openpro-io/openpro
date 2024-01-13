@@ -13,7 +13,7 @@ import {
 } from '../../__generated__/resolvers-types.js';
 import { Issue as IssueModel } from '../../db/models/types.js';
 import { websocketBroadcast } from '../../services/ws-server.js';
-import { formatUserForGraphql } from '../user/helpers';
+import { formatUserForGraphql } from '../user/helpers.js';
 
 const Query: QueryResolvers = {
   issues: async (parent, { input: { projectId, id, search, searchOperator } }, { db, dataLoaderContext }) => {

@@ -14,22 +14,13 @@ const config: CodegenConfig = {
   },
   hooks: {
     afterOneFileWrite: [
-      'sed -i \'\' -e \'1s|import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from "graphql";|import { type GraphQLResolveInfo, GraphQLScalarType, type GraphQLScalarTypeConfig } from "graphql";|\' src/__generated__/resolvers-types.ts',
+      "sed -i '' 's/import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from '\\''graphql'\\'';/import type { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from '\\''graphql'\\'';/g' src/__generated__/resolvers-types.ts\n",
+      "sed -i '' 's/import { ApolloContext } from '\\''..\\/server\\/apollo.js'\\'';/import type { ApolloContext } from '\\''..\\/server\\/apollo.js'\\'';/g' src/__generated__/resolvers-types.ts\n",
     ],
   },
   config: {
     useIndexSignature: true,
     contextType: '../server/apollo.js#ApolloContext',
-    mappers: {
-      // Project: '../db/models/types.js#Project as ProjectModel',
-      // ProjectTag: '../db/models/types.js#ProjectTag as ProjectTagModel',
-      // CustomField: '../db/models/types.js#ProjectCustomField as ProjectCustomFieldModel',
-      // User: '../db/models/types.js#User as UserModel',
-      // Issue: '../db/models/types.js#Issue as IssueModel',
-      // IssueComment: '../db/models/types.js#IssueComment as IssueCommentModel',
-      // Board: '../db/models/types.js#Board as BoardModel',
-      // IssueStatus: '../db/models/types.js#IssueStatus as IssueStatusModel',
-    },
   },
 };
 

@@ -9,7 +9,7 @@ import {
   type Resolvers,
   type ViewState,
 } from '../../__generated__/resolvers-types.js';
-import { formatUserForGraphql } from '../user/helpers';
+import { formatUserForGraphql } from '../user/helpers.js';
 
 const Query: QueryResolvers = {
   projects: async (parent, args, { db, dataLoaderContext }) => {
