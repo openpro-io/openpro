@@ -33,12 +33,15 @@ const Notifications = () => {
     useWsAuthenticatedSocket();
 
   useEffect(() => {
-    if (msg && msg?.type === 'notification') {
-      if (!msg.id && msg.messageId) msg.id = msg.messageId;
-      msg.subscriptionId = `http://${PUBLIC_NEXTAUTH_URL}/${msg.topic}`;
-      msg.new = 1;
+    if (msg && msg?.type === 'NOTIFICATION') {
+      const data = {
+        ...msg.payload,
+      };
 
-      notificationsTable.add(msg).catch((error) => {
+      data.subscriptionId = `http://${PUBLIC_NEXTAUTH_URL}/${msg.topic}`;
+      data.new = 1;
+
+      notificationsTable.add(data).catch((error) => {
         if (
           !error.toString().includes('Key already exists in the object store.')
         ) {
@@ -49,21 +52,21 @@ const Notifications = () => {
         return;
       });
 
-      const { otherTags, openpro } = processTags(msg?.tags);
+      const { otherTags, openpro } = processTags(data?.tags);
 
       toast.success(
         JSON.stringify({
-          title: msg?.title,
-          message: msg?.message,
+          title: data?.title,
+          message: data?.message,
           tags: otherTags,
-          priority: msg?.priority,
-          click: msg?.click,
+          priority: data?.priority,
+          click: data?.click,
         }),
         {
           duration: openpro?.notificationDuration
             ? Number(openpro?.notificationDuration)
             : 10000,
-          icon: priorityToIcon(msg?.priority),
+          icon: priorityToIcon(data?.priority),
         }
       );
     }
