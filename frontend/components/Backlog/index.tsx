@@ -24,6 +24,7 @@ import { cloneDeep, flatMap, pullAt } from 'lodash';
 import { getSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 import IssueModal from '@/components/IssueModal';
 import IssueModalContents from '@/components/IssueModal/IssueModalContents';
@@ -32,7 +33,6 @@ import {
   CREATE_ISSUE_STATUS_MUTATION,
   GET_PROJECT_INFO,
   UPDATE_BOARD_MUTATION,
-  UPDATE_ISSUE_MUTATION,
 } from '@/gql/gql-queries-mutations';
 import useWsAuthenticatedSocket from '@/hooks/useWsAuthenticatedSocket';
 
@@ -171,11 +171,14 @@ export default function Backlog({ projectId }: { projectId: string }) {
     const session = await getSession();
 
     const notification = {
-      type: 'notification',
-      title: 'New issue Created',
-      message: `Ticket title: ${backlogState.itemName}`,
-      topic: `user:${session?.user?.id}`,
-      tags: ['white_check_mark', 'openpro.notificationDuration=3000'],
+      type: 'NOTIFICATION',
+      payload: {
+        id: uuidv4(),
+        title: 'New issue Created',
+        message: `Ticket title: ${backlogState.itemName}`,
+        topic: `user:${session?.user?.id}`,
+        tags: ['white_check_mark', 'openpro.notificationDuration=3000'],
+      },
     };
 
     sendJsonMessage(notification);

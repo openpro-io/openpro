@@ -30,6 +30,7 @@ import { useEffect, useState } from 'react';
 import Fireworks from 'react-canvas-confetti/dist/presets/fireworks';
 import Realistic from 'react-canvas-confetti/dist/presets/realistic';
 import { TConductorInstance } from 'react-canvas-confetti/dist/types';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Button } from '@/components/Button';
 import IssueModal from '@/components/IssueModal';
@@ -204,14 +205,17 @@ export default function KanbanBoard({
     const session = await getSession();
 
     const notification = {
-      type: 'notification',
-      title: 'New issue Created',
-      message: `Ticket title: ${itemName}`,
-      topic: `user:${session?.user?.id}`,
-      tags: ['white_check_mark', 'openpro.notificationDuration=3000'],
-      click: `${getDomainName()}/projects/${projectId}/boards/${boardId}/?selectedIssueId=${
-        newIssue.id
-      }`,
+      type: 'NOTIFICATION',
+      payload: {
+        id: uuidv4(),
+        title: 'New issue Created',
+        message: `Ticket title: ${itemName}`,
+        topic: `user:${session?.user?.id}`,
+        tags: ['white_check_mark', 'openpro.notificationDuration=3000'],
+        click: `${getDomainName()}/projects/${projectId}/boards/${boardId}/?selectedIssueId=${
+          newIssue.id
+        }`,
+      },
     };
 
     sendJsonMessage(notification);
