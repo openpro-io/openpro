@@ -375,6 +375,24 @@ const typeDefs = gql`
     id: String!
   }
 
+  input AddItemToViewStateItemInput {
+    boardId: String!
+    viewStateId: String!
+    issueId: String!
+    columnPositionIndex: Int
+  }
+
+  input RemoveItemFromViewStateItemInput {
+    id: ID!
+    viewStateId: String!
+  }
+
+  input CreateViewStateInput {
+    boardId: String!
+    positionIndex: Int
+    title: String
+  }
+
   # Mutations
   type Mutation {
     createProject(input: CreateProjectInput): Project
@@ -410,6 +428,11 @@ const typeDefs = gql`
     deleteIssueLink(input: DeleteIssueLinkInput!): MessageAndStatus
 
     updateMe(input: UpdateMeInput!): User
+
+    # Adds a column to the kanban board
+    createViewState(input: CreateViewStateInput!): [ViewState]
+    addItemToViewState(input: AddItemToViewStateItemInput!): [ViewState]
+    removeItemFromViewState(input: RemoveItemFromViewStateItemInput!): [ViewState]
   }
 
   # Queries

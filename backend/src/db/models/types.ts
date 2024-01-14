@@ -187,8 +187,8 @@ export class IssueTag extends Model<
 }
 
 export class Board extends Model<
-  InferAttributes<Board, { omit: 'issues' }>,
-  InferCreationAttributes<Board, { omit: 'issues' }>
+  InferAttributes<Board, { omit: 'issues' | 'containers' }>,
+  InferCreationAttributes<Board, { omit: 'issues' | 'containers' }>
 > {
   // id can be undefined during creation when using `autoIncrement`
   declare id: CreationOptional<number>;
@@ -206,9 +206,11 @@ export class Board extends Model<
   declare static associate: Associate;
 
   declare issues?: NonAttribute<Issue[]>; // Note this is optional since it's only populated when explicitly requested in code
+  declare containers?: NonAttribute<BoardContainer[]>; // Note this is optional since it's only populated when explicitly requested in code
 
   declare static associations: {
-    issue: Association<Board, Issue>;
+    issues: Association<Board, Issue>;
+    containers: Association<Board, BoardContainer>;
   };
 
   declare createdAt: CreationOptional<Date>;
@@ -263,8 +265,11 @@ export class IssueBoard extends Model<
 }
 
 export class Issue extends Model<
-  InferAttributes<Issue, { omit: 'project' | 'linkedToIssues' | 'linkedByIssues' | 'IssueLink' }>,
-  InferCreationAttributes<Issue, { omit: 'project' | 'linkedToIssues' | 'linkedByIssues' | 'IssueLink' }>
+  InferAttributes<Issue, { omit: 'project' | 'linkedToIssues' | 'linkedByIssues' | 'IssueLink' | 'issueStatus' }>,
+  InferCreationAttributes<
+    Issue,
+    { omit: 'project' | 'linkedToIssues' | 'linkedByIssues' | 'IssueLink' | 'issueStatus' }
+  >
 > {
   // id can be undefined during creation when using `autoIncrement`
   declare id: CreationOptional<number>;
@@ -298,11 +303,13 @@ export class Issue extends Model<
   declare linkedToIssues?: NonAttribute<Issue[]>;
   declare linkedByIssues?: NonAttribute<Issue[]>;
   declare IssueLink?: NonAttribute<IssueLink>;
+  declare issueStatus?: NonAttribute<IssueStatus>; // Note this is optional since it's only populated when explicitly requested in code
 
   declare static associations: {
     project: Association<Issue, Project>;
     linkedToIssues: Association<Issue, Issue>;
     linkedByIssues: Association<Issue, Issue>;
+    issueStatus: Association<Issue, IssueStatus>;
   };
 
   // timestamps!
@@ -325,6 +332,54 @@ export class Asset extends Model<InferAttributes<Asset>, InferCreationAttributes
   // TODO: Define associations
 
   declare static associate?: Associate;
+
+  declare createdAt: CreationOptional<Date>;
+  declare updatedAt: CreationOptional<Date>;
+}
+
+export class BoardContainer extends Model<
+  InferAttributes<BoardContainer, { omit: 'board' | 'items' }>,
+  InferCreationAttributes<BoardContainer, { omit: 'board' | 'items' }>
+> {
+  // id can be undefined during creation when using `autoIncrement`
+  declare id: CreationOptional<number>;
+  declare boardId: ForeignKey<Board['id']>;
+  declare title: CreationOptional<string>;
+  declare position: CreationOptional<number>;
+
+  declare static associate?: Associate;
+
+  declare board?: NonAttribute<Board>; // Note this is optional since it's only populated when explicitly requested in code
+  declare items?: NonAttribute<ContainerItem[]>; // Note this is optional since it's only populated when explicitly requested in code
+
+  declare static associations: {
+    board: Association<BoardContainer, Board>;
+    items: Association<BoardContainer, ContainerItem>;
+  };
+
+  declare createdAt: CreationOptional<Date>;
+  declare updatedAt: CreationOptional<Date>;
+}
+
+export class ContainerItem extends Model<
+  InferAttributes<ContainerItem, { omit: 'boardContainer' | 'issue' }>,
+  InferCreationAttributes<ContainerItem, { omit: 'boardContainer' | 'issue' }>
+> {
+  // id can be undefined during creation when using `autoIncrement`
+  declare id: CreationOptional<number>;
+  declare containerId: ForeignKey<BoardContainer['id']>;
+  declare issueId: ForeignKey<Issue['id']>;
+  declare position: CreationOptional<number>;
+
+  declare static associate?: Associate;
+
+  declare boardContainer?: NonAttribute<BoardContainer>; // Note this is optional since it's only populated when explicitly requested in code
+  declare issue?: NonAttribute<Issue>; // Note this is optional since it's only populated when explicitly requested in code
+
+  declare static associations: {
+    boardContainer: Association<ContainerItem, BoardContainer>;
+    issue: Association<ContainerItem, Issue>;
+  };
 
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;

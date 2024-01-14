@@ -1,6 +1,6 @@
 'use client';
 
-import { useMutation, useQuery } from '@apollo/client';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
 import { omitDeep } from '@apollo/client/utilities';
 // https://github.com/chetanverma16/dndkit-guide/tree/main/components
 // This guy did a pretty good job!!!
@@ -37,8 +37,10 @@ import IssueModal from '@/components/IssueModal';
 import IssueModalContents from '@/components/IssueModal/IssueModalContents';
 import Toolbar from '@/components/KanbanBoard/Toolbar';
 import {
+  ADD_ITEM_TO_VIEW_STATE,
   CREATE_ISSUE_MUTATION,
   CREATE_ISSUE_STATUS_MUTATION,
+  GET_ISSUE_QUERY,
   GET_ME,
   GET_PROJECT_INFO,
   ISSUE_FIELDS,
@@ -73,13 +75,6 @@ interface PageState {
   itemName: string;
   saveToBackend: boolean;
 }
-
-const getIssueFragment = (issueId: string) => {
-  return apolloClient.readFragment({
-    id: `Issue:${issueId}`,
-    fragment: ISSUE_FIELDS,
-  });
-};
 
 export default function KanbanBoard({
   projectId,
@@ -122,6 +117,7 @@ export default function KanbanBoard({
   const [updateIssue] = useMutation(UPDATE_ISSUE_MUTATION);
   const [updateBoard] = useMutation(UPDATE_BOARD_MUTATION);
   const [addIssueStatus] = useMutation(CREATE_ISSUE_STATUS_MUTATION);
+  const [addItemToViewState] = useMutation(ADD_ITEM_TO_VIEW_STATE);
 
   const getMe = useQuery(GET_ME);
   const getProjectInfo = useQuery(GET_PROJECT_INFO, {
@@ -131,6 +127,7 @@ export default function KanbanBoard({
       input: { id: `${projectId}` },
     },
   });
+  const [getIssue] = useLazyQuery(GET_ISSUE_QUERY);
 
   // const getBoardIssues = useQuery(GET_BOARD_ISSUES, {
   //   skip: !boardId,
@@ -184,7 +181,13 @@ export default function KanbanBoard({
     if (!container) return;
 
     // @ts-ignore
-    const issueStatusId = container.id.replace('container-', '');
+    const containerId = container.id.replace('container-', '');
+
+    // TODO: Temporary until we decouple the issue status from the container
+    const issueStatusId = getProjectInfo.data.project.issueStatuses.find(
+      (issueStatus: any) =>
+        issueStatus.name.toLowerCase() === container.title.toLowerCase()
+    )?.id;
 
     // Create the item in backend
     const newIssueResp = await createIssue({
@@ -237,6 +240,17 @@ export default function KanbanBoard({
       };
     });
 
+    await addItemToViewState({
+      variables: {
+        input: {
+          boardId,
+          viewStateId: container.id,
+          issueId: newIssue.id,
+          columnPositionIndex: container.items.length,
+        },
+      },
+    });
+
     setShowAddItemModal(false);
   };
 
@@ -265,7 +279,9 @@ export default function KanbanBoard({
 
       const filteredContainers = containers.map((container) => {
         const items = container.items.reduce((acc, item) => {
-          const issueData = getIssueFragment(`${item.id}`.replace('item-', ''));
+          const issueData = getProjectInfo?.data?.project?.issues?.find(
+            (issue: any) => issue.id === `${item.id}`.replace('item-', '')
+          );
 
           // We remove archived items from the board
           if (!issueData.archived) {
@@ -293,7 +309,7 @@ export default function KanbanBoard({
         variables: {
           input: {
             id: boardId,
-            viewState: filteredContainers,
+            // viewState: filteredContainers,
           },
         },
       });
@@ -316,12 +332,16 @@ export default function KanbanBoard({
 
     const remoteDataChanged = !isEqual(incomingData, pageState?.containers);
     let hasMismatchedIssueStatuses = false;
+    let updatedItems = [];
 
     // If the issue status of an issue does not match the container it is in, we need to move it to the correct container
     // this can happen when using the modal issue status dropdown to change the issue status versus dragging the issue to a new container
     incomingData.forEach((container: any) => {
       container.items.forEach((item: any) => {
-        const issueData = getIssueFragment(`${item.id}`.replace('item-', ''));
+        const issueData = getProjectInfo?.data?.project?.issues?.find(
+          (issue: any) => issue.id === `${item.id}`.replace('item-', '')
+        );
+
         if (issueData.status.id !== container.id.replace('container-', '')) {
           hasMismatchedIssueStatuses = true;
 
@@ -632,11 +652,17 @@ export default function KanbanBoard({
       over &&
       active.id === over.id
     ) {
+      // console.log('OTHER,CONTAINER');
       const destinationContainer = findContainerByItemId(over.id);
-      const issueStatusId = `${destinationContainer?.id}`.replace(
-        'container-',
-        ''
-      );
+      if (!destinationContainer) return;
+
+      // TODO: Temporary until we decouple the issue status from the container
+      const issueStatusId = getProjectInfo.data.project.issueStatuses.find(
+        (issueStatus: any) =>
+          issueStatus.name.toLowerCase() ===
+          destinationContainer.title.toLowerCase()
+      )?.id;
+
       const issueId = `${active.id}`.replace('item-', '');
 
       updateIssue({
@@ -683,6 +709,27 @@ export default function KanbanBoard({
               speed: 2,
             });
           }
+
+          const viewStateId = newItems[overContainerIndex].id;
+          const issueId =
+            `${newItems[overContainerIndex].items[overitemIndex].id}`.replace(
+              'item-',
+              ''
+            );
+          const columnPositionIndex = overitemIndex;
+
+          return addItemToViewState({
+            variables: {
+              input: {
+                boardId,
+                viewStateId,
+                issueId,
+                columnPositionIndex,
+              },
+            },
+          }).catch((e) => {
+            console.error('ERROR_ADDING_ITEM_TO_VIEW_STATE', { e });
+          });
         },
       });
     }
@@ -791,6 +838,19 @@ export default function KanbanBoard({
           ...prevState,
           containers: newItems,
         };
+      });
+
+      addItemToViewState({
+        variables: {
+          input: {
+            boardId,
+            viewStateId: overContainer.id,
+            issueId: `${removeditem.id}`.replace('item-', ''),
+            columnPositionIndex: newItems[overContainerIndex].items.length,
+          },
+        },
+      }).catch((e) => {
+        console.error('ERROR_ADDING_ITEM_TO_VIEW_STATE2222', { e });
       });
     }
 

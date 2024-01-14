@@ -1,27 +1,100 @@
+import { arrayMoveImmutable } from 'array-move';
+import { sortBy } from 'lodash-es';
+
 import type {
+  Board,
   BoardResolvers,
   MutationResolvers,
   QueryResolvers,
   ViewState,
+  ViewStateItemResolvers,
 } from '../../__generated__/resolvers-types.js';
 import type { Board as BoardModel } from '../../db/models/types.js';
 import { websocketBroadcast } from '../../services/ws-server.js';
 
-const formatBoardResponse = (board: BoardModel) => {
+const buildViewState = (board: BoardModel): ViewState[] => {
+  return sortBy(
+    board.containers.map((container) => {
+      const containerData = container.toJSON();
+
+      return {
+        ...containerData,
+        id: `container-${containerData.id}`,
+        // @ts-ignore
+        items: sortBy(containerData.items, 'position').map((item) => ({
+          ...item,
+          id: `item-${item.issue.id}`,
+        })),
+      };
+    }),
+    'position'
+  );
+};
+
+export const formatBoardResponse = (board: BoardModel): Board => {
   return {
     ...board.toJSON(),
     id: `${board.id}`,
     projectId: `${board.projectId}`,
     containerOrder: board.containerOrder ? JSON.stringify(board.containerOrder) : undefined,
     settings: board.settings ? JSON.stringify(board.settings) : undefined,
-    viewState: board.viewState ? (board.viewState as ViewState[]) : undefined, // TODO: verify this is correct
+    viewState: buildViewState(board),
   };
+};
+
+const ViewStateItem: ViewStateItemResolvers = {
+  title: async (parent, __, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
+    const issue = await db.Issue.findByPk(Number(parent.id.replace('item-', '')), {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
+
+    return issue?.title ?? null;
+  },
+  status: async (parent, __, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
+    try {
+      const issue = await db.Issue.findByPk(Number(parent.id.replace('item-', '')), {
+        [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+        include: {
+          model: db.IssueStatuses,
+          as: 'issueStatus',
+        },
+      });
+
+      return {
+        id: `${issue.issueStatus.id}`,
+        projectId: `${issue.issueStatus.projectId}`,
+        name: `${issue.issueStatus.name}`,
+      };
+    } catch (error) {
+      console.error({ error });
+      return null;
+    }
+  },
 };
 
 const Query: QueryResolvers = {
   boards: async (parent, args, { db, dataLoaderContext }) => {
     // TODO: should we require a project id to show boards?
-    const boards = await db.Board.findAll();
+    const boards = await db.Board.findAll({
+      include: [
+        {
+          model: db.BoardContainer,
+          as: 'containers',
+          include: [
+            {
+              model: db.ContainerItem,
+              as: 'items',
+              include: [
+                {
+                  model: db.Issue,
+                  as: 'issue',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
 
     dataLoaderContext.prime(boards);
 
@@ -29,10 +102,24 @@ const Query: QueryResolvers = {
   },
   board: async (parent, { input: { id } }, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const board = await db.Board.findByPk(Number(id), {
-      // include: {
-      //   model: db.Issue,
-      //   as: 'issues',
-      // },
+      include: [
+        {
+          model: db.BoardContainer,
+          as: 'containers',
+          include: [
+            {
+              model: db.ContainerItem,
+              as: 'items',
+              include: [
+                {
+                  model: db.Issue,
+                  as: 'issue',
+                },
+              ],
+            },
+          ],
+        },
+      ],
       [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
@@ -41,14 +128,125 @@ const Query: QueryResolvers = {
 };
 
 const Mutation: MutationResolvers = {
+  createViewState: async (
+    parent,
+    { input: { boardId, positionIndex, title } },
+    { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }
+  ) => {
+    const board = await db.Board.findByPk(Number(boardId), {
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
+
+    return formatBoardResponse(board).viewState;
+  },
+  addItemToViewState: async (
+    parent,
+    { input: { boardId, issueId, viewStateId, columnPositionIndex } },
+    { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }
+  ) => {
+    const board = await db.Board.findByPk(Number(boardId), {
+      include: [
+        {
+          model: db.BoardContainer,
+          as: 'containers',
+          include: [
+            {
+              model: db.ContainerItem,
+              as: 'items',
+              include: [
+                {
+                  model: db.Issue,
+                  as: 'issue',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    });
+
+    const doesIssueExist = await db.Issue.findByPk(Number(issueId));
+    if (!doesIssueExist) {
+      throw new Error(`Issue with id ${issueId} does not exist`);
+    }
+
+    const existingBoardContainer = board.containers.find((container) =>
+      container.items.some((item) => Number(item.issueId) === Number(issueId))
+    );
+
+    const destinationBoardContainer = board.containers.find(
+      (container) => container.id === Number(viewStateId.replace('container-', ''))
+    );
+
+    const existingItem = existingBoardContainer?.items.find((item) => Number(item.issueId) === Number(issueId));
+
+    let incomingItem = null;
+
+    if (existingItem) {
+      existingItem.position = Math.max(destinationBoardContainer?.items?.length - 1, 0);
+      existingItem.containerId = Number(viewStateId.replace('container-', ''));
+      await existingItem.save();
+      incomingItem = existingItem;
+    } else {
+      incomingItem = await db.ContainerItem.create({
+        containerId: Number(viewStateId.replace('container-', '')),
+        issueId: Number(issueId),
+        position: Math.max(destinationBoardContainer?.items?.length - 1, 0),
+      });
+    }
+
+    await board.reload();
+
+    const destinationBoardContainerUpdated = board.containers.find(
+      (container) => container.id === Number(viewStateId.replace('container-', ''))
+    );
+
+    if (columnPositionIndex !== undefined) {
+      const containerItems = sortBy(destinationBoardContainerUpdated.items, 'position');
+
+      const sortedItems = arrayMoveImmutable(
+        containerItems,
+        containerItems.findIndex((item) => item.id === incomingItem.id),
+        columnPositionIndex
+      );
+
+      for (let i = 0; i < sortedItems.length; i++) {
+        sortedItems[i].position = i;
+      }
+
+      await Promise.all(sortedItems.map((item) => item.save()));
+      await board.reload();
+    }
+
+    return buildViewState(board);
+  },
   updateBoard: async (parent, { input }, { db, websocketServer, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const { id, name, viewState, backlogEnabled, settings, containerOrder } = input;
 
     const board = await db.Board.findByPk(Number(id), {
       [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      include: [
+        {
+          model: db.BoardContainer,
+          as: 'containers',
+          include: [
+            {
+              model: db.ContainerItem,
+              as: 'items',
+              include: [
+                {
+                  model: db.Issue,
+                  as: 'issue',
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
     if (name) board.name = name;
-    if (typeof viewState !== 'undefined') board.viewState = viewState;
+    // if (typeof viewState !== 'undefined') board.viewState = viewState;
     if (backlogEnabled !== undefined) board.backlogEnabled = backlogEnabled;
     if (typeof settings !== 'undefined') board.settings = JSON.parse(settings);
     // TODO: lets add some more safety checks here
@@ -57,6 +255,7 @@ const Mutation: MutationResolvers = {
     }
 
     await board.save();
+    await board.reload();
 
     dataLoaderContext.prime(board);
 
@@ -116,6 +315,7 @@ const Board: BoardResolvers = {
 };
 
 const resolvers = {
+  ViewStateItem,
   Query,
   Mutation,
   Board,

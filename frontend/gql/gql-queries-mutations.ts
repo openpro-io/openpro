@@ -468,3 +468,11 @@ export const REMOVE_USER_FROM_PROJECT_MUTATION = gql(/* GraphQL */ `
     }
   }
 `);
+
+export const ADD_ITEM_TO_VIEW_STATE = gql(/* GraphQL */ `
+  mutation AddItemToViewState($input: AddItemToViewStateItemInput!) {
+    addItemToViewState(input: $input) {
+      ...ViewStateFields
+    }
+  }
+`);

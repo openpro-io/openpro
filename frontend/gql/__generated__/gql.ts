@@ -17,7 +17,7 @@ const documents = {
     "\n  fragment ProjectFields on Project {\n    id\n    name\n    key\n    description\n    visibility\n    createdAt\n    updatedAt\n    boards {\n      id\n      name\n      viewState {\n        ...ViewStateFields\n      }\n      backlogEnabled\n      settings\n      createdAt\n      updatedAt\n    }\n    issueStatuses {\n      id\n      name\n      projectId\n      createdAt\n      updatedAt\n    }\n    issues {\n      ...IssueFields\n    }\n    users {\n      ...UserFields\n    }\n  }\n": types.ProjectFieldsFragmentDoc,
     "\n  fragment ProjectOnlyFields on Project {\n    id\n    name\n    key\n    visibility\n    description\n    createdAt\n    updatedAt\n  }\n": types.ProjectOnlyFieldsFragmentDoc,
     "\n  fragment IssueFields on Issue {\n    id\n    title\n    description\n    projectId\n    priority\n    archived\n    tags {\n      id\n      name\n      projectId\n      createdAt\n      updatedAt\n    }\n    status {\n      id\n      name\n      projectId\n    }\n    reporter {\n      ...UserFields\n    }\n    assignee {\n      ...UserFields\n    }\n    comments {\n      ...IssueCommentFields\n    }\n    createdAt\n    updatedAt\n  }\n": types.IssueFieldsFragmentDoc,
-    "\n  fragment UserFields on User {\n    id\n    email\n    externalId\n    name\n    firstName\n    lastName\n    avatarUrl\n  }\n": types.UserFieldsFragmentDoc,
+    "\n  fragment UserFields on User {\n    id\n    email\n    externalId\n    name\n    firstName\n    lastName\n    avatarUrl\n    settings\n  }\n": types.UserFieldsFragmentDoc,
     "\n  fragment IssueCommentFields on IssueComment {\n    id\n    comment\n    reporter {\n      ...UserFields\n    }\n    issueId\n    createdAt\n    updatedAt\n  }\n": types.IssueCommentFieldsFragmentDoc,
     "\n  fragment ViewStateIssueStatusFields on ViewStateIssueStatus {\n    id\n    name\n    projectId\n  }\n": types.ViewStateIssueStatusFieldsFragmentDoc,
     "\n  fragment ViewStateItemFields on ViewStateItem {\n    id\n    title\n    status {\n      ...ViewStateIssueStatusFields\n    }\n  }\n": types.ViewStateItemFieldsFragmentDoc,
@@ -86,7 +86,7 @@ export function gql(source: "\n  fragment IssueFields on Issue {\n    id\n    ti
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  fragment UserFields on User {\n    id\n    email\n    externalId\n    name\n    firstName\n    lastName\n    avatarUrl\n  }\n"): (typeof documents)["\n  fragment UserFields on User {\n    id\n    email\n    externalId\n    name\n    firstName\n    lastName\n    avatarUrl\n  }\n"];
+export function gql(source: "\n  fragment UserFields on User {\n    id\n    email\n    externalId\n    name\n    firstName\n    lastName\n    avatarUrl\n    settings\n  }\n"): (typeof documents)["\n  fragment UserFields on User {\n    id\n    email\n    externalId\n    name\n    firstName\n    lastName\n    avatarUrl\n    settings\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

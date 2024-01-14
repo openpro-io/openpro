@@ -104,7 +104,8 @@ export default (sequelize: Sequelize) => {
     }
   );
 
-  Issue.associate = ({ IssueComment, IssueBoard, IssueLink, Issue, Project }) => {
+  Issue.associate = ({ IssueComment, IssueBoard, IssueLink, Issue, Project, IssueStatuses }) => {
+    Issue.belongsTo(IssueStatuses, { foreignKey: 'issue_status_id', as: 'issueStatus' });
     Issue.belongsTo(Project, { foreignKey: 'project_id', as: 'project' });
     Issue.hasMany(IssueComment, { foreignKey: 'issue_id', onDelete: 'CASCADE', as: 'issueComments' });
     Issue.hasMany(IssueBoard, { foreignKey: 'issue_id', onDelete: 'CASCADE', as: 'issueBoards' });

@@ -14,8 +14,8 @@ const config: CodegenConfig = {
   },
   hooks: {
     afterOneFileWrite: [
-      "sed -i '' 's/import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from '\\''graphql'\\'';/import type { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from '\\''graphql'\\'';/g' src/__generated__/resolvers-types.ts\n",
-      "sed -i '' 's/import { ApolloContext } from '\\''..\\/server\\/apollo.js'\\'';/import type { ApolloContext } from '\\''..\\/server\\/apollo.js'\\'';/g' src/__generated__/resolvers-types.ts\n",
+      // "sed -i '' 's/import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from '\\''graphql'\\'';/import type { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from '\\''graphql'\\'';/g' src/__generated__/resolvers-types.ts",
+      // "sed -i '' 's/import { ApolloContext } from '\\''..\\/server\\/apollo.js'\\'';/import type { ApolloContext } from '\\''..\\/server\\/apollo.js'\\'';/g' src/__generated__/resolvers-types.ts",
     ],
   },
   config: {

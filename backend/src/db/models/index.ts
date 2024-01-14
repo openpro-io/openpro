@@ -3,7 +3,9 @@ import { Sequelize } from 'sequelize';
 import { ENABLE_SEQUELIZE_LOGGING, SQL_URI } from '../../services/config.js';
 import type { Db } from '../../typings.js';
 import Asset from './asset.js';
+import BoardContainer from './board-container.js';
 import Board from './board.js';
+import ContainerItem from './container-item.js';
 import IssueBoard from './issue-board.js';
 import IssueComment from './issue-comment.js';
 import IssueLink from './issue-link.js';
@@ -36,6 +38,8 @@ const init = async () => {
   db.IssueLink = IssueLink(db.sequelize);
   db.ProjectPermission = ProjectPermission(db.sequelize);
   db.ProjectCustomField = ProjectCustomField(db.sequelize);
+  db.BoardContainer = BoardContainer(db.sequelize);
+  db.ContainerItem = ContainerItem(db.sequelize);
 
   Object.values(db).forEach((model: any) => {
     if (model.associate) {
