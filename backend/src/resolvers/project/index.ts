@@ -9,7 +9,7 @@ import {
   type Resolvers,
   type ViewState,
 } from '../../__generated__/resolvers-types.js';
-import { formatBoardResponse } from '../board/index.js';
+import { boards, formatBoardResponse } from '../board/index.js';
 import { formatUserForGraphql } from '../user/helpers.js';
 
 const Query: QueryResolvers = {
@@ -329,33 +329,7 @@ const Project: ProjectResolvers = {
       customFields: undefined,
     }));
   },
-  boards: async (parent, args, { db, dataLoaderContext }) => {
-    const boards = await db.Board.findAll({
-      include: [
-        {
-          model: db.BoardContainer,
-          as: 'containers',
-          include: [
-            {
-              model: db.ContainerItem,
-              as: 'items',
-              include: [
-                {
-                  model: db.Issue,
-                  as: 'issue',
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      where: { projectId: parent.id },
-    });
-
-    dataLoaderContext.prime(boards);
-
-    return boards.map(formatBoardResponse);
-  },
+  boards,
   issueStatuses: async (parent, args, { db, dataLoaderContext }) => {
     const issueStatuses = await db.IssueStatuses.findAll({
       where: { projectId: parent.id },

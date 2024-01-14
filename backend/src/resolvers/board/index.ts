@@ -4,12 +4,19 @@ import { sortBy } from 'lodash-es';
 import type {
   Board,
   BoardResolvers,
+  Maybe,
   MutationResolvers,
+  Project,
   QueryResolvers,
+  Resolver,
+  ResolverTypeWrapper,
+  ResolversObject,
+  ResolversTypes,
   ViewState,
   ViewStateItemResolvers,
 } from '../../__generated__/resolvers-types.js';
 import type { Board as BoardModel } from '../../db/models/types.js';
+import type { ApolloContext } from '../../server/apollo';
 import { websocketBroadcast } from '../../services/ws-server.js';
 
 const buildViewState = (board: BoardModel): ViewState[] => {
@@ -72,34 +79,50 @@ const ViewStateItem: ViewStateItemResolvers = {
   },
 };
 
+export const boards: Resolver<ResolverTypeWrapper<Partial<Board>>[], Project | undefined, ApolloContext, {}> = async (
+  parent,
+  args,
+  { db, dataLoaderContext },
+  info
+) => {
+  const additionalOptions = {};
+
+  const isParentTypeProject = info?.parentType?.name === 'Project';
+
+  if (isParentTypeProject && parent.id) {
+    additionalOptions['where'] = {
+      projectId: parent.id,
+    };
+  }
+
+  const boards = await db.Board.findAll({
+    include: [
+      {
+        model: db.BoardContainer,
+        as: 'containers',
+        include: [
+          {
+            model: db.ContainerItem,
+            as: 'items',
+            include: [
+              {
+                model: db.Issue,
+                as: 'issue',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  dataLoaderContext.prime(boards);
+
+  return boards.map(formatBoardResponse);
+};
+
 const Query: QueryResolvers = {
-  boards: async (parent, args, { db, dataLoaderContext }) => {
-    // TODO: should we require a project id to show boards?
-    const boards = await db.Board.findAll({
-      include: [
-        {
-          model: db.BoardContainer,
-          as: 'containers',
-          include: [
-            {
-              model: db.ContainerItem,
-              as: 'items',
-              include: [
-                {
-                  model: db.Issue,
-                  as: 'issue',
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-
-    dataLoaderContext.prime(boards);
-
-    return boards.map(formatBoardResponse);
-  },
+  boards,
   board: async (parent, { input: { id } }, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const board = await db.Board.findByPk(Number(id), {
       include: [
