@@ -164,82 +164,98 @@ const Mutation: MutationResolvers = {
     { input: { boardId, issueId, viewStateId, columnPositionIndex } },
     { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }
   ) => {
-    const board = await db.Board.findByPk(Number(boardId), {
-      include: [
-        {
-          model: db.BoardContainer,
-          as: 'containers',
-          include: [
-            {
-              model: db.ContainerItem,
-              as: 'items',
-              include: [
-                {
-                  model: db.Issue,
-                  as: 'issue',
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
-    });
-
-    const doesIssueExist = await db.Issue.findByPk(Number(issueId));
-    if (!doesIssueExist) {
-      throw new Error(`Issue with id ${issueId} does not exist`);
-    }
-
-    const existingBoardContainer = board.containers.find((container) =>
-      container.items.some((item) => Number(item.issueId) === Number(issueId))
-    );
-
-    const destinationBoardContainer = board.containers.find(
-      (container) => container.id === Number(viewStateId.replace('container-', ''))
-    );
-
-    const existingItem = existingBoardContainer?.items.find((item) => Number(item.issueId) === Number(issueId));
-
-    let incomingItem = null;
-
-    if (existingItem) {
-      existingItem.position = Math.max(destinationBoardContainer?.items?.length - 1, 0);
-      existingItem.containerId = Number(viewStateId.replace('container-', ''));
-      await existingItem.save();
-      incomingItem = existingItem;
-    } else {
-      incomingItem = await db.ContainerItem.create({
-        containerId: Number(viewStateId.replace('container-', '')),
-        issueId: Number(issueId),
-        position: Math.max(destinationBoardContainer?.items?.length - 1, 0),
+    const result = await db.sequelize.transaction(async (transaction) => {
+      const board = await db.Board.findByPk(Number(boardId), {
+        include: [
+          {
+            model: db.BoardContainer,
+            as: 'containers',
+            include: [
+              {
+                model: db.ContainerItem,
+                as: 'items',
+                include: [
+                  {
+                    model: db.Issue,
+                    as: 'issue',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+        transaction,
       });
-    }
 
-    await board.reload();
-
-    const destinationBoardContainerUpdated = board.containers.find(
-      (container) => container.id === Number(viewStateId.replace('container-', ''))
-    );
-
-    if (columnPositionIndex !== undefined) {
-      const containerItems = sortBy(destinationBoardContainerUpdated.items, 'position');
-
-      const sortedItems = arrayMoveImmutable(
-        containerItems,
-        containerItems.findIndex((item) => item.id === incomingItem.id),
-        columnPositionIndex
-      );
-
-      for (let i = 0; i < sortedItems.length; i++) {
-        sortedItems[i].position = i;
+      const doesIssueExist = await db.Issue.findByPk(Number(issueId), {
+        transaction,
+        [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      });
+      if (!doesIssueExist) {
+        throw new Error(`Issue with id ${issueId} does not exist`);
       }
 
-      await Promise.all(sortedItems.map((item) => item.save()));
-      await board.reload();
-    }
+      const existingBoardContainer = board.containers.find((container) =>
+        container.items.some((item) => Number(item.issueId) === Number(issueId))
+      );
 
-    return buildViewState(board);
+      const destinationBoardContainer = board.containers.find(
+        (container) => container.id === Number(viewStateId.replace('container-', ''))
+      );
+
+      const existingItem = existingBoardContainer?.items.find((item) => Number(item.issueId) === Number(issueId));
+
+      let incomingItem = null;
+
+      if (existingItem) {
+        existingItem.position = Math.max(destinationBoardContainer?.items?.length - 1, 0);
+        existingItem.containerId = Number(viewStateId.replace('container-', ''));
+        await existingItem.save({ transaction });
+        dataLoaderContext.prime(existingItem);
+        incomingItem = existingItem;
+      } else {
+        incomingItem = await db.ContainerItem.create(
+          {
+            containerId: Number(viewStateId.replace('container-', '')),
+            issueId: Number(issueId),
+            position: Math.max(destinationBoardContainer?.items?.length - 1, 0),
+          },
+          { transaction }
+        );
+        dataLoaderContext.prime(incomingItem);
+      }
+
+      await board.reload({ transaction });
+      dataLoaderContext.prime(board);
+
+      const destinationBoardContainerUpdated = board.containers.find(
+        (container) => container.id === Number(viewStateId.replace('container-', ''))
+      );
+
+      if (columnPositionIndex !== undefined) {
+        const containerItems = sortBy(destinationBoardContainerUpdated.items, 'position');
+
+        const sortedItems = arrayMoveImmutable(
+          containerItems,
+          containerItems.findIndex((item) => item.id === incomingItem.id),
+          columnPositionIndex
+        );
+
+        for (let i = 0; i < sortedItems.length; i++) {
+          sortedItems[i].position = i;
+        }
+
+        await Promise.all(sortedItems.map((item) => item.save({ transaction })));
+        dataLoaderContext.prime(sortedItems);
+        await board.reload({ transaction });
+        dataLoaderContext.prime(board);
+
+        return board;
+      }
+    });
+
+    return buildViewState(result);
   },
   updateBoard: async (parent, { input }, { db, websocketServer, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const { id, name, viewState, backlogEnabled, settings, containerOrder } = input;

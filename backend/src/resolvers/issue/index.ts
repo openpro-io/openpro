@@ -145,82 +145,88 @@ const Mutation: MutationResolvers = {
       customFieldValue,
     } = input;
 
-    const issue = await db.Issue.findByPk(Number(id), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
-    });
-
-    if (issueStatusId) issue.issueStatusId = Number(issueStatusId);
-    if (assigneeId) issue.assigneeId = Number(assigneeId);
-    if (reporterId) issue.reporterId = Number(reporterId);
-    if (title) issue.title = title;
-    if (description) issue.description = description;
-    if (priority) issue.priority = Number(priority);
-    if (tagIds) {
-      await db.IssueTag.destroy({ where: { issueId: id } });
-      await db.IssueTag.bulkCreate(
-        tagIds.map((tagId) => ({
-          issueId: Number(id),
-          projectTagId: Number(tagId),
-        }))
-      );
-    }
-    if (archived !== undefined) issue.archived = archived;
-
-    // TODO: look for better way to handle nullifying user
-    if (issue.assigneeId === 0) issue.assigneeId = null;
-    if (issue.reporterId === 0) issue.reporterId = null;
-
-    if (customFieldId && customFieldValue) {
-      const customField = await db.ProjectCustomField.findByPk(Number(customFieldId), {
+    return await db.sequelize.transaction(async (transaction) => {
+      const issue = await db.Issue.findByPk(Number(id), {
         [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+        transaction,
       });
-      if (!customField) throw new Error('Custom field not found');
 
-      let valueCasted: number | string | boolean = customFieldValue;
+      if (issueStatusId) issue.issueStatusId = Number(issueStatusId);
+      if (assigneeId) issue.assigneeId = Number(assigneeId);
+      if (reporterId) issue.reporterId = Number(reporterId);
+      if (title) issue.title = title;
+      if (description) issue.description = description;
+      if (priority) issue.priority = Number(priority);
+      if (tagIds) {
+        await db.IssueTag.destroy({ where: { issueId: id }, transaction });
+        await db.IssueTag.bulkCreate(
+          tagIds.map((tagId) => ({
+            issueId: Number(id),
+            projectTagId: Number(tagId),
+          })),
+          { transaction }
+        );
+      }
+      if (archived !== undefined) issue.archived = archived;
 
-      if (customField.fieldType.toLowerCase() === 'number') valueCasted = Number(customFieldValue);
-      else if (customField.fieldType.toLowerCase() === 'boolean') valueCasted = yn(customFieldValue);
+      // TODO: look for better way to handle nullifying user
+      if (issue.assigneeId === 0) issue.assigneeId = null;
+      if (issue.reporterId === 0) issue.reporterId = null;
 
-      const customFieldObject = {
-        id: `${issue.id}-${customField.id}`,
-        customFieldId,
-        value: valueCasted,
-        createdAt: new Date(), // TODO: improve date format decision
+      if (customFieldId && customFieldValue) {
+        const customField = await db.ProjectCustomField.findByPk(Number(customFieldId), {
+          [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+          transaction,
+        });
+        if (!customField) throw new Error('Custom field not found');
+
+        let valueCasted: number | string | boolean = customFieldValue;
+
+        if (customField.fieldType.toLowerCase() === 'number') valueCasted = Number(customFieldValue);
+        else if (customField.fieldType.toLowerCase() === 'boolean') valueCasted = yn(customFieldValue);
+
+        const customFieldObject = {
+          id: `${issue.id}-${customField.id}`,
+          customFieldId,
+          value: valueCasted,
+          createdAt: new Date(), // TODO: improve date format decision
+        };
+
+        // TODO: investigate how to deep set the value instead of this to leverage DB level updating
+        issue.customFields = issue.customFields
+          ? values(merge(keyBy(issue.customFields, 'id'), keyBy([customFieldObject], 'id')))
+          : [customFieldObject];
+      }
+
+      await issue.save({ transaction });
+      dataLoaderContext.prime(issue);
+
+      const issueStatus = await db.IssueStatuses.findByPk(Number(issueStatusId ?? issue.issueStatusId), {
+        [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+        transaction,
+      });
+
+      const returnData = {
+        ...issue.toJSON(),
+        id: `${issue.id}`,
+        projectId: `${issue.projectId}`,
+        project: undefined,
+        customFields: undefined,
+        status: {
+          ...issueStatus.toJSON(),
+          id: `${issueStatus.id}`,
+          projectId: `${issueStatus.projectId}`,
+        },
       };
 
-      // TODO: investigate how to deep set the value instead of this to leverage DB level updating
-      issue.customFields = issue.customFields
-        ? values(merge(keyBy(issue.customFields, 'id'), keyBy([customFieldObject], 'id')))
-        : [customFieldObject];
-    }
+      websocketBroadcast({
+        clients: websocketServer.clients,
+        namespace: 'ws',
+        message: JSON.stringify({ type: 'ISSUE_UPDATED', payload: returnData }),
+      });
 
-    await issue.save();
-    dataLoaderContext.prime(issue);
-
-    const issueStatus = await db.IssueStatuses.findByPk(Number(issueStatusId ?? issue.issueStatusId), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      return returnData;
     });
-
-    const returnData = {
-      ...issue.toJSON(),
-      id: `${issue.id}`,
-      projectId: `${issue.projectId}`,
-      project: undefined,
-      customFields: undefined,
-      status: {
-        ...issueStatus.toJSON(),
-        id: `${issueStatus.id}`,
-        projectId: `${issueStatus.projectId}`,
-      },
-    };
-
-    websocketBroadcast({
-      clients: websocketServer.clients,
-      namespace: 'ws',
-      message: JSON.stringify({ type: 'ISSUE_UPDATED', payload: returnData }),
-    });
-
-    return returnData;
   },
   createIssue: async (parent, { input }, { db, user, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const { projectId, boardId, issueStatusId, assigneeId, title, description, priority } = input;
