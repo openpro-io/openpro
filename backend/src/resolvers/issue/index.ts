@@ -41,34 +41,6 @@ const Query: QueryResolvers = {
     if (searchOperator === 'or') queryOperator = Op.or;
 
     const issuesListPlain = await db.Issue.findAll({
-      // include: [
-      // {
-      //   model: db.Project,
-      //   as: 'project',
-      // },
-      // {
-      //   model: db.Issue,
-      //   as: 'linkedToIssues',
-      //   through: {
-      //     attributes: [
-      //       ['issue_id', 'issueId'],
-      //       ['linked_issue_id', 'linkedIssueId'],
-      //       ['link_type', 'linkType'],
-      //     ],
-      //   },
-      // },
-      // {
-      //   model: db.Issue,
-      //   as: 'linkedByIssues',
-      //   through: {
-      //     attributes: [
-      //       ['issue_id', 'issueId'],
-      //       ['linked_issue_id', 'linkedIssueId'],
-      //       ['link_type', 'linkType'],
-      //     ],
-      //   },
-      // },
-      // ],
       where: {
         [queryOperator]: whereOr,
       },
