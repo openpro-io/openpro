@@ -4,14 +4,11 @@ import { sortBy } from 'lodash-es';
 import type {
   Board,
   BoardResolvers,
-  Maybe,
   MutationResolvers,
   Project,
   QueryResolvers,
   Resolver,
   ResolverTypeWrapper,
-  ResolversObject,
-  ResolversTypes,
   ViewState,
   ViewStateItemResolvers,
 } from '../../__generated__/resolvers-types.js';
