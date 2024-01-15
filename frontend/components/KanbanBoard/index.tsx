@@ -2,8 +2,6 @@
 
 import { useMutation, useQuery } from '@apollo/client';
 import { omitDeep } from '@apollo/client/utilities';
-// https://github.com/chetanverma16/dndkit-guide/tree/main/components
-// This guy did a pretty good job!!!
 import {
   DndContext,
   DragEndEvent,
