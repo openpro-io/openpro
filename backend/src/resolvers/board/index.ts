@@ -237,7 +237,16 @@ const Mutation: MutationResolvers = {
         (container) => container.id === Number(viewStateId.replace('container-', ''))
       );
 
-      const containerItems = sortBy(destinationBoardContainerUpdated.items, 'position');
+      // TODO: Testing out row level locking for re-ordering container items
+      // const containerItems = sortBy(destinationBoardContainerUpdated.items, 'position');
+      const containerItems = await db.ContainerItem.findAll({
+        where: {
+          containerId: destinationBoardContainerUpdated.id,
+        },
+        order: [['position', 'ASC']],
+        lock: true,
+        transaction,
+      });
 
       const sortedItems = arrayMoveImmutable(
         containerItems,
