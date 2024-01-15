@@ -1,13 +1,15 @@
-import React from 'react';
-import ContainerProps from './container.type';
+import { useMutation } from '@apollo/client';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import React from 'react';
+import { BsArrowsMove } from 'react-icons/bs';
+
 // import { Button } from '../Button';
 import { Button } from '@/components/Button';
-import { classNames } from '@/services/utils';
-import { BsArrowsMove } from 'react-icons/bs';
-import { useMutation } from '@apollo/client';
 import { UPDATE_ISSUE_MUTATION } from '@/gql/gql-queries-mutations';
+import { classNames } from '@/services/utils';
+
+import ContainerProps from './container.type';
 
 const Container = ({
   id,
