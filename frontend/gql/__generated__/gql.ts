@@ -51,6 +51,7 @@ const documents = {
     "\n  mutation DeleteIssueLink($input: DeleteIssueLinkInput!) {\n    deleteIssueLink(input: $input) {\n      message\n      status\n    }\n  }\n": types.DeleteIssueLinkDocument,
     "\n  mutation AddUserToProject($input: AddUserToProjectInput!) {\n    addUserToProject(input: $input) {\n      message\n      status\n    }\n  }\n": types.AddUserToProjectDocument,
     "\n  mutation RemoveUserFromProject($input: RemoveUserFromProjectInput!) {\n    removeUserFromProject(input: $input) {\n      message\n      status\n    }\n  }\n": types.RemoveUserFromProjectDocument,
+    "\n  mutation AddItemToViewState($input: AddItemToViewStateItemInput!) {\n    addItemToViewState(input: $input) {\n      ...ViewStateFields\n    }\n  }\n": types.AddItemToViewStateDocument,
 };
 
 /**
@@ -219,6 +220,10 @@ export function gql(source: "\n  mutation AddUserToProject($input: AddUserToProj
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  mutation RemoveUserFromProject($input: RemoveUserFromProjectInput!) {\n    removeUserFromProject(input: $input) {\n      message\n      status\n    }\n  }\n"): (typeof documents)["\n  mutation RemoveUserFromProject($input: RemoveUserFromProjectInput!) {\n    removeUserFromProject(input: $input) {\n      message\n      status\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  mutation AddItemToViewState($input: AddItemToViewStateItemInput!) {\n    addItemToViewState(input: $input) {\n      ...ViewStateFields\n    }\n  }\n"): (typeof documents)["\n  mutation AddItemToViewState($input: AddItemToViewStateItemInput!) {\n    addItemToViewState(input: $input) {\n      ...ViewStateFields\n    }\n  }\n"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};

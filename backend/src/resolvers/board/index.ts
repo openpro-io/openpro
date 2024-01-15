@@ -208,23 +208,27 @@ const Mutation: MutationResolvers = {
 
       let incomingItem = null;
 
+      if (typeof columnPositionIndex === undefined) {
+        columnPositionIndex = Math.max(destinationBoardContainer?.items?.length - 1, 0);
+      }
+
       if (existingItem) {
-        existingItem.position = Math.max(destinationBoardContainer?.items?.length - 1, 0);
+        existingItem.position = columnPositionIndex;
         existingItem.containerId = Number(viewStateId.replace('container-', ''));
         await existingItem.save({ transaction });
-        dataLoaderContext.prime(existingItem);
         incomingItem = existingItem;
       } else {
         incomingItem = await db.ContainerItem.create(
           {
             containerId: Number(viewStateId.replace('container-', '')),
             issueId: Number(issueId),
-            position: Math.max(destinationBoardContainer?.items?.length - 1, 0),
+            position: columnPositionIndex,
           },
           { transaction }
         );
-        dataLoaderContext.prime(incomingItem);
       }
+
+      dataLoaderContext.prime(incomingItem);
 
       await board.reload({ transaction });
       dataLoaderContext.prime(board);
@@ -233,26 +237,24 @@ const Mutation: MutationResolvers = {
         (container) => container.id === Number(viewStateId.replace('container-', ''))
       );
 
-      if (columnPositionIndex !== undefined) {
-        const containerItems = sortBy(destinationBoardContainerUpdated.items, 'position');
+      const containerItems = sortBy(destinationBoardContainerUpdated.items, 'position');
 
-        const sortedItems = arrayMoveImmutable(
-          containerItems,
-          containerItems.findIndex((item) => item.id === incomingItem.id),
-          columnPositionIndex
-        );
+      const sortedItems = arrayMoveImmutable(
+        containerItems,
+        containerItems.findIndex((item) => item.id === incomingItem.id),
+        columnPositionIndex
+      );
 
-        for (let i = 0; i < sortedItems.length; i++) {
-          sortedItems[i].position = i;
-        }
-
-        await Promise.all(sortedItems.map((item) => item.save({ transaction })));
-        dataLoaderContext.prime(sortedItems);
-        await board.reload({ transaction });
-        dataLoaderContext.prime(board);
-
-        return board;
+      for (let i = 0; i < sortedItems.length; i++) {
+        sortedItems[i].position = i;
       }
+
+      await Promise.all(sortedItems.map((item) => item.save({ transaction })));
+      dataLoaderContext.prime(sortedItems);
+      await board.reload({ transaction });
+      dataLoaderContext.prime(board);
+
+      return board;
     });
 
     return buildViewState(result);
