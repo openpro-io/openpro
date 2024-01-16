@@ -106,7 +106,7 @@ export default function KanbanBoard({
   const getMe = useQuery(GET_ME);
   const getProjectInfo = useQuery(GET_PROJECT_INFO, {
     skip: !projectId,
-    fetchPolicy: 'cache-first',
+    fetchPolicy: 'network-only',
     variables: {
       input: { id: `${projectId}` },
     },
@@ -319,10 +319,11 @@ export default function KanbanBoard({
       });
     } else if (hasMismatchedIssueStatuses) {
       console.log({ correctedBoardState });
+      // TODO: Look into if this is needed
       setPageState((prevState) => {
         return {
           ...prevState,
-          containers: correctedBoardState,
+          // containers: correctedBoardState,
         };
       });
     }

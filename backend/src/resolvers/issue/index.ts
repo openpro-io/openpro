@@ -46,7 +46,7 @@ const Query: QueryResolvers = {
       },
     });
 
-    dataLoaderContext.prime(issuesListPlain);
+    // dataLoaderContext.prime(issuesListPlain);
 
     return (
       issuesListPlain &&
@@ -61,7 +61,7 @@ const Query: QueryResolvers = {
   },
   issue: async (parent, { input: { id } }, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const databaseIssue = await db.Issue.findByPk(id, {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return {
@@ -119,7 +119,7 @@ const Mutation: MutationResolvers = {
 
     return await db.sequelize.transaction(async (transaction) => {
       const issue = await db.Issue.findByPk(Number(id), {
-        [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+        // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
         transaction,
       });
 
@@ -147,7 +147,7 @@ const Mutation: MutationResolvers = {
 
       if (customFieldId && customFieldValue) {
         const customField = await db.ProjectCustomField.findByPk(Number(customFieldId), {
-          [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+          // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
           transaction,
         });
         if (!customField) throw new Error('Custom field not found');
@@ -171,7 +171,7 @@ const Mutation: MutationResolvers = {
       }
 
       await issue.save({ transaction });
-      dataLoaderContext.prime(issue);
+      // dataLoaderContext.prime(issue);
 
       const issueStatus = await db.IssueStatuses.findByPk(Number(issueStatusId ?? issue.issueStatusId), {
         [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
@@ -215,7 +215,7 @@ const Mutation: MutationResolvers = {
       priority,
     });
 
-    dataLoaderContext.prime(issue);
+    // dataLoaderContext.prime(issue);
 
     // TODO: This isnt currently implemented in the UI
     if (typeof boardId !== 'undefined') {
@@ -224,11 +224,11 @@ const Mutation: MutationResolvers = {
         issueId: Number(issue.id),
       });
 
-      dataLoaderContext.prime(issueBoard);
+      // dataLoaderContext.prime(issueBoard);
     }
 
     const issueStatus = await db.IssueStatuses.findByPk(issueStatusId, {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return {
@@ -268,7 +268,7 @@ const CustomFieldValue: CustomFieldValueResolvers = {
     if (!parent.customFieldId) return null;
 
     const customFieldData = await db.ProjectCustomField.findByPk(Number(parent.customFieldId), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return {
@@ -283,7 +283,7 @@ const CustomFieldValue: CustomFieldValueResolvers = {
 const Issue: IssueResolvers = {
   links: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const databaseIssues = await db.Issue.findByPk(Number(parent.id), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
       include: [
         {
           model: db.Issue,
@@ -328,12 +328,12 @@ const Issue: IssueResolvers = {
   },
   tags: async (parent, args, { db, dataLoaderContext }) => {
     const issueTags = await db.IssueTag.findAll({ where: { issueId: parent.id } });
-    dataLoaderContext.prime(issueTags);
+    // dataLoaderContext.prime(issueTags);
 
     const projectTags = await db.ProjectTag.findAll({
       where: { id: issueTags.map((issueTag) => issueTag.projectTagId) },
     });
-    dataLoaderContext.prime(projectTags);
+    // dataLoaderContext.prime(projectTags);
 
     return projectTags.map((projectTag) => ({
       ...projectTag.toJSON(),
@@ -346,7 +346,7 @@ const Issue: IssueResolvers = {
       where: { issueId: Number(parent.id) },
       order: [['createdAt', 'DESC']],
     });
-    dataLoaderContext.prime(comments);
+    // dataLoaderContext.prime(comments);
 
     return comments.map((comment) => ({
       ...comment.toJSON(),
@@ -357,13 +357,13 @@ const Issue: IssueResolvers = {
   status: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     // TODO: parent.issueStatusId does exist but since it is not part of the graphql type it is not available according to typescript
     const issue = await db.Issue.findByPk(Number(parent.id), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     if (!issue.issueStatusId) return null;
 
     const issueStatus = await db.IssueStatuses.findByPk(issue.issueStatusId, {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return {
@@ -374,11 +374,11 @@ const Issue: IssueResolvers = {
   },
   reporter: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const issue = await db.Issue.findByPk(Number(parent.id), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     const reporterUser = await db.User.findByPk(Number(issue.reporterId), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     if (!reporterUser) return null;
@@ -387,13 +387,13 @@ const Issue: IssueResolvers = {
   },
   assignee: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const databaseIssue = await db.Issue.findByPk(Number(parent.id), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     if (!databaseIssue?.assigneeId) return null;
 
     const user = await db.User.findByPk(Number(databaseIssue.assigneeId), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return formatUserForGraphql(user);
@@ -402,7 +402,7 @@ const Issue: IssueResolvers = {
     if (parent.project) return parent.project;
 
     const databaseProject = await db.Project.findByPk(Number(parent.projectId), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return {

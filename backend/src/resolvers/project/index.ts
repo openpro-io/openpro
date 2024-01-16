@@ -260,10 +260,10 @@ const Mutation: MutationResolvers = {
     );
 
     // TODO: we may not even need this
-    dataLoaderContext.prime(projectPermission);
-    dataLoaderContext.prime(issueStatuses);
-    dataLoaderContext.prime(project);
-    dataLoaderContext.prime(board);
+    // dataLoaderContext.prime(projectPermission);
+    // dataLoaderContext.prime(issueStatuses);
+    // dataLoaderContext.prime(project);
+    // dataLoaderContext.prime(board);
 
     return {
       ...project.toJSON(),
@@ -289,7 +289,7 @@ const Project: ProjectResolvers = {
       where: { projectId: parent.id },
     });
 
-    dataLoaderContext.prime(projectFields);
+    // dataLoaderContext.prime(projectFields);
 
     return projectFields.map((field) => ({
       ...field.toJSON(),
@@ -303,7 +303,7 @@ const Project: ProjectResolvers = {
       where: { projectId: parent.id },
     });
 
-    dataLoaderContext.prime(projectTags);
+    // dataLoaderContext.prime(projectTags);
 
     return projectTags.map((tag) => ({
       ...tag.toJSON(),
@@ -320,7 +320,7 @@ const Project: ProjectResolvers = {
 
     const databaseIssues = await db.Issue.findAll(findAllInput);
 
-    dataLoaderContext.prime(databaseIssues);
+    // dataLoaderContext.prime(databaseIssues);
 
     return databaseIssues.map((issue) => ({
       ...issue.toJSON(),
@@ -335,7 +335,7 @@ const Project: ProjectResolvers = {
       where: { projectId: parent.id },
     });
 
-    dataLoaderContext.prime(issueStatuses);
+    // dataLoaderContext.prime(issueStatuses);
 
     return issueStatuses.map((issueStatus) => ({
       ...issueStatus.toJSON(),

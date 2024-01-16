@@ -49,7 +49,7 @@ export const formatBoardResponse = (board: BoardModel): Board => {
 const ViewStateItem: ViewStateItemResolvers = {
   title: async (parent, __, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const issue = await db.Issue.findByPk(Number(parent.id.replace('item-', '')), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return issue?.title ?? null;
@@ -57,7 +57,7 @@ const ViewStateItem: ViewStateItemResolvers = {
   status: async (parent, __, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     try {
       const issue = await db.Issue.findByPk(Number(parent.id.replace('item-', '')), {
-        [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+        // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
         include: {
           model: db.IssueStatuses,
           as: 'issueStatus',
@@ -113,7 +113,7 @@ export const boards: Resolver<ResolverTypeWrapper<Partial<Board>>[], Project | u
     ],
   });
 
-  dataLoaderContext.prime(boards);
+  // dataLoaderContext.prime(boards);
 
   return boards.map(formatBoardResponse);
 };
@@ -140,7 +140,7 @@ const Query: QueryResolvers = {
           ],
         },
       ],
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return formatBoardResponse(board);
@@ -154,7 +154,7 @@ const Mutation: MutationResolvers = {
     { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }
   ) => {
     const board = await db.Board.findByPk(Number(boardId), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return formatBoardResponse(board).viewState;
@@ -184,13 +184,13 @@ const Mutation: MutationResolvers = {
             ],
           },
         ],
-        [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+        // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
         transaction,
       });
 
       const doesIssueExist = await db.Issue.findByPk(Number(issueId), {
         transaction,
-        [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+        // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
       });
       if (!doesIssueExist) {
         throw new Error(`Issue with id ${issueId} does not exist`);
@@ -228,10 +228,10 @@ const Mutation: MutationResolvers = {
         );
       }
 
-      dataLoaderContext.prime(incomingItem);
+      // dataLoaderContext.prime(incomingItem);
 
       await board.reload({ transaction });
-      dataLoaderContext.prime(board);
+      // dataLoaderContext.prime(board);
 
       const destinationBoardContainerUpdated = board.containers.find(
         (container) => container.id === Number(viewStateId.replace('container-', ''))
@@ -259,9 +259,9 @@ const Mutation: MutationResolvers = {
       }
 
       await Promise.all(sortedItems.map((item) => item.save({ transaction })));
-      dataLoaderContext.prime(sortedItems);
+      // dataLoaderContext.prime(sortedItems);
       await board.reload({ transaction });
-      dataLoaderContext.prime(board);
+      // dataLoaderContext.prime(board);
 
       return board;
     });
@@ -272,7 +272,7 @@ const Mutation: MutationResolvers = {
     const { id, name, viewState, backlogEnabled, settings, containerOrder } = input;
 
     const board = await db.Board.findByPk(Number(id), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
       include: [
         {
           model: db.BoardContainer,
@@ -304,7 +304,7 @@ const Mutation: MutationResolvers = {
     await board.save();
     await board.reload();
 
-    dataLoaderContext.prime(board);
+    // dataLoaderContext.prime(board);
 
     websocketBroadcast({
       clients: websocketServer.clients,
@@ -324,7 +324,7 @@ const Board: BoardResolvers = {
         model: db.Issue,
         as: 'issues',
       },
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     const boardIssueIdsFromViewState = board.viewState
@@ -344,7 +344,7 @@ const Board: BoardResolvers = {
       raw: true,
     });
 
-    dataLoaderContext.prime(boardIssues);
+    // dataLoaderContext.prime(boardIssues);
 
     return issuesInViewState.map((issue) => ({
       ...issue.toJSON(),
