@@ -178,6 +178,35 @@ const Mutation: MutationResolvers = {
         transaction,
       });
 
+      // START: This is specific to the issue board
+      const board = await db.Board.findOne({
+        where: { projectId: issue.projectId },
+        transaction,
+      });
+
+      // This is the destination column on the board we want to move to
+      const boardContainer = await db.BoardContainer.findOne({
+        where: { boardId: board.id, title: issueStatus.name },
+        transaction,
+      });
+
+      const issueOnBoard = await db.ContainerItem.findOne({
+        where: { issueId: issue.id },
+        transaction,
+      });
+
+      const maxPosition = Number(
+        await db.ContainerItem.max('position', {
+          where: { containerId: boardContainer.id },
+          transaction,
+        })
+      );
+
+      issueOnBoard.containerId = boardContainer.id;
+      issueOnBoard.position = maxPosition > 0 ? maxPosition + 1 : 0;
+      await issueOnBoard.save();
+      // END: This is specific to the issue board
+
       const returnData = {
         ...issue.toJSON(),
         id: `${issue.id}`,

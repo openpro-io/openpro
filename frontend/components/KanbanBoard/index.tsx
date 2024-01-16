@@ -243,6 +243,17 @@ export default function KanbanBoard({
 
     const remoteDataChanged = !isEqual(incomingData, pageState?.containers);
 
+    if (remoteDataChanged) {
+      console.log('REMOTE DATA CHANGED');
+      setPageState((prevState) => {
+        return {
+          ...prevState,
+          containers: incomingData,
+        };
+      });
+      return;
+    }
+
     // TODO: Testing if this is messing with the board
     if (!isEmpty(containers)) {
       console.log('EXITING EARLY');
