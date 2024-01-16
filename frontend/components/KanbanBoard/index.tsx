@@ -636,6 +636,10 @@ export default function KanbanBoard({
                 columnPositionIndex,
               },
             },
+            onCompleted: async () => {
+              // TODO: This may not be needed...
+              await getProjectInfo.refetch();
+            },
           }).catch((e) => {
             console.error('ERROR_ADDING_ITEM_TO_VIEW_STATE', { e });
           });
