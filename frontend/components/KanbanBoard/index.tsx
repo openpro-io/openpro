@@ -242,6 +242,13 @@ export default function KanbanBoard({
     const correctedBoardState = cloneDeep(incomingData);
 
     const remoteDataChanged = !isEqual(incomingData, pageState?.containers);
+
+    // TODO: Testing if this is messing with the board
+    if (!isEmpty(containers)) {
+      console.log('EXITING EARLY');
+      return;
+    }
+
     let hasMismatchedIssueStatuses = false;
 
     // If the issue status of an issue does not match the container it is in, we need to move it to the correct container
@@ -565,14 +572,43 @@ export default function KanbanBoard({
       const destinationContainer = findContainerByItemId(over.id);
       if (!destinationContainer) return;
 
+      const destinationIssueStatus =
+        getProjectInfo.data.project.issueStatuses.find(
+          (issueStatus: any) =>
+            issueStatus.name.toLowerCase() ===
+            destinationContainer.title.toLowerCase()
+        );
+
       // TODO: Temporary until we decouple the issue status from the container
-      const issueStatusId = getProjectInfo.data.project.issueStatuses.find(
-        (issueStatus: any) =>
-          issueStatus.name.toLowerCase() ===
-          destinationContainer.title.toLowerCase()
-      )?.id;
+      const issueStatusId = destinationIssueStatus?.id;
 
       const issueId = `${active.id}`.replace('item-', '');
+
+      // START
+      const overContainer = findValueOfItems(over.id, 'item');
+      if (!overContainer) return;
+
+      const overContainerIndex = containers.findIndex(
+        (container) => container.id === overContainer.id
+      );
+      const overitemIndex = overContainer.items.findIndex(
+        (item) => item.id === over.id
+      );
+
+      let newItems = [...containers];
+
+      newItems[overContainerIndex].items[overitemIndex].status = pick(
+        destinationIssueStatus,
+        ['id', 'name', 'projectId']
+      );
+
+      // setPageState((prevState) => {
+      //   return {
+      //     ...prevState,
+      //     containers: newItems,
+      //   };
+      // });
+      // END
 
       updateIssue({
         variables: {
@@ -582,30 +618,6 @@ export default function KanbanBoard({
           },
         },
         onCompleted: (data) => {
-          const overContainer = findValueOfItems(over.id, 'item');
-          if (!overContainer) return;
-
-          const overContainerIndex = containers.findIndex(
-            (container) => container.id === overContainer.id
-          );
-          const overitemIndex = overContainer.items.findIndex(
-            (item) => item.id === over.id
-          );
-
-          let newItems = [...containers];
-
-          newItems[overContainerIndex].items[overitemIndex].status = pick(
-            data.updateIssue.status,
-            ['id', 'name', 'projectId']
-          );
-
-          setPageState((prevState) => {
-            return {
-              ...prevState,
-              containers: newItems,
-            };
-          });
-
           const isIssueDone =
             data.updateIssue.status.name.toLowerCase() === 'done';
           const userEnabledCelebrateCompletedIssue = getMe?.data?.me?.settings
@@ -638,7 +650,7 @@ export default function KanbanBoard({
             },
             onCompleted: async () => {
               // TODO: This may not be needed...
-              await getProjectInfo.refetch();
+              // await getProjectInfo.refetch();
             },
           }).catch((e) => {
             console.error('ERROR_ADDING_ITEM_TO_VIEW_STATE', { e });
