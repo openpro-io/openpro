@@ -216,6 +216,12 @@ export default function KanbanBoard({
     });
 
     await addItemToViewState({
+      onCompleted: (data) => {
+        setPageState((prevState) => ({
+          ...prevState,
+          boardVersion: prevState.boardVersion + 1,
+        }));
+      },
       variables: {
         input: {
           boardId,
@@ -241,126 +247,20 @@ export default function KanbanBoard({
 
     // We want to omit __typename metafield from gql query results
     const incomingData = omitDeep(thisBoard.viewState, '__typename');
-    const correctedBoardState = cloneDeep(incomingData);
 
-    // const remoteDataChanged = !isEqual(incomingData, pageState?.containers);
     const remoteDataChanged = thisBoard.version > pageState.boardVersion;
 
-    console.log({
-      remoteDataChanged,
-      boardVersion: thisBoard.version,
-      pageStateBoardVersion: pageState.boardVersion,
-    });
-
     if (remoteDataChanged) {
-      setTimeout(() => {
-        console.log('REMOTE DATA CHANGED');
-        console.log({
-          containers,
-          incomingData,
-        });
-        setPageState((prevState) => {
-          return {
-            ...prevState,
-            containers: incomingData,
-            boardVersion: thisBoard.version,
-          };
-        });
-      }, 1000);
-
-      return;
-    }
-
-    // TODO: Testing if this is messing with the board
-    if (!isEmpty(containers)) {
-      console.log('EXITING EARLY');
-      return;
-    }
-
-    let hasMismatchedIssueStatuses = false;
-
-    // If the issue status of an issue does not match the container it is in, we need to move it to the correct container
-    // this can happen when using the modal issue status dropdown to change the issue status versus dragging the issue to a new container
-    incomingData.forEach((container: any) => {
-      container.items.forEach((item: any) => {
-        const issueData = getProjectInfo?.data?.project?.issues?.find(
-          (issue: any) => issue.id === `${item.id}`.replace('item-', '')
-        );
-
-        if (issueData.status.id !== container.id.replace('container-', '')) {
-          hasMismatchedIssueStatuses = true;
-
-          // move to correct container
-          const destinationContainer = findContainerById(
-            `container-${issueData.status.id}`
-          );
-
-          const previousContainer = findContainerByItemId(
-            `item-${issueData.id}`
-          );
-
-          if (!destinationContainer || !previousContainer) return;
-
-          const destinationContainerIndex = containers.findIndex(
-            (container) => container.id === destinationContainer.id
-          );
-          const previousContainerIndex = containers.findIndex(
-            (container) => container.id === previousContainer.id
-          );
-          const issueStatusId = `${issueData.status.id}`;
-          const issueId = `${issueData.id}`;
-          const previousItemIndex = previousContainer.items.findIndex(
-            (item) => item.id === `item-${issueData.id}`
-          );
-          const destinationItemIndex =
-            destinationContainer.items.length > 0
-              ? destinationContainer.items.length + 1
-              : destinationContainer.items.length;
-
-          // remove item from old container
-          const [removedItem] = correctedBoardState[
-            previousContainerIndex
-          ].items.splice(previousItemIndex, 1);
-
-          // push removed item to new container
-          correctedBoardState[destinationContainerIndex].items.splice(
-            destinationItemIndex,
-            0,
-            removedItem
-          );
-        }
-      });
-    });
-
-    const projectHasArchivedIssues =
-      getProjectInfo?.data?.project?.issues?.some(
-        (issue: any) => issue.archived
-      );
-
-    if (isEmpty(containers) || remoteDataChanged) {
+      console.log(`updating board to version ${thisBoard.version}`);
       setPageState((prevState) => {
         return {
           ...prevState,
           containers: incomingData,
+          boardVersion: thisBoard.version,
         };
       });
-    } else if (projectHasArchivedIssues) {
-      // If the project has archived issues, we need to update the board
-      // to remove the archived issues from the board
-      setPageState((prevState) => {
-        return {
-          ...prevState,
-        };
-      });
-    } else if (hasMismatchedIssueStatuses) {
-      console.log({ correctedBoardState });
-      // TODO: Look into if this is needed
-      setPageState((prevState) => {
-        return {
-          ...prevState,
-          // containers: correctedBoardState,
-        };
-      });
+
+      return;
     }
   }, [getProjectInfo.data]);
 
@@ -630,14 +530,6 @@ export default function KanbanBoard({
         ['id', 'name', 'projectId']
       );
 
-      // setPageState((prevState) => {
-      //   return {
-      //     ...prevState,
-      //     containers: newItems,
-      //   };
-      // });
-      // END
-
       updateIssue({
         variables: {
           input: {
@@ -659,33 +551,12 @@ export default function KanbanBoard({
             });
           }
 
-          // const viewStateId = newItems[overContainerIndex].id;
-          // const issueId =
-          //   `${newItems[overContainerIndex].items[overitemIndex].id}`.replace(
-          //     'item-',
-          //     ''
-          //   );
-          // const columnPositionIndex = overitemIndex;
-
           setPageState((prevState) => ({
             ...prevState,
             boardVersion: prevState.boardVersion + 1,
           }));
 
           return getProjectInfo.refetch();
-
-          // return addItemToViewState({
-          //   variables: {
-          //     input: {
-          //       boardId,
-          //       viewStateId,
-          //       issueId,
-          //       columnPositionIndex,
-          //     },
-          //   },
-          // }).catch((e) => {
-          //   console.error('ERROR_ADDING_ITEM_TO_VIEW_STATE', { e });
-          // });
         },
       });
     }
