@@ -184,6 +184,10 @@ const Mutation: MutationResolvers = {
         transaction,
       });
 
+      board.version += 1;
+
+      await board.save({ transaction });
+
       // This is the destination column on the board we want to move to
       const boardContainer = await db.BoardContainer.findOne({
         where: { boardId: board.id, title: issueStatus.name },

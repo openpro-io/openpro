@@ -12,6 +12,7 @@ export const PROJECT_FIELDS = gql(/* GraphQL */ `
     boards {
       id
       name
+      version
       viewState {
         ...ViewStateFields
       }
@@ -177,6 +178,7 @@ export const GET_PROJECT_INFO = gql(/* GraphQL */ `
       }
       boards {
         id
+        version
         viewState {
           ...ViewStateFields
         }
@@ -323,6 +325,7 @@ export const CREATE_PROJECT_MUTATION = gql(/* GraphQL */ `
         id
         style
         backlogEnabled
+        version
         viewState {
           ...ViewStateFields
         }
@@ -339,6 +342,7 @@ export const GET_PROJECTS = gql(/* GraphQL */ `
       boards {
         id
         style
+        version
         viewState {
           ...ViewStateFields
         }
@@ -353,6 +357,7 @@ export const UPDATE_BOARD_MUTATION = gql(/* GraphQL */ `
     updateBoard(input: $input) {
       id
       name
+      version
       viewState {
         ...ViewStateFields
       }
@@ -397,6 +402,7 @@ export const GET_BOARD_INFO = gql(/* GraphQL */ `
     board(input: $input) {
       id
       name
+      version
       viewState {
         ...ViewStateFields
       }
@@ -412,6 +418,7 @@ export const GET_BOARD_ISSUES = gql(/* GraphQL */ `
     board(input: $input) {
       id
       name
+      version
       viewState {
         ...ViewStateFields
       }

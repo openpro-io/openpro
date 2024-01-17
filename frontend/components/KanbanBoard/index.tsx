@@ -66,6 +66,7 @@ interface PageState {
   currentContainerId: UniqueIdentifier | string | null;
   containerName: string;
   itemName: string;
+  boardVersion: number;
 }
 
 export default function KanbanBoard({
@@ -89,6 +90,7 @@ export default function KanbanBoard({
     currentContainerId: null,
     containerName: '',
     itemName: '',
+    boardVersion: 0,
   });
 
   const onInit = ({ conductor }: { conductor: TConductorInstance }) => {
@@ -241,16 +243,31 @@ export default function KanbanBoard({
     const incomingData = omitDeep(thisBoard.viewState, '__typename');
     const correctedBoardState = cloneDeep(incomingData);
 
-    const remoteDataChanged = !isEqual(incomingData, pageState?.containers);
+    // const remoteDataChanged = !isEqual(incomingData, pageState?.containers);
+    const remoteDataChanged = thisBoard.version > pageState.boardVersion;
+
+    console.log({
+      remoteDataChanged,
+      boardVersion: thisBoard.version,
+      pageStateBoardVersion: pageState.boardVersion,
+    });
 
     if (remoteDataChanged) {
-      console.log('REMOTE DATA CHANGED');
-      setPageState((prevState) => {
-        return {
-          ...prevState,
-          containers: incomingData,
-        };
-      });
+      setTimeout(() => {
+        console.log('REMOTE DATA CHANGED');
+        console.log({
+          containers,
+          incomingData,
+        });
+        setPageState((prevState) => {
+          return {
+            ...prevState,
+            containers: incomingData,
+            boardVersion: thisBoard.version,
+          };
+        });
+      }, 1000);
+
       return;
     }
 
@@ -642,30 +659,33 @@ export default function KanbanBoard({
             });
           }
 
-          const viewStateId = newItems[overContainerIndex].id;
-          const issueId =
-            `${newItems[overContainerIndex].items[overitemIndex].id}`.replace(
-              'item-',
-              ''
-            );
-          const columnPositionIndex = overitemIndex;
+          // const viewStateId = newItems[overContainerIndex].id;
+          // const issueId =
+          //   `${newItems[overContainerIndex].items[overitemIndex].id}`.replace(
+          //     'item-',
+          //     ''
+          //   );
+          // const columnPositionIndex = overitemIndex;
 
-          return addItemToViewState({
-            variables: {
-              input: {
-                boardId,
-                viewStateId,
-                issueId,
-                columnPositionIndex,
-              },
-            },
-            onCompleted: async () => {
-              // TODO: This may not be needed...
-              // await getProjectInfo.refetch();
-            },
-          }).catch((e) => {
-            console.error('ERROR_ADDING_ITEM_TO_VIEW_STATE', { e });
-          });
+          setPageState((prevState) => ({
+            ...prevState,
+            boardVersion: prevState.boardVersion + 1,
+          }));
+
+          return getProjectInfo.refetch();
+
+          // return addItemToViewState({
+          //   variables: {
+          //     input: {
+          //       boardId,
+          //       viewStateId,
+          //       issueId,
+          //       columnPositionIndex,
+          //     },
+          //   },
+          // }).catch((e) => {
+          //   console.error('ERROR_ADDING_ITEM_TO_VIEW_STATE', { e });
+          // });
         },
       });
     }

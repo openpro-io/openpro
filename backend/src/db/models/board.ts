@@ -40,6 +40,12 @@ export default (sequelize: Sequelize) => {
         type: DataTypes.JSONB,
         field: 'container_order',
       },
+      version: {
+        type: DataTypes.INTEGER,
+        field: 'version',
+        allowNull: false,
+        defaultValue: 1,
+      },
       createdAt: {
         type: DataTypes.DATE,
         field: 'created_at',

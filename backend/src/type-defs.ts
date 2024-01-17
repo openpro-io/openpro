@@ -162,6 +162,7 @@ const typeDefs = gql`
     style: String
     status: String
     viewState: [ViewState]
+    version: Int
     backlogEnabled: Boolean
     createdAt: DateTime
     updatedAt: DateTime

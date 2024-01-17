@@ -43,6 +43,7 @@ export const formatBoardResponse = (board: BoardModel): Board => {
     containerOrder: board.containerOrder ? JSON.stringify(board.containerOrder) : undefined,
     settings: board.settings ? JSON.stringify(board.settings) : undefined,
     viewState: buildViewState(board),
+    version: Number(board.version),
   };
 };
 
@@ -187,6 +188,10 @@ const Mutation: MutationResolvers = {
         // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
         transaction,
       });
+
+      board.version += 1;
+
+      await board.save({ transaction });
 
       const doesIssueExist = await db.Issue.findByPk(Number(issueId), {
         transaction,

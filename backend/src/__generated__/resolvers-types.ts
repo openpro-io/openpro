@@ -62,6 +62,7 @@ export type Board = {
   status?: Maybe<Scalars['String']['output']>;
   style?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  version?: Maybe<Scalars['Int']['output']>;
   viewState?: Maybe<Array<Maybe<ViewState>>>;
 };
 
@@ -817,6 +818,7 @@ export type BoardResolvers<ContextType = ApolloContext, ParentType = ResolversPa
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   style?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  version?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   viewState?: Resolver<Maybe<Array<Maybe<ResolversTypes['ViewState']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;

@@ -200,6 +200,7 @@ export class Board extends Model<
   declare backlogEnabled: CreationOptional<boolean>;
   declare settings: CreationOptional<object>;
   declare containerOrder: CreationOptional<object>;
+  declare version: CreationOptional<number>;
 
   declare getIssues: BelongsToManyGetAssociationsMixin<Issue[]>;
 
