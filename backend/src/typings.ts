@@ -6,6 +6,8 @@ import type { Readable } from 'stream';
 import {
   Asset,
   Board,
+  BoardContainer,
+  ContainerItem,
   Issue,
   IssueBoard,
   IssueComment,
@@ -29,6 +31,8 @@ export type Db = {
   User?: typeof User;
   Project?: typeof Project;
   Board?: typeof Board;
+  BoardContainer?: typeof BoardContainer;
+  ContainerItem?: typeof ContainerItem;
   IssueStatuses?: typeof IssueStatus;
   Issue?: typeof Issue;
   Asset?: typeof Asset;

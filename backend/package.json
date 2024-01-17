@@ -27,6 +27,7 @@
     "@graphql-tools/merge": "^9.0.1",
     "@hocuspocus/extension-database": "^2.8.1",
     "@hocuspocus/server": "^2.8.1",
+    "array-move": "^4.0.0",
     "axios": "^1.6.0",
     "dataloader-sequelize": "^2.3.3",
     "fastify": "^4.25.2",

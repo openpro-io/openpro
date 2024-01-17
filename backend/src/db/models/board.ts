@@ -40,6 +40,12 @@ export default (sequelize: Sequelize) => {
         type: DataTypes.JSONB,
         field: 'container_order',
       },
+      version: {
+        type: DataTypes.INTEGER,
+        field: 'version',
+        allowNull: false,
+        defaultValue: 1,
+      },
       createdAt: {
         type: DataTypes.DATE,
         field: 'created_at',
@@ -58,7 +64,7 @@ export default (sequelize: Sequelize) => {
     }
   );
 
-  Board.associate = ({ IssueBoard, Project, Issue }) => {
+  Board.associate = ({ IssueBoard, Project, Issue, BoardContainer }) => {
     Board.belongsToMany(Issue, {
       through: IssueBoard,
       foreignKey: 'board_id',
@@ -68,6 +74,10 @@ export default (sequelize: Sequelize) => {
     Board.belongsTo(Project, {
       foreignKey: 'project_id',
       as: 'project',
+    });
+    Board.hasMany(BoardContainer, {
+      foreignKey: 'board_id',
+      as: 'containers',
     });
   };
 

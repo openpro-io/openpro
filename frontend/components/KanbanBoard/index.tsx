@@ -2,8 +2,6 @@
 
 import { useMutation, useQuery } from '@apollo/client';
 import { omitDeep } from '@apollo/client/utilities';
-// https://github.com/chetanverma16/dndkit-guide/tree/main/components
-// This guy did a pretty good job!!!
 import {
   DndContext,
   DragEndEvent,
@@ -28,7 +26,6 @@ import { getSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Fireworks from 'react-canvas-confetti/dist/presets/fireworks';
-import Realistic from 'react-canvas-confetti/dist/presets/realistic';
 import { TConductorInstance } from 'react-canvas-confetti/dist/types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -37,16 +34,14 @@ import IssueModal from '@/components/IssueModal';
 import IssueModalContents from '@/components/IssueModal/IssueModalContents';
 import Toolbar from '@/components/KanbanBoard/Toolbar';
 import {
+  ADD_ITEM_TO_VIEW_STATE,
   CREATE_ISSUE_MUTATION,
   CREATE_ISSUE_STATUS_MUTATION,
   GET_ME,
   GET_PROJECT_INFO,
-  ISSUE_FIELDS,
-  UPDATE_BOARD_MUTATION,
   UPDATE_ISSUE_MUTATION,
 } from '@/gql/gql-queries-mutations';
 import useWsAuthenticatedSocket from '@/hooks/useWsAuthenticatedSocket';
-import { apolloClient } from '@/services/apollo-client';
 import { getDomainName } from '@/services/utils';
 
 // Components
@@ -71,15 +66,8 @@ interface PageState {
   currentContainerId: UniqueIdentifier | string | null;
   containerName: string;
   itemName: string;
-  saveToBackend: boolean;
+  boardVersion: number;
 }
-
-const getIssueFragment = (issueId: string) => {
-  return apolloClient.readFragment({
-    id: `Issue:${issueId}`,
-    fragment: ISSUE_FIELDS,
-  });
-};
 
 export default function KanbanBoard({
   projectId,
@@ -102,42 +90,29 @@ export default function KanbanBoard({
     currentContainerId: null,
     containerName: '',
     itemName: '',
-    saveToBackend: false,
+    boardVersion: 0,
   });
 
   const onInit = ({ conductor }: { conductor: TConductorInstance }) => {
     setConductor(conductor);
   };
 
-  const {
-    containers,
-    activeId,
-    currentContainerId,
-    containerName,
-    itemName,
-    saveToBackend,
-  } = pageState;
+  const { containers, activeId, currentContainerId, containerName, itemName } =
+    pageState;
 
   const [createIssue] = useMutation(CREATE_ISSUE_MUTATION);
   const [updateIssue] = useMutation(UPDATE_ISSUE_MUTATION);
-  const [updateBoard] = useMutation(UPDATE_BOARD_MUTATION);
   const [addIssueStatus] = useMutation(CREATE_ISSUE_STATUS_MUTATION);
+  const [addItemToViewState] = useMutation(ADD_ITEM_TO_VIEW_STATE);
 
   const getMe = useQuery(GET_ME);
   const getProjectInfo = useQuery(GET_PROJECT_INFO, {
     skip: !projectId,
-    fetchPolicy: 'cache-first',
+    fetchPolicy: 'network-only',
     variables: {
       input: { id: `${projectId}` },
     },
   });
-
-  // const getBoardIssues = useQuery(GET_BOARD_ISSUES, {
-  //   skip: !boardId,
-  //   variables: {
-  //     input: { id: `${boardId}` },
-  //   },
-  // });
 
   // On page load we open the modal if there is a query param for the issue
   useEffect(() => {
@@ -148,6 +123,7 @@ export default function KanbanBoard({
     }
   }, [selectedIssueId]);
 
+  // TODO: FIX
   const onAddContainer = async () => {
     if (!containerName) return;
 
@@ -183,8 +159,11 @@ export default function KanbanBoard({
     );
     if (!container) return;
 
-    // @ts-ignore
-    const issueStatusId = container.id.replace('container-', '');
+    // TODO: Temporary until we decouple the issue status from the container
+    const issueStatusId = getProjectInfo.data.project.issueStatuses.find(
+      (issueStatus: any) =>
+        issueStatus.name.toLowerCase() === container.title.toLowerCase()
+    )?.id;
 
     // Create the item in backend
     const newIssueResp = await createIssue({
@@ -199,6 +178,8 @@ export default function KanbanBoard({
         },
       },
     });
+
+    await getProjectInfo.refetch();
 
     const newIssue = newIssueResp.data.createIssue;
 
@@ -219,11 +200,9 @@ export default function KanbanBoard({
     };
 
     sendJsonMessage(notification);
-    // await notify(notification);
 
-    const id = `item-${newIssue.id}`;
     container.items.push({
-      id,
+      id: `item-${newIssue.id}`,
       title: itemName,
       status: omitDeep(newIssue.status, '__typename'),
     });
@@ -232,73 +211,29 @@ export default function KanbanBoard({
       return {
         ...prevState,
         itemName: '',
-        saveToBackend: true,
         containers: newContainers,
       };
     });
 
+    await addItemToViewState({
+      onCompleted: (data) => {
+        setPageState((prevState) => ({
+          ...prevState,
+          boardVersion: prevState.boardVersion + 1,
+        }));
+      },
+      variables: {
+        input: {
+          boardId,
+          viewStateId: container.id,
+          issueId: newIssue.id,
+          columnPositionIndex: container.items.length,
+        },
+      },
+    });
+
     setShowAddItemModal(false);
   };
-
-  useEffect(() => {
-    if (saveToBackend) {
-      // const configuredContainerOrder = JSON.parse(
-      //   getProjectInfo?.data?.project?.boards?.[0]?.containerOrder
-      // ).map((item: any) => ({
-      //   id: `container-${item.id}`,
-      //   name: item.title,
-      //   position: item.position,
-      // }));
-
-      // const currentContainerOrder = containers.map((item, index) => ({
-      //   id: item.id,
-      //   name: item.title,
-      //   position: index,
-      // }));
-
-      // TODO: we got some work to do here on using the backend container order
-      // if (isEqual(configuredContainerOrder, currentContainerOrder)) {
-      //   console.log('No need to update the backend');
-      // } else {
-      //   console.log('Need to update the backend');
-      // }
-
-      const filteredContainers = containers.map((container) => {
-        const items = container.items.reduce((acc, item) => {
-          const issueData = getIssueFragment(`${item.id}`.replace('item-', ''));
-
-          // We remove archived items from the board
-          if (!issueData.archived) {
-            acc.push(item);
-          }
-
-          return acc;
-        }, [] as any[]);
-
-        return {
-          ...container,
-          items,
-        };
-      });
-
-      updateBoard({
-        onCompleted: () => {
-          setPageState((prevState) => {
-            return {
-              ...prevState,
-              saveToBackend: false,
-            };
-          });
-        },
-        variables: {
-          input: {
-            id: boardId,
-            viewState: filteredContainers,
-          },
-        },
-      });
-    }
-  }, [saveToBackend, containers]);
 
   // This is called once we fetch data from server
   useEffect(() => {
@@ -312,91 +247,20 @@ export default function KanbanBoard({
 
     // We want to omit __typename metafield from gql query results
     const incomingData = omitDeep(thisBoard.viewState, '__typename');
-    const correctedBoardState = cloneDeep(incomingData);
 
-    const remoteDataChanged = !isEqual(incomingData, pageState?.containers);
-    let hasMismatchedIssueStatuses = false;
+    const remoteDataChanged = thisBoard.version > pageState.boardVersion;
 
-    // If the issue status of an issue does not match the container it is in, we need to move it to the correct container
-    // this can happen when using the modal issue status dropdown to change the issue status versus dragging the issue to a new container
-    incomingData.forEach((container: any) => {
-      container.items.forEach((item: any) => {
-        const issueData = getIssueFragment(`${item.id}`.replace('item-', ''));
-        if (issueData.status.id !== container.id.replace('container-', '')) {
-          hasMismatchedIssueStatuses = true;
-
-          // move to correct container
-          const destinationContainer = findContainerById(
-            `container-${issueData.status.id}`
-          );
-
-          const previousContainer = findContainerByItemId(
-            `item-${issueData.id}`
-          );
-
-          if (!destinationContainer || !previousContainer) return;
-
-          const destinationContainerIndex = containers.findIndex(
-            (container) => container.id === destinationContainer.id
-          );
-          const previousContainerIndex = containers.findIndex(
-            (container) => container.id === previousContainer.id
-          );
-          const issueStatusId = `${issueData.status.id}`;
-          const issueId = `${issueData.id}`;
-          const previousItemIndex = previousContainer.items.findIndex(
-            (item) => item.id === `item-${issueData.id}`
-          );
-          const destinationItemIndex =
-            destinationContainer.items.length > 0
-              ? destinationContainer.items.length + 1
-              : destinationContainer.items.length;
-
-          // remove item from old container
-          const [removedItem] = correctedBoardState[
-            previousContainerIndex
-          ].items.splice(previousItemIndex, 1);
-
-          // push removed item to new container
-          correctedBoardState[destinationContainerIndex].items.splice(
-            destinationItemIndex,
-            0,
-            removedItem
-          );
-        }
-      });
-    });
-
-    const projectHasArchivedIssues =
-      getProjectInfo?.data?.project?.issues?.some(
-        (issue: any) => issue.archived
-      );
-
-    if (isEmpty(containers) || remoteDataChanged) {
+    if (remoteDataChanged) {
+      console.log(`updating board to version ${thisBoard.version}`);
       setPageState((prevState) => {
         return {
           ...prevState,
           containers: incomingData,
+          boardVersion: thisBoard.version,
         };
       });
-    } else if (projectHasArchivedIssues) {
-      // If the project has archived issues, we need to update the board
-      // to remove the archived issues from the board
-      setPageState((prevState) => {
-        return {
-          ...prevState,
-          saveToBackend: true,
-        };
-      });
-    } else if (hasMismatchedIssueStatuses) {
-      console.log({ correctedBoardState });
-      setPageState((prevState) => {
-        return {
-          ...prevState,
-          containers: correctedBoardState,
-          saveToBackend: true,
-        };
-      });
+
+      return;
     }
   }, [getProjectInfo.data]);
 
@@ -632,12 +496,39 @@ export default function KanbanBoard({
       over &&
       active.id === over.id
     ) {
+      // console.log('OTHER,CONTAINER');
       const destinationContainer = findContainerByItemId(over.id);
-      const issueStatusId = `${destinationContainer?.id}`.replace(
-        'container-',
-        ''
-      );
+      if (!destinationContainer) return;
+
+      const destinationIssueStatus =
+        getProjectInfo.data.project.issueStatuses.find(
+          (issueStatus: any) =>
+            issueStatus.name.toLowerCase() ===
+            destinationContainer.title.toLowerCase()
+        );
+
+      // TODO: Temporary until we decouple the issue status from the container
+      const issueStatusId = destinationIssueStatus?.id;
+
       const issueId = `${active.id}`.replace('item-', '');
+
+      // START
+      const overContainer = findValueOfItems(over.id, 'item');
+      if (!overContainer) return;
+
+      const overContainerIndex = containers.findIndex(
+        (container) => container.id === overContainer.id
+      );
+      const overitemIndex = overContainer.items.findIndex(
+        (item) => item.id === over.id
+      );
+
+      let newItems = [...containers];
+
+      newItems[overContainerIndex].items[overitemIndex].status = pick(
+        destinationIssueStatus,
+        ['id', 'name', 'projectId']
+      );
 
       updateIssue({
         variables: {
@@ -647,30 +538,6 @@ export default function KanbanBoard({
           },
         },
         onCompleted: (data) => {
-          const overContainer = findValueOfItems(over.id, 'item');
-          if (!overContainer) return;
-
-          const overContainerIndex = containers.findIndex(
-            (container) => container.id === overContainer.id
-          );
-          const overitemIndex = overContainer.items.findIndex(
-            (item) => item.id === over.id
-          );
-
-          let newItems = [...containers];
-
-          newItems[overContainerIndex].items[overitemIndex].status = pick(
-            data.updateIssue.status,
-            ['id', 'name', 'projectId']
-          );
-
-          setPageState((prevState) => {
-            return {
-              ...prevState,
-              containers: newItems,
-            };
-          });
-
           const isIssueDone =
             data.updateIssue.status.name.toLowerCase() === 'done';
           const userEnabledCelebrateCompletedIssue = getMe?.data?.me?.settings
@@ -683,6 +550,13 @@ export default function KanbanBoard({
               speed: 2,
             });
           }
+
+          setPageState((prevState) => ({
+            ...prevState,
+            boardVersion: prevState.boardVersion + 1,
+          }));
+
+          return getProjectInfo.refetch();
         },
       });
     }
@@ -792,13 +666,31 @@ export default function KanbanBoard({
           containers: newItems,
         };
       });
+
+      addItemToViewState({
+        onCompleted: (data) => {
+          setPageState((prevState) => ({
+            ...prevState,
+            boardVersion: prevState.boardVersion + 1,
+          }));
+        },
+        variables: {
+          input: {
+            boardId,
+            viewStateId: overContainer.id,
+            issueId: `${removeditem.id}`.replace('item-', ''),
+            columnPositionIndex: newItems[overContainerIndex].items.length,
+          },
+        },
+      }).catch((e) => {
+        console.error('ERROR_ADDING_ITEM_TO_VIEW_STATE', { e });
+      });
     }
 
     setPageState((prevState) => {
       return {
         ...prevState,
         activeId: null,
-        saveToBackend: true,
       };
     });
   }

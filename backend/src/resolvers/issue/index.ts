@@ -41,40 +41,12 @@ const Query: QueryResolvers = {
     if (searchOperator === 'or') queryOperator = Op.or;
 
     const issuesListPlain = await db.Issue.findAll({
-      // include: [
-      // {
-      //   model: db.Project,
-      //   as: 'project',
-      // },
-      // {
-      //   model: db.Issue,
-      //   as: 'linkedToIssues',
-      //   through: {
-      //     attributes: [
-      //       ['issue_id', 'issueId'],
-      //       ['linked_issue_id', 'linkedIssueId'],
-      //       ['link_type', 'linkType'],
-      //     ],
-      //   },
-      // },
-      // {
-      //   model: db.Issue,
-      //   as: 'linkedByIssues',
-      //   through: {
-      //     attributes: [
-      //       ['issue_id', 'issueId'],
-      //       ['linked_issue_id', 'linkedIssueId'],
-      //       ['link_type', 'linkType'],
-      //     ],
-      //   },
-      // },
-      // ],
       where: {
         [queryOperator]: whereOr,
       },
     });
 
-    dataLoaderContext.prime(issuesListPlain);
+    // dataLoaderContext.prime(issuesListPlain);
 
     return (
       issuesListPlain &&
@@ -89,7 +61,7 @@ const Query: QueryResolvers = {
   },
   issue: async (parent, { input: { id } }, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const databaseIssue = await db.Issue.findByPk(id, {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return {
@@ -145,82 +117,121 @@ const Mutation: MutationResolvers = {
       customFieldValue,
     } = input;
 
-    const issue = await db.Issue.findByPk(Number(id), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
-    });
-
-    if (issueStatusId) issue.issueStatusId = Number(issueStatusId);
-    if (assigneeId) issue.assigneeId = Number(assigneeId);
-    if (reporterId) issue.reporterId = Number(reporterId);
-    if (title) issue.title = title;
-    if (description) issue.description = description;
-    if (priority) issue.priority = Number(priority);
-    if (tagIds) {
-      await db.IssueTag.destroy({ where: { issueId: id } });
-      await db.IssueTag.bulkCreate(
-        tagIds.map((tagId) => ({
-          issueId: Number(id),
-          projectTagId: Number(tagId),
-        }))
-      );
-    }
-    if (archived !== undefined) issue.archived = archived;
-
-    // TODO: look for better way to handle nullifying user
-    if (issue.assigneeId === 0) issue.assigneeId = null;
-    if (issue.reporterId === 0) issue.reporterId = null;
-
-    if (customFieldId && customFieldValue) {
-      const customField = await db.ProjectCustomField.findByPk(Number(customFieldId), {
-        [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+    return await db.sequelize.transaction(async (transaction) => {
+      const issue = await db.Issue.findByPk(Number(id), {
+        // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+        transaction,
       });
-      if (!customField) throw new Error('Custom field not found');
 
-      let valueCasted: number | string | boolean = customFieldValue;
+      if (issueStatusId) issue.issueStatusId = Number(issueStatusId);
+      if (assigneeId) issue.assigneeId = Number(assigneeId);
+      if (reporterId) issue.reporterId = Number(reporterId);
+      if (title) issue.title = title;
+      if (description) issue.description = description;
+      if (priority) issue.priority = Number(priority);
+      if (tagIds) {
+        await db.IssueTag.destroy({ where: { issueId: id }, transaction });
+        await db.IssueTag.bulkCreate(
+          tagIds.map((tagId) => ({
+            issueId: Number(id),
+            projectTagId: Number(tagId),
+          })),
+          { transaction }
+        );
+      }
+      if (archived !== undefined) issue.archived = archived;
 
-      if (customField.fieldType.toLowerCase() === 'number') valueCasted = Number(customFieldValue);
-      else if (customField.fieldType.toLowerCase() === 'boolean') valueCasted = yn(customFieldValue);
+      // TODO: look for better way to handle nullifying user
+      if (issue.assigneeId === 0) issue.assigneeId = null;
+      if (issue.reporterId === 0) issue.reporterId = null;
 
-      const customFieldObject = {
-        id: `${issue.id}-${customField.id}`,
-        customFieldId,
-        value: valueCasted,
-        createdAt: new Date(), // TODO: improve date format decision
+      if (customFieldId && customFieldValue) {
+        const customField = await db.ProjectCustomField.findByPk(Number(customFieldId), {
+          // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+          transaction,
+        });
+        if (!customField) throw new Error('Custom field not found');
+
+        let valueCasted: number | string | boolean = customFieldValue;
+
+        if (customField.fieldType.toLowerCase() === 'number') valueCasted = Number(customFieldValue);
+        else if (customField.fieldType.toLowerCase() === 'boolean') valueCasted = yn(customFieldValue);
+
+        const customFieldObject = {
+          id: `${issue.id}-${customField.id}`,
+          customFieldId,
+          value: valueCasted,
+          createdAt: new Date(), // TODO: improve date format decision
+        };
+
+        // TODO: investigate how to deep set the value instead of this to leverage DB level updating
+        issue.customFields = issue.customFields
+          ? values(merge(keyBy(issue.customFields, 'id'), keyBy([customFieldObject], 'id')))
+          : [customFieldObject];
+      }
+
+      await issue.save({ transaction });
+      // dataLoaderContext.prime(issue);
+
+      const issueStatus = await db.IssueStatuses.findByPk(Number(issueStatusId ?? issue.issueStatusId), {
+        [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+        transaction,
+      });
+
+      // START: This is specific to the issue board
+      const board = await db.Board.findOne({
+        where: { projectId: issue.projectId },
+        transaction,
+      });
+
+      board.version += 1;
+
+      await board.save({ transaction });
+
+      // This is the destination column on the board we want to move to
+      const boardContainer = await db.BoardContainer.findOne({
+        where: { boardId: board.id, title: issueStatus.name },
+        transaction,
+      });
+
+      const issueOnBoard = await db.ContainerItem.findOne({
+        where: { issueId: issue.id },
+        transaction,
+      });
+
+      const maxPosition = Number(
+        await db.ContainerItem.max('position', {
+          where: { containerId: boardContainer.id },
+          transaction,
+        })
+      );
+
+      issueOnBoard.containerId = boardContainer.id;
+      issueOnBoard.position = maxPosition > 0 ? maxPosition + 1 : 0;
+      await issueOnBoard.save();
+      // END: This is specific to the issue board
+
+      const returnData = {
+        ...issue.toJSON(),
+        id: `${issue.id}`,
+        projectId: `${issue.projectId}`,
+        project: undefined,
+        customFields: undefined,
+        status: {
+          ...issueStatus.toJSON(),
+          id: `${issueStatus.id}`,
+          projectId: `${issueStatus.projectId}`,
+        },
       };
 
-      // TODO: investigate how to deep set the value instead of this to leverage DB level updating
-      issue.customFields = issue.customFields
-        ? values(merge(keyBy(issue.customFields, 'id'), keyBy([customFieldObject], 'id')))
-        : [customFieldObject];
-    }
+      websocketBroadcast({
+        clients: websocketServer.clients,
+        namespace: 'ws',
+        message: JSON.stringify({ type: 'ISSUE_UPDATED', payload: returnData }),
+      });
 
-    await issue.save();
-    dataLoaderContext.prime(issue);
-
-    const issueStatus = await db.IssueStatuses.findByPk(Number(issueStatusId ?? issue.issueStatusId), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      return returnData;
     });
-
-    const returnData = {
-      ...issue.toJSON(),
-      id: `${issue.id}`,
-      projectId: `${issue.projectId}`,
-      project: undefined,
-      customFields: undefined,
-      status: {
-        ...issueStatus.toJSON(),
-        id: `${issueStatus.id}`,
-        projectId: `${issueStatus.projectId}`,
-      },
-    };
-
-    websocketBroadcast({
-      clients: websocketServer.clients,
-      namespace: 'ws',
-      message: JSON.stringify({ type: 'ISSUE_UPDATED', payload: returnData }),
-    });
-
-    return returnData;
   },
   createIssue: async (parent, { input }, { db, user, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const { projectId, boardId, issueStatusId, assigneeId, title, description, priority } = input;
@@ -237,7 +248,7 @@ const Mutation: MutationResolvers = {
       priority,
     });
 
-    dataLoaderContext.prime(issue);
+    // dataLoaderContext.prime(issue);
 
     // TODO: This isnt currently implemented in the UI
     if (typeof boardId !== 'undefined') {
@@ -246,11 +257,11 @@ const Mutation: MutationResolvers = {
         issueId: Number(issue.id),
       });
 
-      dataLoaderContext.prime(issueBoard);
+      // dataLoaderContext.prime(issueBoard);
     }
 
     const issueStatus = await db.IssueStatuses.findByPk(issueStatusId, {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return {
@@ -290,7 +301,7 @@ const CustomFieldValue: CustomFieldValueResolvers = {
     if (!parent.customFieldId) return null;
 
     const customFieldData = await db.ProjectCustomField.findByPk(Number(parent.customFieldId), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return {
@@ -305,7 +316,7 @@ const CustomFieldValue: CustomFieldValueResolvers = {
 const Issue: IssueResolvers = {
   links: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const databaseIssues = await db.Issue.findByPk(Number(parent.id), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
       include: [
         {
           model: db.Issue,
@@ -350,12 +361,12 @@ const Issue: IssueResolvers = {
   },
   tags: async (parent, args, { db, dataLoaderContext }) => {
     const issueTags = await db.IssueTag.findAll({ where: { issueId: parent.id } });
-    dataLoaderContext.prime(issueTags);
+    // dataLoaderContext.prime(issueTags);
 
     const projectTags = await db.ProjectTag.findAll({
       where: { id: issueTags.map((issueTag) => issueTag.projectTagId) },
     });
-    dataLoaderContext.prime(projectTags);
+    // dataLoaderContext.prime(projectTags);
 
     return projectTags.map((projectTag) => ({
       ...projectTag.toJSON(),
@@ -368,7 +379,7 @@ const Issue: IssueResolvers = {
       where: { issueId: Number(parent.id) },
       order: [['createdAt', 'DESC']],
     });
-    dataLoaderContext.prime(comments);
+    // dataLoaderContext.prime(comments);
 
     return comments.map((comment) => ({
       ...comment.toJSON(),
@@ -379,13 +390,13 @@ const Issue: IssueResolvers = {
   status: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     // TODO: parent.issueStatusId does exist but since it is not part of the graphql type it is not available according to typescript
     const issue = await db.Issue.findByPk(Number(parent.id), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     if (!issue.issueStatusId) return null;
 
     const issueStatus = await db.IssueStatuses.findByPk(issue.issueStatusId, {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return {
@@ -396,11 +407,11 @@ const Issue: IssueResolvers = {
   },
   reporter: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const issue = await db.Issue.findByPk(Number(parent.id), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     const reporterUser = await db.User.findByPk(Number(issue.reporterId), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     if (!reporterUser) return null;
@@ -409,13 +420,13 @@ const Issue: IssueResolvers = {
   },
   assignee: async (parent, args, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const databaseIssue = await db.Issue.findByPk(Number(parent.id), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     if (!databaseIssue?.assigneeId) return null;
 
     const user = await db.User.findByPk(Number(databaseIssue.assigneeId), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return formatUserForGraphql(user);
@@ -424,7 +435,7 @@ const Issue: IssueResolvers = {
     if (parent.project) return parent.project;
 
     const databaseProject = await db.Project.findByPk(Number(parent.projectId), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return {

@@ -1,6 +1,6 @@
-import { type GraphQLResolveInfo, GraphQLScalarType, type GraphQLScalarTypeConfig } from 'graphql';
+import type { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 
-import { type ApolloContext } from '../server/apollo.js';
+import type { ApolloContext } from '../server/apollo.js';
 
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -19,6 +19,13 @@ export type Scalars = {
   Float: { input: number; output: number };
   DateTime: { input: any; output: any };
   Upload: { input: any; output: any };
+};
+
+export type AddItemToViewStateItemInput = {
+  boardId: Scalars['String']['input'];
+  columnPositionIndex?: InputMaybe<Scalars['Int']['input']>;
+  issueId: Scalars['String']['input'];
+  viewStateId: Scalars['String']['input'];
 };
 
 export type AddUserToProjectInput = {
@@ -55,6 +62,7 @@ export type Board = {
   status?: Maybe<Scalars['String']['output']>;
   style?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  version?: Maybe<Scalars['Int']['output']>;
   viewState?: Maybe<Array<Maybe<ViewState>>>;
 };
 
@@ -133,6 +141,12 @@ export type CreateProjectTagInput = {
 export type CreateProjectValidationInput = {
   key?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CreateViewStateInput = {
+  boardId: Scalars['String']['input'];
+  positionIndex?: InputMaybe<Scalars['Int']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type CustomField = {
@@ -237,6 +251,7 @@ export type MessageAndStatus = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  addItemToViewState?: Maybe<Array<Maybe<ViewState>>>;
   addUserToProject?: Maybe<MessageAndStatus>;
   assignAssetAsAvatar?: Maybe<Asset>;
   createBoard?: Maybe<Board>;
@@ -247,18 +262,24 @@ export type Mutation = {
   createProject?: Maybe<Project>;
   createProjectCustomField?: Maybe<CustomField>;
   createProjectTag?: Maybe<ProjectTag>;
+  createViewState?: Maybe<Array<Maybe<ViewState>>>;
   deleteAsset?: Maybe<MessageAndStatus>;
   deleteIssue?: Maybe<MessageAndStatus>;
   deleteIssueComment?: Maybe<MessageAndStatus>;
   deleteIssueLink?: Maybe<MessageAndStatus>;
   deleteProjectCustomField?: Maybe<MessageAndStatus>;
   deleteProjectTag?: Maybe<MessageAndStatus>;
+  removeItemFromViewState?: Maybe<Array<Maybe<ViewState>>>;
   removeUserFromProject?: Maybe<MessageAndStatus>;
   updateBoard?: Maybe<Board>;
   updateIssue?: Maybe<Issue>;
   updateIssueComment?: Maybe<IssueComment>;
   updateMe?: Maybe<User>;
   uploadAsset?: Maybe<Asset>;
+};
+
+export type MutationAddItemToViewStateArgs = {
+  input: AddItemToViewStateItemInput;
 };
 
 export type MutationAddUserToProjectArgs = {
@@ -301,6 +322,10 @@ export type MutationCreateProjectTagArgs = {
   input: CreateProjectTagInput;
 };
 
+export type MutationCreateViewStateArgs = {
+  input: CreateViewStateInput;
+};
+
 export type MutationDeleteAssetArgs = {
   input: DeleteAssetInput;
 };
@@ -323,6 +348,10 @@ export type MutationDeleteProjectCustomFieldArgs = {
 
 export type MutationDeleteProjectTagArgs = {
   input: DeleteProjectTagInput;
+};
+
+export type MutationRemoveItemFromViewStateArgs = {
+  input: RemoveItemFromViewStateItemInput;
 };
 
 export type MutationRemoveUserFromProjectArgs = {
@@ -457,6 +486,11 @@ export type QueryProjectTagsInput = {
   id?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   projectId: Scalars['String']['input'];
+};
+
+export type RemoveItemFromViewStateItemInput = {
+  id: Scalars['ID']['input'];
+  viewStateId: Scalars['String']['input'];
 };
 
 export type RemoveUserFromProjectInput = {
@@ -634,6 +668,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
+  AddItemToViewStateItemInput: ResolverTypeWrapper<Partial<AddItemToViewStateItemInput>>;
   AddUserToProjectInput: ResolverTypeWrapper<Partial<AddUserToProjectInput>>;
   Asset: ResolverTypeWrapper<Partial<Asset>>;
   AssignAssetAsAvatarInput: ResolverTypeWrapper<Partial<AssignAssetAsAvatarInput>>;
@@ -651,6 +686,7 @@ export type ResolversTypes = ResolversObject<{
   CreateProjectInput: ResolverTypeWrapper<Partial<CreateProjectInput>>;
   CreateProjectTagInput: ResolverTypeWrapper<Partial<CreateProjectTagInput>>;
   CreateProjectValidationInput: ResolverTypeWrapper<Partial<CreateProjectValidationInput>>;
+  CreateViewStateInput: ResolverTypeWrapper<Partial<CreateViewStateInput>>;
   CustomField: ResolverTypeWrapper<Partial<CustomField>>;
   CustomFieldValue: ResolverTypeWrapper<Partial<CustomFieldValue>>;
   DateTime: ResolverTypeWrapper<Partial<Scalars['DateTime']['output']>>;
@@ -677,6 +713,7 @@ export type ResolversTypes = ResolversObject<{
   QueryIssueInput: ResolverTypeWrapper<Partial<QueryIssueInput>>;
   QueryProjectInput: ResolverTypeWrapper<Partial<QueryProjectInput>>;
   QueryProjectTagsInput: ResolverTypeWrapper<Partial<QueryProjectTagsInput>>;
+  RemoveItemFromViewStateItemInput: ResolverTypeWrapper<Partial<RemoveItemFromViewStateItemInput>>;
   RemoveUserFromProjectInput: ResolverTypeWrapper<Partial<RemoveUserFromProjectInput>>;
   SortBy: ResolverTypeWrapper<Partial<SortBy>>;
   String: ResolverTypeWrapper<Partial<Scalars['String']['output']>>;
@@ -697,6 +734,7 @@ export type ResolversTypes = ResolversObject<{
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
+  AddItemToViewStateItemInput: Partial<AddItemToViewStateItemInput>;
   AddUserToProjectInput: Partial<AddUserToProjectInput>;
   Asset: Partial<Asset>;
   AssignAssetAsAvatarInput: Partial<AssignAssetAsAvatarInput>;
@@ -712,6 +750,7 @@ export type ResolversParentTypes = ResolversObject<{
   CreateProjectInput: Partial<CreateProjectInput>;
   CreateProjectTagInput: Partial<CreateProjectTagInput>;
   CreateProjectValidationInput: Partial<CreateProjectValidationInput>;
+  CreateViewStateInput: Partial<CreateViewStateInput>;
   CustomField: Partial<CustomField>;
   CustomFieldValue: Partial<CustomFieldValue>;
   DateTime: Partial<Scalars['DateTime']['output']>;
@@ -736,6 +775,7 @@ export type ResolversParentTypes = ResolversObject<{
   QueryIssueInput: Partial<QueryIssueInput>;
   QueryProjectInput: Partial<QueryProjectInput>;
   QueryProjectTagsInput: Partial<QueryProjectTagsInput>;
+  RemoveItemFromViewStateItemInput: Partial<RemoveItemFromViewStateItemInput>;
   RemoveUserFromProjectInput: Partial<RemoveUserFromProjectInput>;
   SortBy: Partial<SortBy>;
   String: Partial<Scalars['String']['output']>;
@@ -778,6 +818,7 @@ export type BoardResolvers<ContextType = ApolloContext, ParentType = ResolversPa
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   style?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  version?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   viewState?: Resolver<Maybe<Array<Maybe<ResolversTypes['ViewState']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -889,6 +930,12 @@ export type MutationResolvers<
   ContextType = ApolloContext,
   ParentType = ResolversParentTypes['Mutation'],
 > = ResolversObject<{
+  addItemToViewState?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ViewState']>>>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationAddItemToViewStateArgs, 'input'>
+  >;
   addUserToProject?: Resolver<
     Maybe<ResolversTypes['MessageAndStatus']>,
     ParentType,
@@ -939,6 +986,12 @@ export type MutationResolvers<
     ContextType,
     RequireFields<MutationCreateProjectTagArgs, 'input'>
   >;
+  createViewState?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ViewState']>>>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationCreateViewStateArgs, 'input'>
+  >;
   deleteAsset?: Resolver<
     Maybe<ResolversTypes['MessageAndStatus']>,
     ParentType,
@@ -974,6 +1027,12 @@ export type MutationResolvers<
     ParentType,
     ContextType,
     RequireFields<MutationDeleteProjectTagArgs, 'input'>
+  >;
+  removeItemFromViewState?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ViewState']>>>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationRemoveItemFromViewStateArgs, 'input'>
   >;
   removeUserFromProject?: Resolver<
     Maybe<ResolversTypes['MessageAndStatus']>,

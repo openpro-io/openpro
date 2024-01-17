@@ -1,4 +1,11 @@
-import { ApolloClient, InMemoryCache, from, gql, split } from '@apollo/client';
+import {
+  ApolloClient,
+  HttpLink,
+  InMemoryCache,
+  from,
+  gql,
+  split,
+} from '@apollo/client';
 import { createFragmentRegistry } from '@apollo/client/cache';
 import { BatchHttpLink } from '@apollo/client/link/batch-http';
 import { setContext } from '@apollo/client/link/context';
@@ -36,18 +43,37 @@ const authLink = setContext(async (_, { headers }) => {
 
 const uri = `${NEXT_PUBLIC_API_URL}/graphql`;
 
-const batchLink = new BatchHttpLink({
-  uri,
-  batchMax: 10, // No more than 5 operations per batch
-  batchInterval: 30, // Wait no more than 30ms after first batched operation
-});
-
 const uploadLink = createUploadLink({
   uri,
   headers: {
     'apollo-require-preflight': 'true',
   },
 });
+
+const batchLink = new BatchHttpLink({
+  uri,
+  batchMax: 10, // No more than 5 operations per batch
+  batchInterval: 30, // Wait no more than 30ms after first batched operation
+});
+
+const httpLink = new HttpLink({
+  uri,
+});
+
+// We process mutations singularly BEFORE processing queries.
+// This leads to less race conditions where a mutation and query of same data are in same batch.
+export const batchOrNotLink = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query);
+
+    return (
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'mutation'
+    );
+  },
+  httpLink,
+  batchLink
+);
 
 export const splitLink = split(
   ({ query }) => {
@@ -60,7 +86,7 @@ export const splitLink = split(
     );
   },
   uploadLink,
-  batchLink
+  batchOrNotLink
 );
 
 export const apolloClient = new ApolloClient({

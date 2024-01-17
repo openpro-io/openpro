@@ -9,6 +9,7 @@ import {
   type Resolvers,
   type ViewState,
 } from '../../__generated__/resolvers-types.js';
+import { boards, formatBoardResponse } from '../board/index.js';
 import { formatUserForGraphql } from '../user/helpers.js';
 
 const Query: QueryResolvers = {
@@ -24,7 +25,7 @@ const Query: QueryResolvers = {
       // ],
     });
 
-    dataLoaderContext.prime(databaseProjects);
+    // dataLoaderContext.prime(databaseProjects);
 
     return databaseProjects.map((project) => ({
       ...project.toJSON(),
@@ -67,7 +68,7 @@ const Query: QueryResolvers = {
           as: 'users',
         },
       ],
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     return {
@@ -89,7 +90,7 @@ const Query: QueryResolvers = {
     }
 
     const databaseProjectTags = await db.ProjectTag.findAll({ where });
-    dataLoaderContext.prime(databaseProjectTags);
+    // dataLoaderContext.prime(databaseProjectTags);
 
     return databaseProjectTags.map((projectTag) => ({
       ...projectTag.toJSON(),
@@ -116,7 +117,7 @@ const Mutation: MutationResolvers = {
       }
     );
 
-    dataLoaderContext.prime(projectCustomField);
+    // dataLoaderContext.prime(projectCustomField);
 
     return {
       ...projectCustomField.toJSON(),
@@ -127,7 +128,7 @@ const Mutation: MutationResolvers = {
   },
   deleteProjectCustomField: async (parent, { input: { id } }, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const findCustomField = await db.ProjectCustomField.findByPk(Number(id), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     if (!findCustomField) throw new Error('Custom field not found');
@@ -152,7 +153,7 @@ const Mutation: MutationResolvers = {
       }
     );
 
-    dataLoaderContext.prime(projectTag);
+    // dataLoaderContext.prime(projectTag);
 
     return {
       ...projectTag.toJSON(),
@@ -162,7 +163,7 @@ const Mutation: MutationResolvers = {
   },
   deleteProjectTag: async (parent, { input: { id } }, { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }) => {
     const findProjectTag = await db.ProjectTag.findByPk(Number(id), {
-      [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+      // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
     });
 
     if (!findProjectTag) {
@@ -247,11 +248,22 @@ const Mutation: MutationResolvers = {
       })),
     });
 
+    // Without this db.BoardContainer will fail the FK constraint
+    await board.reload();
+
+    await db.BoardContainer.bulkCreate(
+      issueStatuses.map((is, index) => ({
+        boardId: Number(board.id),
+        title: is.name,
+        position: Number(index),
+      }))
+    );
+
     // TODO: we may not even need this
-    dataLoaderContext.prime(projectPermission);
-    dataLoaderContext.prime(issueStatuses);
-    dataLoaderContext.prime(project);
-    dataLoaderContext.prime(board);
+    // dataLoaderContext.prime(projectPermission);
+    // dataLoaderContext.prime(issueStatuses);
+    // dataLoaderContext.prime(project);
+    // dataLoaderContext.prime(board);
 
     return {
       ...project.toJSON(),
@@ -277,7 +289,7 @@ const Project: ProjectResolvers = {
       where: { projectId: parent.id },
     });
 
-    dataLoaderContext.prime(projectFields);
+    // dataLoaderContext.prime(projectFields);
 
     return projectFields.map((field) => ({
       ...field.toJSON(),
@@ -291,7 +303,7 @@ const Project: ProjectResolvers = {
       where: { projectId: parent.id },
     });
 
-    dataLoaderContext.prime(projectTags);
+    // dataLoaderContext.prime(projectTags);
 
     return projectTags.map((tag) => ({
       ...tag.toJSON(),
@@ -308,7 +320,7 @@ const Project: ProjectResolvers = {
 
     const databaseIssues = await db.Issue.findAll(findAllInput);
 
-    dataLoaderContext.prime(databaseIssues);
+    // dataLoaderContext.prime(databaseIssues);
 
     return databaseIssues.map((issue) => ({
       ...issue.toJSON(),
@@ -317,28 +329,13 @@ const Project: ProjectResolvers = {
       customFields: undefined,
     }));
   },
-  boards: async (parent, args, { db, dataLoaderContext }) => {
-    const boards = await db.Board.findAll({
-      where: { projectId: parent.id },
-    });
-
-    dataLoaderContext.prime(boards);
-
-    return boards.map((board) => ({
-      ...board.toJSON(),
-      id: `${board.id}`,
-      projectId: `${board.projectId}`,
-      containerOrder: board.containerOrder ? JSON.stringify(board.containerOrder) : undefined, // TODO: Fix this
-      settings: board.settings ? JSON.stringify(board.settings) : undefined, // TODO: Fix this
-      viewState: board.viewState ? (board.viewState as ViewState[]) : undefined, // TODO: fix this
-    }));
-  },
+  boards,
   issueStatuses: async (parent, args, { db, dataLoaderContext }) => {
     const issueStatuses = await db.IssueStatuses.findAll({
       where: { projectId: parent.id },
     });
 
-    dataLoaderContext.prime(issueStatuses);
+    // dataLoaderContext.prime(issueStatuses);
 
     return issueStatuses.map((issueStatus) => ({
       ...issueStatus.toJSON(),

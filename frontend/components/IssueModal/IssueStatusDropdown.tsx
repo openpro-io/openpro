@@ -1,10 +1,12 @@
 'use client';
 
-import React, { Fragment, useEffect } from 'react';
+import { gql, useMutation, useQuery } from '@apollo/client';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
-import { classNames } from '@/services/utils';
-import { gql, useMutation, useQuery } from '@apollo/client';
+import { useParams } from 'next/navigation';
+import React, { Fragment, useEffect } from 'react';
+
+import { IssueStatus } from '@/constants/types';
 import {
   GET_ISSUE_QUERY,
   GET_ISSUE_STATUSES_FOR_PROJECT,
@@ -12,8 +14,6 @@ import {
   UPDATE_BOARD_MUTATION,
   UPDATE_ISSUE_MUTATION,
 } from '@/gql/gql-queries-mutations';
-import { IssueStatus } from '@/constants/types';
-import { useParams } from 'next/navigation';
 
 const IssueStatusDropdown = ({
   projectId,
@@ -40,6 +40,7 @@ const IssueStatusDropdown = ({
   const [updateIssue, { called, reset }] = useMutation(UPDATE_ISSUE_MUTATION, {
     refetchQueries: [
       {
+        fetchPolicy: 'network-only',
         query: GET_PROJECT_INFO,
         variables: {
           input: {

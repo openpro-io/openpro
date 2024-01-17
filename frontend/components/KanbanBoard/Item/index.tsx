@@ -1,16 +1,17 @@
+import { useFragment } from '@apollo/client';
 import { UniqueIdentifier } from '@dnd-kit/core';
 import { useSortable } from '@dnd-kit/sortable';
-import React, { useCallback, useState } from 'react';
 import { CSS } from '@dnd-kit/utilities';
-import { classNames, formatUser } from '@/services/utils';
+import type { Route } from 'next';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useFragment } from '@apollo/client';
-import { ISSUE_FIELDS } from '@/gql/gql-queries-mutations';
-import Avatar from '@/components/Avatar';
-import type { Route } from 'next';
+import React, { useCallback, useState } from 'react';
 import { RiTaskFill } from 'react-icons/ri';
+
+import Avatar from '@/components/Avatar';
 import { priorityToIcon } from '@/components/Icons';
+import { ISSUE_FIELDS } from '@/gql/gql-queries-mutations';
+import { classNames, formatUser } from '@/services/utils';
 
 type ItemsType = {
   id: UniqueIdentifier;
