@@ -1,5 +1,5 @@
 import { arrayMoveImmutable } from 'array-move';
-import { sortBy } from 'lodash-es';
+import { isUndefined, sortBy } from 'lodash-es';
 
 import type {
   Board,
@@ -213,7 +213,7 @@ const Mutation: MutationResolvers = {
 
       let incomingItem = null;
 
-      if (typeof columnPositionIndex === undefined) {
+      if (isUndefined(columnPositionIndex)) {
         columnPositionIndex = Math.max(destinationBoardContainer?.items?.length - 1, 0);
       }
 
