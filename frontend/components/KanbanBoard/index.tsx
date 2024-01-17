@@ -797,6 +797,12 @@ export default function KanbanBoard({
       });
 
       addItemToViewState({
+        onCompleted: (data) => {
+          setPageState((prevState) => ({
+            ...prevState,
+            boardVersion: prevState.boardVersion + 1,
+          }));
+        },
         variables: {
           input: {
             boardId,
