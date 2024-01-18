@@ -394,6 +394,11 @@ const typeDefs = gql`
     title: String
   }
 
+  input UpdateViewStateInput {
+    id: ID!
+    positionIndex: Int
+  }
+
   # Mutations
   type Mutation {
     createProject(input: CreateProjectInput): Project
@@ -434,6 +439,7 @@ const typeDefs = gql`
     createViewState(input: CreateViewStateInput!): [ViewState]
     addItemToViewState(input: AddItemToViewStateItemInput!): [ViewState]
     removeItemFromViewState(input: RemoveItemFromViewStateItemInput!): [ViewState]
+    updateViewState(input: UpdateViewStateInput!): [ViewState]
   }
 
   # Queries

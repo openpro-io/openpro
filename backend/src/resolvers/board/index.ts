@@ -150,6 +150,61 @@ const Query: QueryResolvers = {
 };
 
 const Mutation: MutationResolvers = {
+  updateViewState: async (
+    parent,
+    { input: { id, positionIndex } },
+    { db, dataLoaderContext, EXPECTED_OPTIONS_KEY }
+  ) => {
+    const result = await db.sequelize.transaction(async (transaction) => {
+      const container = await db.BoardContainer.findByPk(Number(id.replace('container-', '')), { transaction });
+
+      if (!container) throw Error('Container not found');
+
+      const board = await db.Board.findByPk(Number(container.boardId), {
+        include: [
+          {
+            model: db.BoardContainer,
+            as: 'containers',
+            include: [
+              {
+                model: db.ContainerItem,
+                as: 'items',
+                include: [
+                  {
+                    model: db.Issue,
+                    as: 'issue',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        // [EXPECTED_OPTIONS_KEY]: dataLoaderContext,
+        transaction,
+      });
+
+      board.version += 1;
+
+      await board.save({ transaction });
+
+      const sortedItems = arrayMoveImmutable(
+        board.containers,
+        board.containers.findIndex((boardContainer) => boardContainer.id === container.id),
+        positionIndex
+      );
+
+      for (let i = 0; i < sortedItems.length; i++) {
+        sortedItems[i].position = i;
+      }
+
+      await Promise.all(sortedItems.map((item) => item.save({ transaction })));
+      await board.reload({ transaction });
+
+      return board;
+    });
+
+    return buildViewState(result);
+  },
   createViewState: async (
     parent,
     { input: { boardId, positionIndex, title } },

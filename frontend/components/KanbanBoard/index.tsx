@@ -40,6 +40,7 @@ import {
   GET_ME,
   GET_PROJECT_INFO,
   UPDATE_ISSUE_MUTATION,
+  UPDATE_VIEW_STATE_MUTATION,
 } from '@/gql/gql-queries-mutations';
 import useWsAuthenticatedSocket from '@/hooks/useWsAuthenticatedSocket';
 import { getDomainName } from '@/services/utils';
@@ -104,6 +105,7 @@ export default function KanbanBoard({
   const [updateIssue] = useMutation(UPDATE_ISSUE_MUTATION);
   const [addIssueStatus] = useMutation(CREATE_ISSUE_STATUS_MUTATION);
   const [addItemToViewState] = useMutation(ADD_ITEM_TO_VIEW_STATE);
+  const [updateViewState] = useMutation(UPDATE_VIEW_STATE_MUTATION);
 
   const getMe = useQuery(GET_ME);
   const getProjectInfo = useQuery(GET_PROJECT_INFO, {
@@ -485,7 +487,21 @@ export default function KanbanBoard({
           containers: newItems,
         };
       });
-      // console.log({ newItems, containers });
+
+      updateViewState({
+        onCompleted: (data) => {
+          setPageState((prevState) => ({
+            ...prevState,
+            boardVersion: prevState.boardVersion + 1,
+          }));
+        },
+        variables: {
+          input: {
+            id: containers[activeContainerIndex].id,
+            positionIndex: overContainerIndex,
+          },
+        },
+      });
     }
 
     // Handling item moving to another container

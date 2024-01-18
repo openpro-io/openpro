@@ -275,6 +275,7 @@ export type Mutation = {
   updateIssue?: Maybe<Issue>;
   updateIssueComment?: Maybe<IssueComment>;
   updateMe?: Maybe<User>;
+  updateViewState?: Maybe<Array<Maybe<ViewState>>>;
   uploadAsset?: Maybe<Asset>;
 };
 
@@ -372,6 +373,10 @@ export type MutationUpdateIssueCommentArgs = {
 
 export type MutationUpdateMeArgs = {
   input: UpdateMeInput;
+};
+
+export type MutationUpdateViewStateArgs = {
+  input: UpdateViewStateInput;
 };
 
 export type MutationUploadAssetArgs = {
@@ -535,6 +540,11 @@ export type UpdateMeInput = {
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
   settings?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateViewStateInput = {
+  id: Scalars['ID']['input'];
+  positionIndex?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type UploadAssetInput = {
@@ -721,6 +731,7 @@ export type ResolversTypes = ResolversObject<{
   UpdateIssueCommentInput: ResolverTypeWrapper<Partial<UpdateIssueCommentInput>>;
   UpdateIssueInput: ResolverTypeWrapper<Partial<UpdateIssueInput>>;
   UpdateMeInput: ResolverTypeWrapper<Partial<UpdateMeInput>>;
+  UpdateViewStateInput: ResolverTypeWrapper<Partial<UpdateViewStateInput>>;
   Upload: ResolverTypeWrapper<Partial<Scalars['Upload']['output']>>;
   UploadAssetInput: ResolverTypeWrapper<Partial<UploadAssetInput>>;
   User: ResolverTypeWrapper<Partial<User>>;
@@ -783,6 +794,7 @@ export type ResolversParentTypes = ResolversObject<{
   UpdateIssueCommentInput: Partial<UpdateIssueCommentInput>;
   UpdateIssueInput: Partial<UpdateIssueInput>;
   UpdateMeInput: Partial<UpdateMeInput>;
+  UpdateViewStateInput: Partial<UpdateViewStateInput>;
   Upload: Partial<Scalars['Upload']['output']>;
   UploadAssetInput: Partial<UploadAssetInput>;
   User: Partial<User>;
@@ -1053,6 +1065,12 @@ export type MutationResolvers<
     ParentType,
     ContextType,
     RequireFields<MutationUpdateMeArgs, 'input'>
+  >;
+  updateViewState?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ViewState']>>>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationUpdateViewStateArgs, 'input'>
   >;
   uploadAsset?: Resolver<
     Maybe<ResolversTypes['Asset']>,
