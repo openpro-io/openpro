@@ -483,3 +483,11 @@ export const ADD_ITEM_TO_VIEW_STATE = gql(/* GraphQL */ `
     }
   }
 `);
+
+export const UPDATE_VIEW_STATE_MUTATION = gql(/* GraphQL */ `
+  mutation UpdateViewState($input: UpdateViewStateInput!) {
+    updateViewState(input: $input) {
+      ...ViewStateFields
+    }
+  }
+`);

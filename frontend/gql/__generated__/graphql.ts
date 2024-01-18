@@ -274,6 +274,7 @@ export type Mutation = {
   updateIssue?: Maybe<Issue>;
   updateIssueComment?: Maybe<IssueComment>;
   updateMe?: Maybe<User>;
+  updateViewState?: Maybe<Array<Maybe<ViewState>>>;
   uploadAsset?: Maybe<Asset>;
 };
 
@@ -395,6 +396,11 @@ export type MutationUpdateIssueCommentArgs = {
 
 export type MutationUpdateMeArgs = {
   input: UpdateMeInput;
+};
+
+
+export type MutationUpdateViewStateArgs = {
+  input: UpdateViewStateInput;
 };
 
 
@@ -567,6 +573,11 @@ export type UpdateMeInput = {
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
   settings?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateViewStateInput = {
+  id: Scalars['ID']['input'];
+  positionIndex?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type UploadAssetInput = {
