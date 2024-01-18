@@ -1,12 +1,13 @@
-import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
-import { classNames } from '@/services/utils';
 import { useSuspenseQuery } from '@apollo/client';
+import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
+import { sample } from 'lodash';
+import type { Route } from 'next';
+import Link from 'next/link';
+import { Suspense } from 'react';
+
 import { GetProjectsQuery, Project } from '@/gql/__generated__/graphql';
 import { GET_PROJECTS } from '@/gql/gql-queries-mutations';
-import { sample } from 'lodash';
-import Link from 'next/link';
-import type { Route } from 'next';
-import { Suspense } from 'react';
+import { classNames } from '@/services/utils';
 
 const baseColors = [
   'bg-pink-600',
@@ -33,12 +34,15 @@ const getUniqueColor = () => {
 };
 
 const formatProjectCard = (project: Project) => {
+  const { id, name, key: initials, issueCount, boards } = project;
+  const boardId = boards?.[0]?.id ?? 1;
+
   return {
-    id: project.id,
-    name: project.name,
-    initials: project.key,
-    href: `projects/${project.id}/boards/1`,
-    issueCount: project.issueCount,
+    id,
+    name,
+    initials,
+    href: `projects/${id}/boards/${boardId}`,
+    issueCount,
     bgColor: getUniqueColor(),
   };
 };

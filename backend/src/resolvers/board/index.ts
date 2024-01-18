@@ -94,6 +94,7 @@ export const boards: Resolver<ResolverTypeWrapper<Partial<Board>>[], Project | u
   }
 
   const boards = await db.Board.findAll({
+    ...additionalOptions,
     include: [
       {
         model: db.BoardContainer,
