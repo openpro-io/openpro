@@ -1,4 +1,5 @@
 import type { CodegenConfig } from '@graphql-codegen/cli';
+import fs from 'fs';
 
 const config: CodegenConfig = {
   overwrite: true,
@@ -14,8 +15,23 @@ const config: CodegenConfig = {
   },
   hooks: {
     afterOneFileWrite: [
-      // "sed -i '' 's/import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from '\\''graphql'\\'';/import type { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from '\\''graphql'\\'';/g' src/__generated__/resolvers-types.ts",
-      // "sed -i '' 's/import { ApolloContext } from '\\''..\\/server\\/apollo.js'\\'';/import type { ApolloContext } from '\\''..\\/server\\/apollo.js'\\'';/g' src/__generated__/resolvers-types.ts",
+      (filePath) => {
+        if (filePath.endsWith('resolvers-types.ts')) {
+          const content = fs.readFileSync(filePath, 'utf8');
+
+          const graphqlImportRegex =
+            /import { (GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig) } from 'graphql';/g;
+          const apolloContextImportRegex = /import { (ApolloContext) } from '\.\.\/server\/apollo\.js';/g;
+
+          let modifiedContent = content.replace(graphqlImportRegex, "import type { $1 } from 'graphql';");
+          modifiedContent = modifiedContent.replace(
+            apolloContextImportRegex,
+            "import type { $1 } from '../server/apollo.js';"
+          );
+
+          fs.writeFileSync(filePath, modifiedContent);
+        }
+      },
     ],
   },
   config: {
