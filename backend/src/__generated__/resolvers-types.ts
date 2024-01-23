@@ -1,7 +1,5 @@
 import type { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-
 import type { ApolloContext } from '../server/apollo.js';
-
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -12,13 +10,13 @@ export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' |
 export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string; output: string };
-  String: { input: string; output: string };
-  Boolean: { input: boolean; output: boolean };
-  Int: { input: number; output: number };
-  Float: { input: number; output: number };
-  DateTime: { input: any; output: any };
-  Upload: { input: any; output: any };
+  ID: { input: string; output: string; }
+  String: { input: string; output: string; }
+  Boolean: { input: boolean; output: boolean; }
+  Int: { input: number; output: number; }
+  Float: { input: number; output: number; }
+  DateTime: { input: any; output: any; }
+  Upload: { input: any; output: any; }
 };
 
 export type AddItemToViewStateItemInput = {
@@ -68,14 +66,14 @@ export type Board = {
 
 export enum BoardStyle {
   Kanban = 'KANBAN',
-  Scrum = 'SCRUM',
+  Scrum = 'SCRUM'
 }
 
 export enum Custom_Field_Type {
   Boolean = 'BOOLEAN',
   Date = 'DATE',
   Number = 'NUMBER',
-  Text = 'TEXT',
+  Text = 'TEXT'
 }
 
 export type Column = {
@@ -279,105 +277,131 @@ export type Mutation = {
   uploadAsset?: Maybe<Asset>;
 };
 
+
 export type MutationAddItemToViewStateArgs = {
   input: AddItemToViewStateItemInput;
 };
+
 
 export type MutationAddUserToProjectArgs = {
   input: AddUserToProjectInput;
 };
 
+
 export type MutationAssignAssetAsAvatarArgs = {
   input: AssignAssetAsAvatarInput;
 };
+
 
 export type MutationCreateBoardArgs = {
   input?: InputMaybe<CreateBoardInput>;
 };
 
+
 export type MutationCreateIssueArgs = {
   input?: InputMaybe<CreateIssueInput>;
 };
+
 
 export type MutationCreateIssueCommentArgs = {
   input: CreateIssueCommentInput;
 };
 
+
 export type MutationCreateIssueLinkArgs = {
   input: CreateIssueLinkInput;
 };
+
 
 export type MutationCreateIssueStatusArgs = {
   input: CreateIssueStatusInput;
 };
 
+
 export type MutationCreateProjectArgs = {
   input?: InputMaybe<CreateProjectInput>;
 };
+
 
 export type MutationCreateProjectCustomFieldArgs = {
   input: CreateProjectCustomFieldInput;
 };
 
+
 export type MutationCreateProjectTagArgs = {
   input: CreateProjectTagInput;
 };
+
 
 export type MutationCreateViewStateArgs = {
   input: CreateViewStateInput;
 };
 
+
 export type MutationDeleteAssetArgs = {
   input: DeleteAssetInput;
 };
+
 
 export type MutationDeleteIssueArgs = {
   input: DeleteIssueInput;
 };
 
+
 export type MutationDeleteIssueCommentArgs = {
   input: DeleteIssueCommentInput;
 };
+
 
 export type MutationDeleteIssueLinkArgs = {
   input: DeleteIssueLinkInput;
 };
 
+
 export type MutationDeleteProjectCustomFieldArgs = {
   input: DeleteProjectCustomFieldInput;
 };
+
 
 export type MutationDeleteProjectTagArgs = {
   input: DeleteProjectTagInput;
 };
 
+
 export type MutationRemoveItemFromViewStateArgs = {
   input: RemoveItemFromViewStateItemInput;
 };
+
 
 export type MutationRemoveUserFromProjectArgs = {
   input: RemoveUserFromProjectInput;
 };
 
+
 export type MutationUpdateBoardArgs = {
   input?: InputMaybe<UpdateBoardInput>;
 };
+
 
 export type MutationUpdateIssueArgs = {
   input?: InputMaybe<UpdateIssueInput>;
 };
 
+
 export type MutationUpdateIssueCommentArgs = {
   input: UpdateIssueCommentInput;
 };
+
 
 export type MutationUpdateMeArgs = {
   input: UpdateMeInput;
 };
 
+
 export type MutationUpdateViewStateArgs = {
   input: UpdateViewStateInput;
 };
+
 
 export type MutationUploadAssetArgs = {
   input: UploadAssetInput;
@@ -385,7 +409,7 @@ export type MutationUploadAssetArgs = {
 
 export enum Order {
   Asc = 'ASC',
-  Desc = 'DESC',
+  Desc = 'DESC'
 }
 
 export type Project = {
@@ -408,6 +432,7 @@ export type Project = {
   visibility?: Maybe<ProjectVisibility>;
 };
 
+
 export type ProjectIssuesArgs = {
   input?: InputMaybe<QueryIssueInput>;
 };
@@ -424,7 +449,7 @@ export type ProjectTag = {
 export enum ProjectVisibility {
   Internal = 'INTERNAL',
   Private = 'PRIVATE',
-  Public = 'PUBLIC',
+  Public = 'PUBLIC'
 }
 
 export type Query = {
@@ -443,29 +468,36 @@ export type Query = {
   users?: Maybe<Array<Maybe<User>>>;
 };
 
+
 export type QueryBoardArgs = {
   input: QueryBoardInput;
 };
+
 
 export type QueryCreateProjectValidationArgs = {
   input: CreateProjectValidationInput;
 };
 
+
 export type QueryIssueArgs = {
   input?: InputMaybe<QueryIssueInput>;
 };
+
 
 export type QueryIssuesArgs = {
   input?: InputMaybe<QueryIssueInput>;
 };
 
+
 export type QueryProjectArgs = {
   input?: InputMaybe<QueryProjectInput>;
 };
 
+
 export type QueryProjectTagsArgs = {
   input: QueryProjectTagsInput;
 };
+
 
 export type QueryProjectsArgs = {
   input?: InputMaybe<QueryProjectInput>;
@@ -608,12 +640,11 @@ export type ResolversObject<TObject> = WithIndex<TObject>;
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
 
+
 export type ResolverWithResolve<TResult, TParent, TContext, TArgs> = {
   resolve: ResolverFn<TResult, TParent, TContext, TArgs>;
 };
-export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> =
-  | ResolverFn<TResult, TParent, TContext, TArgs>
-  | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
+export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> = ResolverFn<TResult, TParent, TContext, TArgs> | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
 
 export type ResolverFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
@@ -660,11 +691,7 @@ export type TypeResolveFn<TTypes, TParent = {}, TContext = {}> = (
   info: GraphQLResolveInfo
 ) => Maybe<TTypes> | Promise<Maybe<TTypes>>;
 
-export type IsTypeOfResolverFn<T = {}, TContext = {}> = (
-  obj: T,
-  context: TContext,
-  info: GraphQLResolveInfo
-) => boolean | Promise<boolean>;
+export type IsTypeOfResolverFn<T = {}, TContext = {}> = (obj: T, context: TContext, info: GraphQLResolveInfo) => boolean | Promise<boolean>;
 
 export type NextResolverFn<T> = () => Promise<T>;
 
@@ -675,6 +702,8 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
   context: TContext,
   info: GraphQLResolveInfo
 ) => TResult | Promise<TResult>;
+
+
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
@@ -835,20 +864,14 @@ export type BoardResolvers<ContextType = ApolloContext, ParentType = ResolversPa
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type ColumnResolvers<
-  ContextType = ApolloContext,
-  ParentType = ResolversParentTypes['Column'],
-> = ResolversObject<{
+export type ColumnResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['Column']> = ResolversObject<{
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   issues?: Resolver<Maybe<Array<Maybe<ResolversTypes['Issue']>>>, ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type CustomFieldResolvers<
-  ContextType = ApolloContext,
-  ParentType = ResolversParentTypes['CustomField'],
-> = ResolversObject<{
+export type CustomFieldResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['CustomField']> = ResolversObject<{
   createdAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   fieldType?: Resolver<ResolversTypes['CUSTOM_FIELD_TYPE'], ParentType, ContextType>;
@@ -858,10 +881,7 @@ export type CustomFieldResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type CustomFieldValueResolvers<
-  ContextType = ApolloContext,
-  ParentType = ResolversParentTypes['CustomFieldValue'],
-> = ResolversObject<{
+export type CustomFieldValueResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['CustomFieldValue']> = ResolversObject<{
   createdAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   customField?: Resolver<Maybe<ResolversTypes['CustomField']>, ParentType, ContextType>;
   customFieldId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -904,10 +924,7 @@ export type IssueResolvers<ContextType = ApolloContext, ParentType = ResolversPa
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type IssueCommentResolvers<
-  ContextType = ApolloContext,
-  ParentType = ResolversParentTypes['IssueComment'],
-> = ResolversObject<{
+export type IssueCommentResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['IssueComment']> = ResolversObject<{
   comment?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -917,10 +934,7 @@ export type IssueCommentResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type IssueStatusResolvers<
-  ContextType = ApolloContext,
-  ParentType = ResolversParentTypes['IssueStatus'],
-> = ResolversObject<{
+export type IssueStatusResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['IssueStatus']> = ResolversObject<{
   createdAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -929,161 +943,42 @@ export type IssueStatusResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type MessageAndStatusResolvers<
-  ContextType = ApolloContext,
-  ParentType = ResolversParentTypes['MessageAndStatus'],
-> = ResolversObject<{
+export type MessageAndStatusResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['MessageAndStatus']> = ResolversObject<{
   message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type MutationResolvers<
-  ContextType = ApolloContext,
-  ParentType = ResolversParentTypes['Mutation'],
-> = ResolversObject<{
-  addItemToViewState?: Resolver<
-    Maybe<Array<Maybe<ResolversTypes['ViewState']>>>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationAddItemToViewStateArgs, 'input'>
-  >;
-  addUserToProject?: Resolver<
-    Maybe<ResolversTypes['MessageAndStatus']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationAddUserToProjectArgs, 'input'>
-  >;
-  assignAssetAsAvatar?: Resolver<
-    Maybe<ResolversTypes['Asset']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationAssignAssetAsAvatarArgs, 'input'>
-  >;
+export type MutationResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['Mutation']> = ResolversObject<{
+  addItemToViewState?: Resolver<Maybe<Array<Maybe<ResolversTypes['ViewState']>>>, ParentType, ContextType, RequireFields<MutationAddItemToViewStateArgs, 'input'>>;
+  addUserToProject?: Resolver<Maybe<ResolversTypes['MessageAndStatus']>, ParentType, ContextType, RequireFields<MutationAddUserToProjectArgs, 'input'>>;
+  assignAssetAsAvatar?: Resolver<Maybe<ResolversTypes['Asset']>, ParentType, ContextType, RequireFields<MutationAssignAssetAsAvatarArgs, 'input'>>;
   createBoard?: Resolver<Maybe<ResolversTypes['Board']>, ParentType, ContextType, Partial<MutationCreateBoardArgs>>;
   createIssue?: Resolver<Maybe<ResolversTypes['Issue']>, ParentType, ContextType, Partial<MutationCreateIssueArgs>>;
-  createIssueComment?: Resolver<
-    Maybe<ResolversTypes['IssueComment']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationCreateIssueCommentArgs, 'input'>
-  >;
-  createIssueLink?: Resolver<
-    Maybe<ResolversTypes['MessageAndStatus']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationCreateIssueLinkArgs, 'input'>
-  >;
-  createIssueStatus?: Resolver<
-    Maybe<ResolversTypes['IssueStatus']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationCreateIssueStatusArgs, 'input'>
-  >;
-  createProject?: Resolver<
-    Maybe<ResolversTypes['Project']>,
-    ParentType,
-    ContextType,
-    Partial<MutationCreateProjectArgs>
-  >;
-  createProjectCustomField?: Resolver<
-    Maybe<ResolversTypes['CustomField']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationCreateProjectCustomFieldArgs, 'input'>
-  >;
-  createProjectTag?: Resolver<
-    Maybe<ResolversTypes['ProjectTag']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationCreateProjectTagArgs, 'input'>
-  >;
-  createViewState?: Resolver<
-    Maybe<Array<Maybe<ResolversTypes['ViewState']>>>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationCreateViewStateArgs, 'input'>
-  >;
-  deleteAsset?: Resolver<
-    Maybe<ResolversTypes['MessageAndStatus']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationDeleteAssetArgs, 'input'>
-  >;
-  deleteIssue?: Resolver<
-    Maybe<ResolversTypes['MessageAndStatus']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationDeleteIssueArgs, 'input'>
-  >;
-  deleteIssueComment?: Resolver<
-    Maybe<ResolversTypes['MessageAndStatus']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationDeleteIssueCommentArgs, 'input'>
-  >;
-  deleteIssueLink?: Resolver<
-    Maybe<ResolversTypes['MessageAndStatus']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationDeleteIssueLinkArgs, 'input'>
-  >;
-  deleteProjectCustomField?: Resolver<
-    Maybe<ResolversTypes['MessageAndStatus']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationDeleteProjectCustomFieldArgs, 'input'>
-  >;
-  deleteProjectTag?: Resolver<
-    Maybe<ResolversTypes['MessageAndStatus']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationDeleteProjectTagArgs, 'input'>
-  >;
-  removeItemFromViewState?: Resolver<
-    Maybe<Array<Maybe<ResolversTypes['ViewState']>>>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationRemoveItemFromViewStateArgs, 'input'>
-  >;
-  removeUserFromProject?: Resolver<
-    Maybe<ResolversTypes['MessageAndStatus']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationRemoveUserFromProjectArgs, 'input'>
-  >;
+  createIssueComment?: Resolver<Maybe<ResolversTypes['IssueComment']>, ParentType, ContextType, RequireFields<MutationCreateIssueCommentArgs, 'input'>>;
+  createIssueLink?: Resolver<Maybe<ResolversTypes['MessageAndStatus']>, ParentType, ContextType, RequireFields<MutationCreateIssueLinkArgs, 'input'>>;
+  createIssueStatus?: Resolver<Maybe<ResolversTypes['IssueStatus']>, ParentType, ContextType, RequireFields<MutationCreateIssueStatusArgs, 'input'>>;
+  createProject?: Resolver<Maybe<ResolversTypes['Project']>, ParentType, ContextType, Partial<MutationCreateProjectArgs>>;
+  createProjectCustomField?: Resolver<Maybe<ResolversTypes['CustomField']>, ParentType, ContextType, RequireFields<MutationCreateProjectCustomFieldArgs, 'input'>>;
+  createProjectTag?: Resolver<Maybe<ResolversTypes['ProjectTag']>, ParentType, ContextType, RequireFields<MutationCreateProjectTagArgs, 'input'>>;
+  createViewState?: Resolver<Maybe<Array<Maybe<ResolversTypes['ViewState']>>>, ParentType, ContextType, RequireFields<MutationCreateViewStateArgs, 'input'>>;
+  deleteAsset?: Resolver<Maybe<ResolversTypes['MessageAndStatus']>, ParentType, ContextType, RequireFields<MutationDeleteAssetArgs, 'input'>>;
+  deleteIssue?: Resolver<Maybe<ResolversTypes['MessageAndStatus']>, ParentType, ContextType, RequireFields<MutationDeleteIssueArgs, 'input'>>;
+  deleteIssueComment?: Resolver<Maybe<ResolversTypes['MessageAndStatus']>, ParentType, ContextType, RequireFields<MutationDeleteIssueCommentArgs, 'input'>>;
+  deleteIssueLink?: Resolver<Maybe<ResolversTypes['MessageAndStatus']>, ParentType, ContextType, RequireFields<MutationDeleteIssueLinkArgs, 'input'>>;
+  deleteProjectCustomField?: Resolver<Maybe<ResolversTypes['MessageAndStatus']>, ParentType, ContextType, RequireFields<MutationDeleteProjectCustomFieldArgs, 'input'>>;
+  deleteProjectTag?: Resolver<Maybe<ResolversTypes['MessageAndStatus']>, ParentType, ContextType, RequireFields<MutationDeleteProjectTagArgs, 'input'>>;
+  removeItemFromViewState?: Resolver<Maybe<Array<Maybe<ResolversTypes['ViewState']>>>, ParentType, ContextType, RequireFields<MutationRemoveItemFromViewStateArgs, 'input'>>;
+  removeUserFromProject?: Resolver<Maybe<ResolversTypes['MessageAndStatus']>, ParentType, ContextType, RequireFields<MutationRemoveUserFromProjectArgs, 'input'>>;
   updateBoard?: Resolver<Maybe<ResolversTypes['Board']>, ParentType, ContextType, Partial<MutationUpdateBoardArgs>>;
   updateIssue?: Resolver<Maybe<ResolversTypes['Issue']>, ParentType, ContextType, Partial<MutationUpdateIssueArgs>>;
-  updateIssueComment?: Resolver<
-    Maybe<ResolversTypes['IssueComment']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationUpdateIssueCommentArgs, 'input'>
-  >;
-  updateMe?: Resolver<
-    Maybe<ResolversTypes['User']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationUpdateMeArgs, 'input'>
-  >;
-  updateViewState?: Resolver<
-    Maybe<Array<Maybe<ResolversTypes['ViewState']>>>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationUpdateViewStateArgs, 'input'>
-  >;
-  uploadAsset?: Resolver<
-    Maybe<ResolversTypes['Asset']>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationUploadAssetArgs, 'input'>
-  >;
+  updateIssueComment?: Resolver<Maybe<ResolversTypes['IssueComment']>, ParentType, ContextType, RequireFields<MutationUpdateIssueCommentArgs, 'input'>>;
+  updateMe?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationUpdateMeArgs, 'input'>>;
+  updateViewState?: Resolver<Maybe<Array<Maybe<ResolversTypes['ViewState']>>>, ParentType, ContextType, RequireFields<MutationUpdateViewStateArgs, 'input'>>;
+  uploadAsset?: Resolver<Maybe<ResolversTypes['Asset']>, ParentType, ContextType, RequireFields<MutationUploadAssetArgs, 'input'>>;
 }>;
 
-export type ProjectResolvers<
-  ContextType = ApolloContext,
-  ParentType = ResolversParentTypes['Project'],
-> = ResolversObject<{
+export type ProjectResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['Project']> = ResolversObject<{
   boards?: Resolver<Maybe<Array<Maybe<ResolversTypes['Board']>>>, ParentType, ContextType>;
   createdAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   customFields?: Resolver<Maybe<Array<Maybe<ResolversTypes['CustomField']>>>, ParentType, ContextType>;
@@ -1103,10 +998,7 @@ export type ProjectResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type ProjectTagResolvers<
-  ContextType = ApolloContext,
-  ParentType = ResolversParentTypes['ProjectTag'],
-> = ResolversObject<{
+export type ProjectTagResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['ProjectTag']> = ResolversObject<{
   createdAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1118,29 +1010,14 @@ export type ProjectTagResolvers<
 export type QueryResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['Query']> = ResolversObject<{
   board?: Resolver<Maybe<ResolversTypes['Board']>, ParentType, ContextType, RequireFields<QueryBoardArgs, 'input'>>;
   boards?: Resolver<Maybe<Array<Maybe<ResolversTypes['Board']>>>, ParentType, ContextType>;
-  createProjectValidation?: Resolver<
-    Maybe<ResolversTypes['MessageAndStatus']>,
-    ParentType,
-    ContextType,
-    RequireFields<QueryCreateProjectValidationArgs, 'input'>
-  >;
+  createProjectValidation?: Resolver<Maybe<ResolversTypes['MessageAndStatus']>, ParentType, ContextType, RequireFields<QueryCreateProjectValidationArgs, 'input'>>;
   helloWorld?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   issue?: Resolver<Maybe<ResolversTypes['Issue']>, ParentType, ContextType, Partial<QueryIssueArgs>>;
   issues?: Resolver<Maybe<Array<Maybe<ResolversTypes['Issue']>>>, ParentType, ContextType, Partial<QueryIssuesArgs>>;
   me?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   project?: Resolver<Maybe<ResolversTypes['Project']>, ParentType, ContextType, Partial<QueryProjectArgs>>;
-  projectTags?: Resolver<
-    Maybe<Array<Maybe<ResolversTypes['ProjectTag']>>>,
-    ParentType,
-    ContextType,
-    RequireFields<QueryProjectTagsArgs, 'input'>
-  >;
-  projects?: Resolver<
-    Maybe<Array<Maybe<ResolversTypes['Project']>>>,
-    ParentType,
-    ContextType,
-    Partial<QueryProjectsArgs>
-  >;
+  projectTags?: Resolver<Maybe<Array<Maybe<ResolversTypes['ProjectTag']>>>, ParentType, ContextType, RequireFields<QueryProjectTagsArgs, 'input'>>;
+  projects?: Resolver<Maybe<Array<Maybe<ResolversTypes['Project']>>>, ParentType, ContextType, Partial<QueryProjectsArgs>>;
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   users?: Resolver<Maybe<Array<Maybe<ResolversTypes['User']>>>, ParentType, ContextType>;
 }>;
@@ -1161,30 +1038,21 @@ export type UserResolvers<ContextType = ApolloContext, ParentType = ResolversPar
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type ViewStateResolvers<
-  ContextType = ApolloContext,
-  ParentType = ResolversParentTypes['ViewState'],
-> = ResolversObject<{
+export type ViewStateResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['ViewState']> = ResolversObject<{
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   items?: Resolver<Maybe<Array<Maybe<ResolversTypes['ViewStateItem']>>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type ViewStateIssueStatusResolvers<
-  ContextType = ApolloContext,
-  ParentType = ResolversParentTypes['ViewStateIssueStatus'],
-> = ResolversObject<{
+export type ViewStateIssueStatusResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['ViewStateIssueStatus']> = ResolversObject<{
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   projectId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type ViewStateItemResolvers<
-  ContextType = ApolloContext,
-  ParentType = ResolversParentTypes['ViewStateItem'],
-> = ResolversObject<{
+export type ViewStateItemResolvers<ContextType = ApolloContext, ParentType = ResolversParentTypes['ViewStateItem']> = ResolversObject<{
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   status?: Resolver<Maybe<ResolversTypes['ViewStateIssueStatus']>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1213,3 +1081,4 @@ export type Resolvers<ContextType = ApolloContext> = ResolversObject<{
   ViewStateIssueStatus?: ViewStateIssueStatusResolvers<ContextType>;
   ViewStateItem?: ViewStateItemResolvers<ContextType>;
 }>;
+
